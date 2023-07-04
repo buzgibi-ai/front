@@ -1,0 +1,28 @@
+services:
+
+  frontend:
+    image: europe-west3-docker.pkg.dev/turkish-trade-house/front/front:latest
+    container_name: frontend
+    restart: 'always'
+    ports:
+      - '3001:3000'
+    networks:
+      tth:
+        ipv4_address: 192.168.21.2
+
+  proxy:
+    image: nginx
+    container_name: frontend-proxy
+    volumes:
+      - ${PWD}/deploy/nginx/proxy.conf:/etc/nginx/nginx.conf
+    ports:
+      - '80:80'
+    networks:
+      - tth
+
+networks:
+  tth:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 192.168.21.0/25

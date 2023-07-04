@@ -1,0 +1,8 @@
+{
+    "telegramBot": "bot2096396660:AAFgPJkIGmBOgbWuzvyejPJJo7-HpFgr2CY",
+    "telegramChat": "-934720023",
+    "telegramHost": "https://api.telegram.org/",
+    "scaffoldHost": "https://api.buzgibi.app",
+    "cssLink": "https://cdn.jsdelivr.net/gh/fclaw/turkish-trade-house-style-and-css@",
+    "cssFiles": ["style", "error", "cookie", "alert", "search"]
+}
