@@ -8,11 +8,11 @@
     "spago": "^0.20.9"
   },
   "scripts": {
-    "clean": "rm -rf output-es node_modules output .spago app/*.js *.lock .cache src/core/TTHouse/Api/Foreign/Scaffold",
+    "clean": "rm -rf output-es node_modules output .spago app/*.js *.lock .cache src/core/Buzgibi/Api/Foreign/BuzgibiBack",
     "test": "spago tes",
     "serve": "node esbuild-serve.mjs",
     "bundle": "./scripts/bundle.sh",
-    "api": "./scripts/api.sh https://api.buzgibi.app/swagger.json api-scaffold.json Scaffold"
+    "api": "./scripts/api.sh https://api.buzgibi.app/swagger.json api-back.json BuzgibiBack"
   },
   "dependencies": {
     "babel": "^6.23.0",

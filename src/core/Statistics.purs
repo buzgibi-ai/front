@@ -2,10 +2,10 @@ module Statistics (sendComponentTime) where
 
 import Prelude
 
-import TTHouse.Capability.LogMessages (logDebug)
-import TTHouse.Api.Foreign.Request (makeWithResp)
-import TTHouse.Api.Foreign.Scaffold as Scaffold
-import TTHouse.Data.Config
+import Buzgibi.Capability.LogMessages (logDebug)
+import Buzgibi.Api.Foreign.Request (makeWithResp)
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
+import Buzgibi.Data.Config
 
 import Effect
 import Halogen as H
@@ -19,13 +19,13 @@ import Effect.Exception (message)
 
 sendComponentTime start end component = do 
   logDebug "sendComponentTime enter .."
-  { config: Config {scaffoldHost, sha256Commit} } <- getStore
+  { config: Config {apiBuzgibiHost, sha256Commit} } <- getStore
   let payload =  
             "component" := component
          ~> "totalTime" := (end - start)
          ~> jsonEmptyObject
-  req <- H.liftEffect $ runFn2 Scaffold.mkLogReq sha256Commit (unsafeToForeign payload)
-  resp <- makeWithResp scaffoldHost Scaffold.mkFrontApi $ Scaffold.sendLog req
+  req <- H.liftEffect $ runFn2 BuzgibiBack.mkLogReq sha256Commit (unsafeToForeign payload)
+  resp <- makeWithResp apiBuzgibiHost BuzgibiBack.mkFrontApi $ BuzgibiBack.sendLog req
   case resp of 
     Right _ -> logDebug "ok"
     Left err -> logDebug $ "errr- >" <> message err

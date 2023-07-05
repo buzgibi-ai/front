@@ -14,8 +14,8 @@ package-lock.json
 
 openapitools.json
 
-src/core/TTHouse/Api/Foreign/Scaffold
-src/lib/TTHouse/Web/Bowser
+src/core/Buzgibi/Api/Foreign/BuzgibiBack
+src/lib/Buzgibi/Web/Bowser
 
 app/*.js
 

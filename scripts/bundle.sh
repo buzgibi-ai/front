@@ -31,8 +31,8 @@ go() {
    cp $(which purs) node_modules/purescript 
    mv node_modules/purescript/purs node_modules/purescript/purs.bin
    spago build
-   cp -r src/lib/TTHouse/Web/Bowser ./output/TTHouse.Web.Platform
-   cp -r src/core/TTHouse/Api/Foreign/Scaffold ./output/TTHouse.Api.Foreign.Scaffold
+   cp -r src/lib/Buzgibi/Web/Bowser ./output/Buzgibi.Web.Platform
+   cp -r src/core/Buzgibi/Api/Foreign/BuzgibiBack ./output/Buzgibi.Api.Foreign.BuzgibiBack
    node esbuild.mjs
 }
 

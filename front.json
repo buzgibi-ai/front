@@ -1,0 +1,94 @@
+{
+  "sha": "da4b29ff822da2fac299330dcbbd1da1cc31979c",
+  "node_id": "C_kwDOJ2WHiNoAKGRhNGIyOWZmODIyZGEyZmFjMjk5MzMwZGNiYmQxZGExY2MzMTk3OWM",
+  "commit": {
+    "author": {
+      "name": "Sergey Yakovlev",
+      "email": "fclaw007@gmail.com",
+      "date": "2023-07-04T03:53:49Z"
+    },
+    "committer": {
+      "name": "Sergey Yakovlev",
+      "email": "fclaw007@gmail.com",
+      "date": "2023-07-04T03:53:49Z"
+    },
+    "message": "init",
+    "tree": {
+      "sha": "1fcdf451bd4411be9aac6b0a6323aaa055427e99",
+      "url": "https://api.github.com/repos/buzgibi-ai/front/git/trees/1fcdf451bd4411be9aac6b0a6323aaa055427e99"
+    },
+    "url": "https://api.github.com/repos/buzgibi-ai/front/git/commits/da4b29ff822da2fac299330dcbbd1da1cc31979c",
+    "comment_count": 0,
+    "verification": {
+      "verified": false,
+      "reason": "unsigned",
+      "signature": null,
+      "payload": null
+    }
+  },
+  "url": "https://api.github.com/repos/buzgibi-ai/front/commits/da4b29ff822da2fac299330dcbbd1da1cc31979c",
+  "html_url": "https://github.com/buzgibi-ai/front/commit/da4b29ff822da2fac299330dcbbd1da1cc31979c",
+  "comments_url": "https://api.github.com/repos/buzgibi-ai/front/commits/da4b29ff822da2fac299330dcbbd1da1cc31979c/comments",
+  "author": {
+    "login": "fclaw",
+    "id": 88312844,
+    "node_id": "MDQ6VXNlcjg4MzEyODQ0",
+    "avatar_url": "https://avatars.githubusercontent.com/u/88312844?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/fclaw",
+    "html_url": "https://github.com/fclaw",
+    "followers_url": "https://api.github.com/users/fclaw/followers",
+    "following_url": "https://api.github.com/users/fclaw/following{/other_user}",
+    "gists_url": "https://api.github.com/users/fclaw/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/fclaw/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/fclaw/subscriptions",
+    "organizations_url": "https://api.github.com/users/fclaw/orgs",
+    "repos_url": "https://api.github.com/users/fclaw/repos",
+    "events_url": "https://api.github.com/users/fclaw/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/fclaw/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "fclaw",
+    "id": 88312844,
+    "node_id": "MDQ6VXNlcjg4MzEyODQ0",
+    "avatar_url": "https://avatars.githubusercontent.com/u/88312844?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/fclaw",
+    "html_url": "https://github.com/fclaw",
+    "followers_url": "https://api.github.com/users/fclaw/followers",
+    "following_url": "https://api.github.com/users/fclaw/following{/other_user}",
+    "gists_url": "https://api.github.com/users/fclaw/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/fclaw/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/fclaw/subscriptions",
+    "organizations_url": "https://api.github.com/users/fclaw/orgs",
+    "repos_url": "https://api.github.com/users/fclaw/repos",
+    "events_url": "https://api.github.com/users/fclaw/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/fclaw/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  "parents": [
+
+  ],
+  "stats": {
+    "total": 4384,
+    "additions": 4384,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "396663e118b108ce609d5a5230d1a49a92be2601",
+      "filename": ".dockerignore",
+      "status": "added",
+      "additions": 14,
+      "deletions": 0,
+      "changes": 14,
+      "blob_url": "https://github.com/buzgibi-ai/front/blob/da4b29ff822da2fac299330dcbbd1da1cc31979c/.dockerignore",
+      "raw_url": "https://github.com/buzgibi-ai/front/raw/da4b29ff822da2fac299330dcbbd1da1cc31979c/.dockerignore",
+      "contents_url": "https://api.github.com/repos/buzgibi-ai/front/contents/.dockerignore?ref=da4b29ff822da2fac299330dcbbd1da1cc31979c",
+      "patch": "@@ -0,0 +1,14 @@\n+*\n+!deploy\n+!dev\n+!src\n+!test\n+!package.json\n+!*.dhall\n+!*.nix\n+!*.mjs\n+!config.json\n+!app\n+!index.js\n+!nix\n+!scripts\n\\ No newline at end of file"
+    }
+  ]
+}

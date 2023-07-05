@@ -8,7 +8,7 @@ module Cache
 
 import Prelude
 
-import TTHouse.Api.Foreign.Scaffold (Translation)
+import Buzgibi.Api.Foreign.BuzgibiBack (Translation)
 
 import Data.Map as Map
 import Data.Maybe (Maybe (..))

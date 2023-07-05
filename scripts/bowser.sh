@@ -7,7 +7,7 @@ cleanup() {
 }
 trap cleanup EXIT INT QUIT TERM
 
-unpack=$(pwd)/src/lib/TTHouse/Web
+unpack=$(pwd)/src/lib/Buzgibi/Web
 
 check_for_existence() {
   if [ -d "$unpack/Bowser" ]; then

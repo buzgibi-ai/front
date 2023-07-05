@@ -2,13 +2,13 @@ module Main (main) where
 
 import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (>>>))
 
-import TTHouse.Data.Route (routeCodec)
-import TTHouse.Component.Root as Root
-import TTHouse.Data.Config as Cfg
-import TTHouse.Api.Foreign.Scaffold (getShaCSSCommit, getShaCommit, getCookiesInit)
-import TTHouse.Component.Lang.Data (Lang (..))
-import TTHouse.Component.AppInitFailure as AppInitFailure 
-import TTHouse.Data.Config
+import Buzgibi.Data.Route (routeCodec)
+import Buzgibi.Component.Root as Root
+import Buzgibi.Data.Config as Cfg
+import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookiesInit)
+import Buzgibi.Component.Lang.Data (Lang (..))
+import Buzgibi.Component.AppInitFailure as AppInitFailure 
+import Buzgibi.Data.Config
 
 import Effect (Effect)
 import Halogen.Aff as HA
@@ -21,7 +21,7 @@ import AppM as AppM
 import Routing.Hash (matchesWith)
 import Routing.Duplex (parse)
 import Control.Monad.Error.Class (catchError, throwError)
-import TTHouse.Web.Platform (getPlatform)
+import Buzgibi.Web.Platform (getPlatform)
 import Data.Function.Uncurried (runFn1)
 import Web.HTML.Navigator (userAgent)
 import Web.HTML.Window (navigator, document)
@@ -30,7 +30,7 @@ import Store (initAppStore)
 import Store.Types (readPlatform)
 import Effect.Exception as Excep
 import Undefined (undefined)
-import TTHouse.Api.Foreign.Scaffold as Scaffold
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Data.Either (Either (..))
 import Effect.AVar (new) as Async
 import Effect.Console (infoShow, logShow)
@@ -65,7 +65,7 @@ main cfg = do
       body <- HA.awaitBody 
 
       -- request the backend to send initial values (such as static content) required to get the app running
-      initResp <- initAppStore (_.scaffoldHost (getVal cfg))
+      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg))
       case initResp of 
         Left err -> void $ runUI AppInitFailure.component {error: err} body
         Right init -> do
@@ -80,7 +80,7 @@ main cfg = do
 
           telVar <- H.liftEffect $ Async.newChannel
 
-          logLevel <- H.liftEffect $ withMaybe $ Scaffold.getLogLevel init
+          logLevel <- H.liftEffect $ withMaybe $ BuzgibiBack.getLogLevel init
 
           platform <- H.liftEffect $ withMaybe _platform
 
@@ -95,8 +95,8 @@ main cfg = do
           let initialStore = 
                 { config: 
                    setShaCommit (getShaCommit init) $
-                   setIsCaptcha (fromMaybe false (Scaffold.getIsCaptcha init)) $
-                   setToTelegram (fromMaybe false (Scaffold.getToTelegram init)) cfg
+                   setIsCaptcha (fromMaybe false (BuzgibiBack.getIsCaptcha init)) $
+                   setToTelegram (fromMaybe false (BuzgibiBack.getToTelegram init)) cfg
                 , error: Nothing
                 , platform: platform
                 , init: init

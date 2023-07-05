@@ -13,13 +13,13 @@ module Store
 
 import Prelude
 
-import TTHouse.Data.Config (Config)
-import TTHouse.Api.Foreign.Scaffold as Scaffold 
-import TTHouse.Capability.LogMessages (logError, logDebug)
-import TTHouse.Api.Foreign.Request as Request
-import TTHouse.Component.Lang.Data (Lang, Recipients)
-import TTHouse.Data.Route (Route)
-import TTHouse.Component.Async as Async
+import Buzgibi.Data.Config (Config)
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack 
+import Buzgibi.Capability.LogMessages (logError, logDebug)
+import Buzgibi.Api.Foreign.Request as Request
+import Buzgibi.Component.Lang.Data (Lang, Recipients)
+import Buzgibi.Data.Route (Route)
+import Buzgibi.Component.Async as Async
 import Store.Types
 
 import Data.Maybe (Maybe(..))
@@ -54,7 +54,7 @@ type Store =
      { config :: Config
      , error :: Maybe Error
      , platform :: Platform
-     , init :: Scaffold.Init
+     , init :: BuzgibiBack.Init
      , cache :: Cache.Cache
      , async :: Async.Channel Async.Async Async.Async
      , cookies :: Array String
@@ -84,7 +84,7 @@ printStore store =
 -- | able to set the current user.
 data Action = 
        WriteError Error
-     | WriteTranslationToCache Scaffold.Translation String
+     | WriteTranslationToCache BuzgibiBack.Translation String
 
 -- | Finally, we'll map this action to a state update in a function called a
 -- | 'reducer'. If you're curious to learn more, see the `halogen-store`
@@ -93,5 +93,5 @@ reduce :: Store -> Action -> Store
 reduce store (WriteError err) = store { error = Just err }
 reduce store (WriteTranslationToCache x hash) = store {  cache = Cache.writeTranslation x hash (_.cache store) }
 
-initAppStore :: String -> Aff (Either Excep.Error Scaffold.Init)
-initAppStore host = Request.make host Scaffold.mkFrontApi $ runFn1 Scaffold.init
+initAppStore :: String -> Aff (Either Excep.Error BuzgibiBack.Init)
+initAppStore host = Request.make host BuzgibiBack.mkFrontApi $ runFn1 BuzgibiBack.init
