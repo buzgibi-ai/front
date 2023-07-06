@@ -70,5 +70,5 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
               cd back
-              docker-compose down front
+              docker-compose down buzgibi-front
               docker-compose up front    
