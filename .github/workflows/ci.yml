@@ -55,3 +55,20 @@ jobs:
           tags: |
             ${{ steps.meta_tag_1.outputs.tags }}
             ${{ steps.meta_branch_1.outputs.tags }}
+
+  deploy:
+    name: Deploy the server
+    runs-on: ubuntu-latest
+    environment: google
+    needs: push_to_google_registry
+    steps:
+      - uses: actions/checkout@v2
+      - uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ vars.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+              cd back
+              docker-compose front
+              docker-compose up front    
