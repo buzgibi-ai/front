@@ -1,4 +1,9 @@
-module Buzgibi.Component.Auth.SignUp (component, proxy) where
+module Buzgibi.Component.Auth.SignUp
+  ( component
+  , proxy
+  , slot
+  )
+  where
 
 import Prelude
 
@@ -29,6 +34,8 @@ proxy = Proxy :: _ "auth_signUp"
 
 data Error = Mismatch | Weak String
 
+slot = HH.slot_ proxy unit component unit
+
 data Action = 
        MakeRequest Event 
      | FillEmail String 
@@ -54,35 +61,35 @@ component =
     , eval: H.mkEval H.defaultEval 
       { handleAction = handleAction }
     }
-
-handleAction (MakeRequest ev) = do 
-  H.liftEffect $ preventDefault ev
-  logDebug $ loc <> "pass stregth ---> trying registering"
-  {email, password, reapatedPassword} <- H.get
-  if password /= reapatedPassword
-  then do 
-    Async.send $ Async.mkOrdinary "passwords mismatch" Async.Info Nothing
-    logDebug $ loc <> "passwords mismatch"
-  else do 
-    { config: Config {apiBuzgibiHost} } <- getStore
-    let mkCred (Just email) (Just password) 
-          | length password > 0 =
-            Just { email: email, password: password }
-          | otherwise = Nothing  
-        mkCred _ _ = Nothing 
-    let cred = mkCred email password
-    case cred of
-      Nothing -> do 
-        Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
-        logDebug $ loc <> "login or password is empty"
-      Just cred -> do 
-        resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.register cred
-        onFailure resp undefined undefined
-handleAction (FillEmail s) = H.modify_ _ { email = Just s }
-handleAction (FillPassword s) = do
-  logDebug $ loc <> "pass stregth ---> " <> show (check s)
-  H.modify_ _ { password = Just s, strength = Just (check s) }
-handleAction (FillRepeatedPassword s) = H.modify_ _ { reapatedPassword = Just s }
+  where
+    handleAction (MakeRequest ev) = do 
+      H.liftEffect $ preventDefault ev
+      logDebug $ loc <> "pass stregth ---> trying registering"
+      {email, password, reapatedPassword} <- H.get
+      if password /= reapatedPassword
+      then do 
+        Async.send $ Async.mkOrdinary "passwords mismatch" Async.Info Nothing
+        logDebug $ loc <> "passwords mismatch"
+      else do 
+        { config: Config {apiBuzgibiHost} } <- getStore
+        let mkCred (Just email) (Just password) 
+              | length password > 0 =
+                Just { email: email, password: password }
+              | otherwise = Nothing  
+            mkCred _ _ = Nothing 
+        let cred = mkCred email password
+        case cred of
+          Nothing -> do 
+            Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
+            logDebug $ loc <> "login or password is empty"
+          Just cred -> do 
+            resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.register cred
+            onFailure resp undefined undefined
+    handleAction (FillEmail s) = H.modify_ _ { email = Just s }
+    handleAction (FillPassword s) = do
+      logDebug $ loc <> "pass stregth ---> " <> show (check s)
+      H.modify_ _ { password = Just s, strength = Just (check s) }
+    handleAction (FillRepeatedPassword s) = H.modify_ _ { reapatedPassword = Just s }
 
 render { email, password, reapatedPassword, strength } = 
   HH.div_ 

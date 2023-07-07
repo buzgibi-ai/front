@@ -80,6 +80,6 @@ routeCodec = root $ sum
   { "Home": noArgs
   , "Error500": "500" / noArgs
   , "Error404": "404" / noArgs
-  , "SignUp": "signUp" / noArgs
-  , "SignIn": "signIn" / noArgs
+  , "SignUp": "auth" / "signUp" / noArgs
+  , "SignIn": "auth" / "signIn" / noArgs
   }

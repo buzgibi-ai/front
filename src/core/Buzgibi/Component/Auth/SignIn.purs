@@ -1,4 +1,9 @@
-module Buzgibi.Component.Auth.SignIn (component, proxy) where
+module Buzgibi.Component.Auth.SignIn
+  ( component
+  , proxy
+  , slot
+  )
+  where
 
 import Prelude
 
@@ -16,3 +21,5 @@ component =
     }
 
 render = HH.text "sign in"
+
+slot = HH.slot_ proxy unit component unit

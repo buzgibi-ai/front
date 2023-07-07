@@ -31,9 +31,10 @@ import Buzgibi.Component.Root.Fork.Translation as Fork.Translation
 import Buzgibi.Component.Root.Fork.Telegram as Fork.Telegram
 import Buzgibi.Component.HTML.Loading as HTML.Loading
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Auth as Auth
-import Buzgibi.Component.Auth.SignUp as Auth.SignUp
-import Buzgibi.Component.Auth.SignIn as Auth.SignIn
+import Buzgibi.Component.Auth.SignUp as SignUp 
+import Buzgibi.Component.Auth.SignIn as SignIn
+import Buzgibi.Page.Auth as Auth
+import Buzgibi.Data.Route as Route
 
 import Data.Either (hush, Either (..))
 import Data.Foldable (elem)
@@ -71,8 +72,8 @@ type ChildSlots =
   ( home :: OpaqueSlot Unit
   , error500 :: OpaqueSlot Unit
   , error404 :: OpaqueSlot Unit
-  , auth_signUp :: OpaqueSlot Unit
-  , auth_signIn :: OpaqueSlot Unit
+  , auth_container_sign_in :: OpaqueSlot Unit
+  , auth_container_sign_up :: OpaqueSlot Unit
   )
 
 component
@@ -120,6 +121,7 @@ component = H.mkComponent
   handleAction (LangChange lang) = H.modify_ _ { lang = lang }
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
   handleQuery (Navigate dest a) = do
+    logDebug $ loc <> " ---> routing to " <> show dest
     store <- getStore
     logDebug $ printStore store
     H.modify_ _ { route = pure dest }
@@ -140,7 +142,13 @@ render :: forall m
   -> H.ComponentHTML Action ChildSlots m
 render { route: Nothing } = HTML.Loading.html  
 render { route: Just r@Home } = HH.slot_ Home.proxy unit (Home.component (Body.mkBodyHtml params r)) unit
-render { route: Just SignIn } = Auth.html $ HH.slot_ Auth.SignIn.proxy unit Auth.SignIn.component unit
-render { route: Just SignUp } = Auth.html $ HH.slot_ Auth.SignUp.proxy unit Auth.SignUp.component unit
+render { route: Just r@SignIn } = 
+  HH.slot_ Auth.proxy_sign_in unit 
+  (Auth.component (Body.mkBodyHtml params r) SignIn.slot) 
+  {route: Route.SignIn, title: "SignIn"}
+render { route: Just r@SignUp } = 
+  HH.slot_ Auth.proxy_sign_up unit 
+  (Auth.component (Body.mkBodyHtml params r) SignUp.slot) 
+  {route: Route.SignUp, title: "SignUp"}
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
