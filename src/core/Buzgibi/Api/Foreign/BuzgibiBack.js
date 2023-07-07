@@ -17,7 +17,7 @@ export const mkSendGridSendMailRequest =
 export const send =
     function(req, api) {
         return function(onError, onOk) {
-            api.apiForeignSendgridSendPost(req).then(onOk).catch(onError)
+            api.foreignSendgridSendPost(req).then(onOk).catch(onError)
         };
     }
 
@@ -34,7 +34,7 @@ export const _goReCaptcha = function(withError, key, api) {
             grecaptcha.execute(key, {
                 action: 'submit'
             }).then(function(token) {
-                api.apiCaptchaVerifyPost('\"' + token + '\"').then(onOk).catch(resp => {
+                api.captchaVerifyPost('\"' + token + '\"').then(onOk).catch(resp => {
                     return withError(resp, onError)
                 });
             });

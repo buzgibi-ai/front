@@ -70,7 +70,7 @@ render { route, menu } =
     ,   HH.div [css "menu"]
         [
             HH.div [HPExt.style "#position: relative; #top: -50%;margin:0 auto;width:200px"] 
-            [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum Home .. fromEnum Service) )]
+            [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
         ]     
     ]
 

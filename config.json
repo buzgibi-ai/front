@@ -3,6 +3,6 @@
     "telegramChat": "-934720023",
     "telegramHost": "https://api.telegram.org/",
     "apiBuzgibiHost": "https://api.buzgibi.app",
-    "cssLink": "https://cdn.jsdelivr.net/gh/fclaw/turkish-trade-house-style-and-css@",
-    "cssFiles": ["style", "error", "cookie", "alert", "search"]
+    "cssLink": "https://cdn.jsdelivr.net/gh/buzgibi-ai/front-css@",
+    "cssFiles": ["load-app", "captcha"]
 }

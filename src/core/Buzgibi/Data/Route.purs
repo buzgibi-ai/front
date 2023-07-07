@@ -38,8 +38,8 @@ data Route
   = Error500
   | Error404
   | Home
-  | About
-  | Service 
+  | SignUp
+  | SignIn
  
 derive instance genericRoute :: Generic Route _
 derive instance eqRoute :: Eq Route
@@ -49,8 +49,8 @@ instance showRoute :: Show Route where
   show Home = "home"
   show Error500 = "500"
   show Error404 = "404"
-  show About = "about"
-  show Service = "service"
+  show SignUp = "signUp"
+  show SignIn = "signIn"
 
 instance enumRoute :: Enum Route where 
   succ = genericSucc
@@ -62,7 +62,7 @@ instance boundedEnumRoute :: BoundedEnum Route where
   fromEnum = genericFromEnum
 
 instance boundedRoute :: Bounded Route where 
-  top = Service
+  top = SignIn
   bottom = Error500
 
 instance decodeJson :: DecodeJson Route where
@@ -80,6 +80,6 @@ routeCodec = root $ sum
   { "Home": noArgs
   , "Error500": "500" / noArgs
   , "Error404": "404" / noArgs
-  , "About": "about" / noArgs
-  , "Service": "service" / noArgs
+  , "SignUp": noArgs
+  , "SignIn": noArgs
   }

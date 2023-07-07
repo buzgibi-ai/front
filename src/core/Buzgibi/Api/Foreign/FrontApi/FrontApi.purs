@@ -3,6 +3,7 @@ module Buzgibi.Api.BuzgibiBack.FrontApi
   , FrontApi
   , FrontendLogRequest
   , Init
+  , JWTToken(..)
   , MapMenuText
   , MapMessengerText
   , MapPageText
@@ -21,9 +22,7 @@ module Buzgibi.Api.BuzgibiBack.FrontApi
   , getShaCSSCommit
   , getShaCommit
   , getToTelegram
-  , getTranslationCopyright
   , getTranslationMenu
-  , getTranslationMessenger
   , getTranslationPage
   , init
   , loadTranslation
@@ -70,10 +69,15 @@ foreign import data MapMessengerText :: Type
 
 foreign import mkFrontApi :: Fn1 ApiClient (Effect FrontApi)
 
-foreign import _init :: Fn2 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) FrontApi (AC.EffectFnAff (Object (Response Init)))
+foreign import _init :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) (Maybe JWTToken) FrontApi (AC.EffectFnAff (Object (Response Init)))
 
-init :: FrontApi -> AC.EffectFnAff (Object (Response Init))
-init = runFn2 _init withError 
+newtype JWTToken = JWTToken String
+
+instance EncodeJson JWTToken where
+  encodeJson (JWTToken token) = "token" := token ~> jsonEmptyObject
+
+init :: Maybe JWTToken -> FrontApi -> AC.EffectFnAff (Object (Response Init))
+init token = runFn3 _init withError token
 
 instance Show Init where
   show = _showInit
@@ -153,12 +157,4 @@ foreign import _getTranslationPage :: Translation -> Array MapPageText
 
 getTranslationPage :: Translation -> Map.Map String String
 getTranslationPage = Map.fromFoldable <<< map toTpl <<< _getTranslationPage
-  where toTpl x = Tuple (_getKeyText x) (_getValText x)
-
-foreign import getTranslationCopyright :: Translation -> String
-
-foreign import _getTranslationMessenger :: Translation -> Array MapMessengerText
-
-getTranslationMessenger :: Translation -> Map.Map String String
-getTranslationMessenger = Map.fromFoldable <<< map toTpl <<< _getTranslationMessenger
   where toTpl x = Tuple (_getKeyText x) (_getValText x)

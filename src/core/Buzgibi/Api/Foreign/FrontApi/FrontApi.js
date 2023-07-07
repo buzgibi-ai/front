@@ -7,9 +7,9 @@ export const mkFrontApi = function(api) {
 }
 
 export const _init =
-    function(withError, api) {
+    function(withError, token, api) {
         return function(onError, onOk) {
-            api.apiFrontendInitGet().then(onOk).catch(resp => {
+            api.frontendInitGet(token).then(onOk).catch(resp => {
                 return withError(resp, onError)
             })
         };
@@ -26,7 +26,7 @@ export const _showTranslation =
     }
 
 export const getShaCommit = (obj) => {
-    return obj.getShaCommit();
+    return obj.getSha();
 }
 
 export const _getLogLevel = obj => {
@@ -34,7 +34,7 @@ export const _getLogLevel = obj => {
 }
 
 export const getShaCSSCommit = (obj) => {
-    return obj.getShaCommitCss();
+    return obj.getShaCss();
 }
 
 export const _getIsCaptcha = nothing => just => obj => {
@@ -50,7 +50,7 @@ export const _getToTelegram = nothing => just => obj => {
 export const _loadTranslation =
     function(withError, lang, api) {
         return function(onError, onOk) {
-            api.apiFrontendTranslateLangGet(lang).then(onOk).catch(resp => {
+            api.frontendTranslateLangGet(lang).then(onOk).catch(resp => {
                 return withError(resp, onError)
             })
         };
@@ -67,7 +67,7 @@ export const mkLogReq = function(build, payload) {
 
 export const _sendLog = function(withError, req, api) {
     return function(onError, onOk) {
-        api.apiFrontendLogPut(req).then(onOk).catch(resp => {
+        api.frontendLogPut(req).then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };
@@ -79,7 +79,7 @@ export const _showCookie = cookie => {
 
 export const _getCookies = function(withError, api) {
     return function(onError, onOk) {
-        api.apiFrontendCookiesGet().then(onOk).catch(resp => {
+        api.frontendCookiesGet().then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };
@@ -87,7 +87,7 @@ export const _getCookies = function(withError, api) {
 
 export const _getMeta = function(withError, page, api) {
     return function(onError, onOk) {
-        api.apiFrontendMetaGet(page).then(onOk).catch(resp => {
+        api.frontendMetaGet(page).then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };
@@ -118,12 +118,4 @@ export const _getTranslationPage = obj => {
 
 export const _showMapMenuText = menu => {
     return "{ key: " + menu.getKey() + ", value: " + menu.getValue() + " }";
-}
-
-export const getTranslationCopyright = obj => {
-    return obj.getCopyright();
-}
-
-export const _getTranslationMessenger = obj => {
-    return obj.getMessenger();
 }

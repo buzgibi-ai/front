@@ -67,7 +67,7 @@ render { route, menu } =
   [
       HH.nav [css "navbar navbar-expand-lg navbar-light"]
       [
-          HH.ul [css "navbar-nav"] (map (mkItem route menu addFontStyle) (fromEnum Home .. fromEnum Service) ) 
+          HH.ul [css "navbar-nav"] (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) ) 
       ]
   ]
 

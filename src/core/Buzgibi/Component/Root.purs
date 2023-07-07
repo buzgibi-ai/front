@@ -17,8 +17,6 @@ import Prelude
 import Buzgibi.Component.Utils (OpaqueSlot)
 import Buzgibi.Data.Route (Route(..), routeCodec)
 import Buzgibi.Page.Home as Home
-import Buzgibi.Page.Service as Service
-import Buzgibi.Page.About as About
 import Buzgibi.Page.Error.Page500 as Page500
 import Buzgibi.Page.Error.Page404 as Page404 
 import Buzgibi.Capability.Navigate
@@ -33,6 +31,9 @@ import Buzgibi.Component.Root.Fork.Translation as Fork.Translation
 import Buzgibi.Component.Root.Fork.Telegram as Fork.Telegram
 import Buzgibi.Component.HTML.Loading as HTML.Loading
 import Buzgibi.Data.Config
+import Buzgibi.Component.HTML.Auth as Auth
+import Buzgibi.Component.Auth.SignUp as Auth.SignUp
+import Buzgibi.Component.Auth.SignIn as Auth.SignIn
 
 import Data.Either (hush, Either (..))
 import Data.Foldable (elem)
@@ -69,9 +70,9 @@ data Action = Initialize | LangChange Lang
 type ChildSlots =
   ( home :: OpaqueSlot Unit
   , error500 :: OpaqueSlot Unit
-  , about :: OpaqueSlot Unit
-  , service :: OpaqueSlot Unit
   , error404 :: OpaqueSlot Unit
+  , auth_signUp :: OpaqueSlot Unit
+  , auth_signIn :: OpaqueSlot Unit
   )
 
 component
@@ -139,7 +140,7 @@ render :: forall m
   -> H.ComponentHTML Action ChildSlots m
 render { route: Nothing } = HTML.Loading.html  
 render { route: Just r@Home } = HH.slot_ Home.proxy unit (Home.component (Body.mkBodyHtml params r)) unit
+render { route: Just SignIn } = Auth.html $ HH.slot_ Auth.SignIn.proxy unit Auth.SignIn.component unit
+render { route: Just SignUp } = Auth.html $ HH.slot_ Auth.SignUp.proxy unit Auth.SignUp.component unit
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
-render { route: Just r@About } = HH.slot_ About.proxy unit (About.component (Body.mkBodyHtml params r)) unit
-render { route: Just r@Service } = HH.slot_ Service.proxy unit (Service.component (Body.mkBodyHtml params r)) unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit

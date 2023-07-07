@@ -70,7 +70,7 @@ component mkBody =
         HH.div_ [mkBody p w (content body) ]
       render _ = HH.div_ []
       handleAction Initialize = do
-        H.liftEffect $ window >>= document >>= setTitle "TTH"
+        H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Home"
         { platform, config: Config {apiBuzgibiHost: host}, async } <- getStore
         w <- H.liftEffect $ window >>= innerWidth
 

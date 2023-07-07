@@ -65,7 +65,7 @@ main cfg = do
       body <- HA.awaitBody 
 
       -- request the backend to send initial values (such as static content) required to get the app running
-      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg))
+      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg)) Nothing
       case initResp of 
         Left err -> void $ runUI AppInitFailure.component {error: err} body
         Right init -> do

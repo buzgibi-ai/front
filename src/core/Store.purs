@@ -28,7 +28,6 @@ import Data.Argonaut.Core (stringify)
 import Data.Argonaut.Encode.Class (encodeJson)
 import Data.Maybe
 import Effect (Effect)
-import Data.Function.Uncurried (runFn1)
 import Effect.Aff (Aff)
 import Data.Traversable (for)
 import Effect.Class (liftEffect)
@@ -93,5 +92,5 @@ reduce :: Store -> Action -> Store
 reduce store (WriteError err) = store { error = Just err }
 reduce store (WriteTranslationToCache x hash) = store {  cache = Cache.writeTranslation x hash (_.cache store) }
 
-initAppStore :: String -> Aff (Either Excep.Error BuzgibiBack.Init)
-initAppStore host = Request.make host BuzgibiBack.mkFrontApi $ runFn1 BuzgibiBack.init
+initAppStore :: String -> Maybe BuzgibiBack.JWTToken -> Aff (Either Excep.Error BuzgibiBack.Init)
+initAppStore host token = Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.init token
