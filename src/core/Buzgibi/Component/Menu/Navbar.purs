@@ -62,22 +62,14 @@ component =
         H.modify_ _ { hash = hash, menu = xs }
 
 -- taken from: https://codepen.io/albizan/pen/mMWdWZ
-render { route, menu } =
-  HH.div [css "header-menu-wrapper"]
-  [
-      HH.nav [css "navbar navbar-expand-lg navbar-light"]
-      [
-          HH.ul [css "navbar-nav"] (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) ) 
-      ]
-  ]
+render { route, menu } = HH.div_ [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
 
 mkItem _ xs  _ _ | Map.isEmpty xs = HH.li_ [HH.text "loading.."]
 mkItem route xs applyStyle idx =
   HH.li_ 
   [
       HH.a 
-      [ css "nav-link"
-      , safeHref (mkRoute idx)
+      [ safeHref (mkRoute idx)
       , isDisabled (mkRoute idx == route)
       ] 
       [el]
@@ -89,4 +81,4 @@ mkItem route xs applyStyle idx =
     title = fromMaybe (show (mkRoute idx)) $ Map.lookup (show (mkRoute idx)) xs
     el = applyStyle $ HH.text title
 
-addFontStyle el = HH.div [HPExt.style "font-size: 20px; text-transform:uppercase;"] [el]
+addFontStyle el = HH.div_ [el]

@@ -35,9 +35,7 @@ onFailure
   :: forall m a s xs ys o . 
   LogMessages m => 
   Now m => 
-  MonadAff m => 
-  MonadStore Action Store m => 
-  Navigate m => 
+  MonadAff m =>
   Either Error a -> 
   (Error -> HalogenM s xs ys o m Unit) ->
   (a -> HalogenM s xs ys o m Unit) -> 

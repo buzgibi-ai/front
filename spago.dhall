@@ -45,6 +45,7 @@
   , "lists"
   , "nullable"
   , "channel"
+  , "web-storage"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

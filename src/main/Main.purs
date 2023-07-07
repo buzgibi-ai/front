@@ -9,6 +9,7 @@ import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookie
 import Buzgibi.Component.Lang.Data (Lang (..))
 import Buzgibi.Component.AppInitFailure as AppInitFailure 
 import Buzgibi.Data.Config
+import Buzgibi.Api.BuzgibiBack.FrontApi (JWTToken (..))
 
 import Effect (Effect)
 import Halogen.Aff as HA
@@ -24,7 +25,7 @@ import Control.Monad.Error.Class (catchError, throwError)
 import Buzgibi.Web.Platform (getPlatform)
 import Data.Function.Uncurried (runFn1)
 import Web.HTML.Navigator (userAgent)
-import Web.HTML.Window (navigator, document)
+import Web.HTML.Window (navigator, document, localStorage)
 import Web.HTML (window)
 import Store (initAppStore)
 import Store.Types (readPlatform)
@@ -48,6 +49,7 @@ import Concurrent.Channel (newChannel) as Async
 import Store.Types (LogLevel (Dev))
 import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
+import Web.Storage.Storage (getItem)
 
 main :: Cfg.Config -> Effect Unit
 main cfg = do
@@ -64,8 +66,11 @@ main cfg = do
       -- reference to the <body> tag as soon as it exists.
       body <- HA.awaitBody 
 
+      -- try getting an User's JWTToken
+      jwt <- H.liftEffect $ getJWTfromStorage
+
       -- request the backend to send initial values (such as static content) required to get the app running
-      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg)) Nothing
+      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg)) jwt
       case initResp of 
         Left err -> void $ runUI AppInitFailure.component {error: err} body
         Right init -> do
@@ -182,3 +187,5 @@ setCssLink sha mkHref file = do
 withMaybe :: forall a . Maybe a -> Effect a
 withMaybe Nothing = throwError $ Excep.error "value has been resolved into nothing"
 withMaybe (Just a) = pure a
+
+getJWTfromStorage = window >>= localStorage >>= map (map JWTToken) <<< getItem "buzgibi_jwt"

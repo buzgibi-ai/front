@@ -62,16 +62,6 @@ component =
      
 
 -- I piggyback on the following implementation https://codepen.io/alvarotrigo/pen/PoJGObg
-render { route, menu } =
-    HH.div_
-    [
-        HH.input [HPExt.type_ InputCheckbox, css "toggler"]
-    ,   HH.div [css "hamburger"] [HH.div_ []]
-    ,   HH.div [css "menu"]
-        [
-            HH.div [HPExt.style "#position: relative; #top: -50%;margin:0 auto;width:200px"] 
-            [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
-        ]     
-    ]
-
-addFontStyle el = HH.div [HPExt.style "text-transform:uppercase;"] [el]
+render { route, menu } = HH.div_ [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]   
+  
+addFontStyle el = HH.div [] [el]
