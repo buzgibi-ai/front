@@ -1,4 +1,4 @@
-module Buzgibi.Api.BuzgibiBack.FrontApi
+module Buzgibi.Api.Foreign.Front.Api
   ( Cookie
   , FrontApi
   , FrontendLogRequest

@@ -14,7 +14,7 @@ module Buzgibi.Component.Async
 import Prelude
 
 import Buzgibi.Component.HTML.Utils (css)
-import Buzgibi.Capability.LogMessages (logError)
+import Buzgibi.Capability.LogMessages (logError, logDebug)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -42,6 +42,8 @@ import Store.Types (LogLevel (..))
 
 import Undefined
 
+loc = "Buzgibi.Component.Async"
+
 proxy = Proxy :: _ "async"
 
 data Action = Close Int | Add Async | Initialize
@@ -53,6 +55,11 @@ type State = { xs :: Map.Map Int AsyncWithTM }
 data Level = Warning | Success | Info
 
 data Value = Exception Error | Ordinary String Level 
+
+instance Show Value where 
+  show (Exception e) = show e
+  show (Ordinary s _) = s
+
 
 type Async = { val :: Value, loc :: Maybe String }
 
@@ -73,7 +80,9 @@ component =
       void $ H.fork $ forever $ do
         H.liftAff $ Aff.delay $ Aff.Milliseconds 1000.0
         val <- H.liftAff $ Async.recv $ _.input async
-        for_ val $ handleAction <<< Add 
+        for_ val $ \x -> do
+          logDebug $ loc <> " ---> async val " <> show x   
+          handleAction $ Add x 
     handleAction (Add e@{val: v} ) = do
       let isAdded (Exception _) _ = true
           isAdded (Ordinary _ _) Dev = true
@@ -120,9 +129,11 @@ recalculateIdx xs =
       idXs = fromFoldable (1 .. length valXs)
   in Map.fromFoldable $ zip idXs valXs
 
-send val = do 
+send val = do
+  logDebug $ loc <> " ---> async start"
   { async } <- getStore
-  void $ H.liftAff $ Async.send (_.output async) val
+  void $ H.fork $ void $ H.liftAff $ Async.send (_.output async) val
+  logDebug $ loc <> " ---> async end"
 
 withAffjax :: forall a . String -> Async.Channel Async Async -> Either AX.Error (AX.Response a) -> (a -> Aff.Aff Unit) -> Aff.Aff Unit
 withAffjax loc async (Left e) _ = void $ Async.send (_.output async) $ mkException (error (AX.printError e)) loc

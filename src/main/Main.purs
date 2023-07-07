@@ -9,7 +9,7 @@ import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookie
 import Buzgibi.Component.Lang.Data (Lang (..))
 import Buzgibi.Component.AppInitFailure as AppInitFailure 
 import Buzgibi.Data.Config
-import Buzgibi.Api.BuzgibiBack.FrontApi (JWTToken (..))
+import Buzgibi.Api.Foreign.BuzgibiBack (JWTToken (..))
 
 import Effect (Effect)
 import Halogen.Aff as HA

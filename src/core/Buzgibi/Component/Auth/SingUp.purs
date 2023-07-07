@@ -4,6 +4,10 @@ import Prelude
 
 import Buzgibi.Component.Auth.SignUp.PasswordCheker (Validation, check)
 import Buzgibi.Capability.LogMessages (logDebug)
+import Buzgibi.Api.Foreign.Request as Request
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack 
+import Buzgibi.Api.Foreign.Request.Handler (onFailure) 
+import Buzgibi.Data.Config (Config (..))
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -14,6 +18,10 @@ import Halogen.HTML.Events as HE
 import Web.Event.Event (preventDefault, Event)
 import Data.Traversable (for)
 import Data.String (length)
+import Buzgibi.Component.Async as Async
+import Halogen.Store.Monad (getStore)
+
+import Undefined
 
 loc = "Buzgibi.Component.Auth.SignUp"
 
@@ -47,7 +55,29 @@ component =
       { handleAction = handleAction }
     }
 
-handleAction (MakeRequest ev) = H.liftEffect $ preventDefault ev
+handleAction (MakeRequest ev) = do 
+  H.liftEffect $ preventDefault ev
+  logDebug $ loc <> "pass stregth ---> trying registering"
+  {email, password, reapatedPassword} <- H.get
+  if password /= reapatedPassword
+  then do 
+    Async.send $ Async.mkOrdinary "passwords mismatch" Async.Info Nothing
+    logDebug $ loc <> "passwords mismatch"
+  else do 
+    { config: Config {apiBuzgibiHost} } <- getStore
+    let mkCred (Just email) (Just password) 
+          | length password > 0 =
+            Just { email: email, password: password }
+          | otherwise = Nothing  
+        mkCred _ _ = Nothing 
+    let cred = mkCred email password
+    case cred of
+      Nothing -> do 
+        Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
+        logDebug $ loc <> "login or password is empty"
+      Just cred -> do 
+        resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.register cred
+        onFailure resp undefined undefined
 handleAction (FillEmail s) = H.modify_ _ { email = Just s }
 handleAction (FillPassword s) = do
   logDebug $ loc <> "pass stregth ---> " <> show (check s)

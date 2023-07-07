@@ -13,6 +13,7 @@ module Buzgibi.Api.Foreign.BuzgibiBack
   , mkSendGridSendMailRequest
   , module Common
   , module FrontApi
+  , module AuthApi
   , send
   )
   where
@@ -21,8 +22,8 @@ import Prelude
 
 import Buzgibi.Api.Foreign.Common as Common
 import Buzgibi.Api.Foreign.Common
-import Buzgibi.Api.BuzgibiBack.FrontApi as FrontApi
-
+import Buzgibi.Api.Foreign.Front.Api as FrontApi
+import Buzgibi.Api.Foreign.Auth.Api as AuthApi
 
 import Data.Function.Uncurried (Fn1, Fn2, Fn3, runFn3)
 import Effect (Effect)
