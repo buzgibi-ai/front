@@ -42,6 +42,7 @@ import Effect.AVar (AVar)
 import Data.Map as Map
 import Cache as Cache
 import Concurrent.Channel as Async
+import Crypto.Jwt (JwtUser)
 
 -- | We can now construct our central state which will be available to all
 -- | components (if they opt-in).
@@ -60,6 +61,7 @@ type Store =
      , langVar ::  AVar Lang
      , telegramVar :: Async.Channel String String
      , logLevel :: LogLevel
+     , jwtUser :: Maybe JwtUser
      }
 
 printStore store = 
@@ -72,7 +74,8 @@ printStore store =
   ", cookies: " <> show (_.cookies store) <>
   ", langVar: <AVar>" <>
   ", telegramVar: <AVar>" <>
-  ", logLevel: " <> show (_.logLevel store) <> " }"
+  ", logLevel: " <> show (_.logLevel store) <> 
+  ", jwtUser:  " <> show (_.jwtUser store) <> " }"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that

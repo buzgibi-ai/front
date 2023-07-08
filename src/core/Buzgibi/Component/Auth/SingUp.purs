@@ -13,11 +13,13 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack 
 import Buzgibi.Api.Foreign.Request.Handler (onFailure) 
 import Buzgibi.Data.Config (Config (..))
+import Buzgibi.Capability.Navigate (navigate)
+import Buzgibi.Data.Route as Route
 
 import Halogen as H
 import Halogen.HTML as HH
 import Type.Proxy (Proxy(..))
-import Data.Maybe (Maybe (..), fromMaybe, isNothing)
+import Data.Maybe (Maybe (..), fromMaybe, isNothing, isJust)
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen.HTML.Events as HE
 import Web.Event.Event (preventDefault, Event)
@@ -25,6 +27,10 @@ import Data.Traversable (for)
 import Data.String (length)
 import Buzgibi.Component.Async as Async
 import Halogen.Store.Monad (getStore)
+import Effect.Exception (message)
+import Web.HTML.Window (localStorage)
+import Web.Storage.Storage (setItem)
+import Web.HTML (window)
 
 import Undefined
 
@@ -41,27 +47,35 @@ data Action =
      | FillEmail String 
      | FillPassword String 
      | FillRepeatedPassword String
+     | Initialize
 
 type State = 
      { email :: Maybe String
      , password :: Maybe String
      , reapatedPassword :: Maybe String
      , strength :: Maybe Validation
+     , errMsg :: Maybe String
      }
+
+def = 
+  { email: Nothing
+  , password: Nothing
+  , reapatedPassword: Nothing
+  , strength: Nothing
+  , errMsg: Nothing }
 
 component =
   H.mkComponent
-    { initialState: 
-       const { 
-          email: Nothing
-        , password: Nothing
-        , reapatedPassword: Nothing
-        , strength: Nothing }
+    { initialState: const def
     , render: render
     , eval: H.mkEval H.defaultEval 
-      { handleAction = handleAction }
+      { handleAction = handleAction
+      , initialize = pure Initialize }
     }
   where
+    handleAction Initialize = do 
+      {jwtUser} <- getStore
+      when (isJust jwtUser) $ navigate Route.Home
     handleAction (MakeRequest ev) = do 
       H.liftEffect $ preventDefault ev
       logDebug $ loc <> "pass stregth ---> trying registering"
@@ -84,14 +98,24 @@ component =
             logDebug $ loc <> "login or password is empty"
           Just cred -> do 
             resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.register cred
-            onFailure resp undefined undefined
+            let onError e = 
+                  H.modify_ _ { 
+                     errMsg = Just $ message e
+                  ,  email = Nothing
+                  ,  password = Nothing
+                  ,  reapatedPassword = Nothing
+                  ,  strength = Nothing}
+            onFailure resp onError \token -> do 
+              logDebug $ loc <> " jwt ---> " <> token
+              H.liftEffect $ window >>= localStorage >>= setItem "buzgibi_jwt" token
+              navigate Route.Home
     handleAction (FillEmail s) = H.modify_ _ { email = Just s }
     handleAction (FillPassword s) = do
       logDebug $ loc <> "pass stregth ---> " <> show (check s)
       H.modify_ _ { password = Just s, strength = Just (check s) }
     handleAction (FillRepeatedPassword s) = H.modify_ _ { reapatedPassword = Just s }
 
-render { email, password, reapatedPassword, strength } = 
+render { email, password, reapatedPassword, strength, errMsg} = 
   HH.div_ 
   [
       HH.form [ HE.onSubmit MakeRequest]
@@ -101,6 +125,9 @@ render { email, password, reapatedPassword, strength } =
             HPExt.type_ HPExt.InputEmail
           , HE.onValueInput FillEmail
           ]
+      ,   if isNothing errMsg 
+          then HH.div_ []
+          else HH.div_ [HH.text (fromMaybe undefined errMsg)]
       ,
           HH.input 
           [ HPExt.type_ HPExt.InputPassword

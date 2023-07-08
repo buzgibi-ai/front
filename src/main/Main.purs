@@ -1,11 +1,11 @@
 module Main (main) where
 
-import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (>>>))
+import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (>>>), (*>))
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
 import Buzgibi.Data.Config as Cfg
-import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookiesInit)
+import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookiesInit, getJwtStatus, JWTStatus (..))
 import Buzgibi.Component.Lang.Data (Lang (..))
 import Buzgibi.Component.AppInitFailure as AppInitFailure 
 import Buzgibi.Data.Config
@@ -30,7 +30,6 @@ import Web.HTML (window)
 import Store (initAppStore)
 import Store.Types (readPlatform)
 import Effect.Exception as Excep
-import Undefined (undefined)
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Data.Either (Either (..))
 import Effect.AVar (new) as Async
@@ -49,7 +48,8 @@ import Concurrent.Channel (newChannel) as Async
 import Store.Types (LogLevel (Dev))
 import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
-import Web.Storage.Storage (getItem)
+import Web.Storage.Storage (getItem, removeItem)
+import Crypto.Jwt as Jwt
 
 main :: Cfg.Config -> Effect Unit
 main cfg = do
@@ -70,7 +70,7 @@ main cfg = do
       jwt <- H.liftEffect $ getJWTfromStorage
 
       -- request the backend to send initial values (such as static content) required to get the app running
-      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg)) jwt
+      initResp <- initAppStore (_.apiBuzgibiHost (getVal cfg)) $ map JWTToken jwt
       case initResp of 
         Left err -> void $ runUI AppInitFailure.component {error: err} body
         Right init -> do
@@ -94,6 +94,8 @@ main cfg = do
               infoShow $ "init --> " <> show init
               infoShow $ "cfg --> " <> stringifyWithIndent 4 (encodeJson cfg)
 
+          user <- H.liftEffect $ getCurrentUser jwt $ getJwtStatus init
+
           -- We now have the three pieces of information necessary to configure our app. Let's create
           -- a record that matches the `Store` type our application requires by filling in these three
           -- fields. If our environment type ever changes, we'll get a compiler error here.
@@ -111,6 +113,7 @@ main cfg = do
                 , langVar: langVar
                 , telegramVar: telVar
                 , logLevel: logLevel
+                , jwtUser: user
                 }
 
           -- With our app environment ready to go, we can prepare the router to run as our root component.
@@ -188,4 +191,9 @@ withMaybe :: forall a . Maybe a -> Effect a
 withMaybe Nothing = throwError $ Excep.error "value has been resolved into nothing"
 withMaybe (Just a) = pure a
 
-getJWTfromStorage = window >>= localStorage >>= map (map JWTToken) <<< getItem "buzgibi_jwt"
+getJWTfromStorage = window >>= localStorage >>= getItem "buzgibi_jwt"
+
+getCurrentUser jwt (Just Valid) = for jwt Jwt.parse
+getCurrentUser _ (Just Invalid) = (window >>= localStorage >>= removeItem "buzgibi_jwt") *> pure Nothing
+getCurrentUser _ (Just Skip) = pure Nothing 
+getCurrentUser _ _ = throwError $ Excep.error $ "value has been resolved into nothing"

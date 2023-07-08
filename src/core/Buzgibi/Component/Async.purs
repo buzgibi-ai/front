@@ -132,7 +132,7 @@ recalculateIdx xs =
 send val = do
   logDebug $ loc <> " ---> async start"
   { async } <- getStore
-  void $ H.fork $ void $ H.liftAff $ Async.send (_.output async) val
+  void $ H.liftAff $ Async.send (_.output async) val
   logDebug $ loc <> " ---> async end"
 
 withAffjax :: forall a . String -> Async.Channel Async Async -> Either AX.Error (AX.Response a) -> (a -> Aff.Aff Unit) -> Aff.Aff Unit

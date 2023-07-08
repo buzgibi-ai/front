@@ -3,7 +3,6 @@ module Buzgibi.Api.Foreign.Front.Api
   , FrontApi
   , FrontendLogRequest
   , Init
-  , JWTToken(..)
   , MapMenuText
   , MapMessengerText
   , MapPageText
@@ -16,6 +15,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , getCookies
   , getCookiesInit
   , getIsCaptcha
+  , getJwtStatus
   , getLogLevel
   , getMeta
   , getMetaDescription
@@ -38,7 +38,7 @@ import Buzgibi.Api.Foreign.Common
 import Buzgibi.Component.Lang.Data (Lang)
 import Store.Types (LogLevel, readLogLevel)
 
-import Data.Function.Uncurried (Fn2, Fn1, Fn3, runFn2, runFn3)
+import Data.Function.Uncurried (Fn2, Fn1, Fn3, runFn2, runFn3, runFn1)
 import Effect.Aff.Compat as AC
 import Foreign.Object (Object)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
@@ -69,15 +69,10 @@ foreign import data MapMessengerText :: Type
 
 foreign import mkFrontApi :: Fn1 ApiClient (Effect FrontApi)
 
-foreign import _init :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) (Maybe JWTToken) FrontApi (AC.EffectFnAff (Object (Response Init)))
-
-newtype JWTToken = JWTToken String
-
-instance EncodeJson JWTToken where
-  encodeJson (JWTToken token) = "token" := token ~> jsonEmptyObject
+foreign import _init :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object (Response Init)))
 
 init :: Maybe JWTToken -> FrontApi -> AC.EffectFnAff (Object (Response Init))
-init token = runFn3 _init withError token
+init token = runFn3 _init withError (fromMaybe jsonEmptyObject (map encodeJson token))
 
 instance Show Init where
   show = _showInit
@@ -100,6 +95,17 @@ getIsCaptcha = _getIsCaptcha Nothing Just
 getToTelegram :: Init -> Maybe Boolean
 getToTelegram = _getToTelegram Nothing Just
 
+foreign import _getJwtStatus :: Init -> String
+
+getJwtStatus :: Init -> Maybe JWTStatus
+getJwtStatus init = 
+  let st = _getJwtStatus init
+  in case st of 
+       "valid" -> Just Valid
+       "invalid" -> Just Invalid
+       "skip" -> Just Skip
+       _ -> Nothing
+
 foreign import _loadTranslation :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object ResponseTranslation))
 
 foreign import mkLogReq :: Fn2 String Foreign (Effect FrontendLogRequest)
@@ -109,7 +115,7 @@ foreign import _sendLog :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error
 sendLog :: FrontendLogRequest -> FrontApi -> AC.EffectFnAff (Object (Response Unit))
 sendLog = runFn3 _sendLog withError
 
-instance Show Cookie where 
+instance Show Cookie where
   show = _showCookie
 
 foreign import _showCookie :: Cookie -> String

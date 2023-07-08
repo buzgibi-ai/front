@@ -37,6 +37,10 @@ export const getShaCSSCommit = (obj) => {
     return obj.getShaCss();
 }
 
+export const _getJwtStatus = obj => {
+    return obj.getIsJwtValid();
+}
+
 export const _getIsCaptcha = nothing => just => obj => {
     let env = obj.getEnv();
     return env !== undefined ? just(env.getIsCaptcha()) : nothing;
