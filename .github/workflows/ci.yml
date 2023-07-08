@@ -71,4 +71,5 @@ jobs:
           script: |
               cd back
               docker-compose stop front
+              docker image rm -f europe-west3-docker.pkg.dev/buzgibi/front/front
               docker-compose up front -d    
