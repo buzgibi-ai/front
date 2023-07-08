@@ -18,7 +18,9 @@ import Data.Enum (fromEnum, toEnum)
 import Type.Proxy (Proxy(..))
 import Effect.Aff as Aff
 import Data.Map as Map
-import Data.Maybe (Maybe (..), fromMaybe)
+import Data.Maybe (Maybe (..), fromMaybe, isJust)
+import Halogen.Store.Monad (getStore)
+import Data.Array (concatMap)
 
 import Undefined
 
@@ -33,12 +35,13 @@ type State =
      { route :: Route
      , menu :: Map.Map String String
      , hash :: String
+     , isAuth :: Boolean
      }
 
 component =
   H.mkComponent
     { initialState: 
-      \{ route } -> { route: route, menu: Map.empty, hash: mempty }
+      \{ route } -> { route: route, menu: Map.empty, hash: mempty, isAuth: false }
     , render: render
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -47,10 +50,12 @@ component =
     }
     where 
       handleAction Initialize = do
+        {jwtUser} <- getStore
         void $ initTranslation loc \hash translation -> 
           H.modify_ _ {
               menu = BuzgibiBack.getTranslationMenu translation
-            , hash = hash }
+            , hash = hash
+            , isAuth = isJust jwtUser }
         { menu, hash } <- H.get
         logDebug $ loc <> " menu: ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash
@@ -62,18 +67,21 @@ component =
         H.modify_ _ { hash = hash, menu = xs }
 
 -- taken from: https://codepen.io/albizan/pen/mMWdWZ
-render { route, menu } = HH.div_ [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
+render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
 
-mkItem _ xs  _ _ | Map.isEmpty xs = HH.li_ [HH.text "loading.."]
-mkItem route xs applyStyle idx =
-  HH.li_ 
-  [
-      HH.a 
-      [ safeHref (mkRoute idx)
-      , isDisabled (mkRoute idx == route)
-      ] 
-      [el]
-  ] 
+mkItem _ _ xs  _ _ | Map.isEmpty xs = [HH.li_ [HH.text "loading.."]]
+mkItem isAuth route xs applyStyle idx =
+  if (mkRoute idx == SignUp || mkRoute idx == SignIn) && isAuth
+  then []
+  else
+    [HH.li_ 
+    [
+        HH.a 
+        [ safeHref (mkRoute idx)
+        , isDisabled (mkRoute idx == route)
+        ] 
+        [el]
+    ]] 
   where 
     mkRoute = fromMaybe undefined <<< (toEnum :: Int -> Maybe Route)
     isDisabled true = HPExt.style "cursor: not-allowed;"

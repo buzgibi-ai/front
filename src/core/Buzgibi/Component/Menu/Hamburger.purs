@@ -20,7 +20,9 @@ import Type.Proxy (Proxy(..))
 import Halogen.Store.Monad (getStore)
 import Effect.Aff as Aff
 import Data.Map as Map
-
+import Halogen.Store.Monad (getStore)
+import Data.Maybe (isJust)
+import Data.Array (concatMap)
 
 proxy = Proxy :: _ "hamburger"
 
@@ -32,12 +34,13 @@ type State =
      { route :: Route
      , menu :: Map.Map String String
      , hash :: String
+     , isAuth :: Boolean
      }
 
 component =
   H.mkComponent
     { initialState:
-      \{ route } -> { route: route, menu: Map.empty, hash: mempty }
+      \{ route } -> { route: route, menu: Map.empty, hash: mempty, isAuth: false }
     , render: render
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -46,10 +49,12 @@ component =
     }
     where 
       handleAction Initialize = do
+        {jwtUser} <- getStore
         void $ initTranslation loc \hash translation -> 
           H.modify_ _ { 
               hash = hash
-            , menu = BuzgibiBack.getTranslationMenu translation }
+            , menu = BuzgibiBack.getTranslationMenu translation
+            , isAuth = isJust jwtUser  }
         { menu, hash } <- H.get
         logDebug $ loc <> " ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash
@@ -62,6 +67,6 @@ component =
      
 
 -- I piggyback on the following implementation https://codepen.io/alvarotrigo/pen/PoJGObg
-render { route, menu } = HH.div_ [HH.ul_ (map (mkItem route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]   
+render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]   
   
 addFontStyle el = HH.div [] [el]
