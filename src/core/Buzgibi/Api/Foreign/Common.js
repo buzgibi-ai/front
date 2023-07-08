@@ -1,9 +1,15 @@
 import * as e from '../Buzgibi.Api.Foreign.BuzgibiBack/BuzgibiBack/src/index';
 
-export const mkApiClient = function(host) {
+export const _mkApiClient = function(jwt, host) {
     return () => {
-        let cl = new e.ApiClient(host)
-        cl.defaultHeaders = [];
+        let cl = new e.ApiClient(host);
+        if (jwt !== undefined) {
+            cl.defaultHeaders = {
+                Authorization: 'Bearer ' + jwt
+            };
+        } else {
+            cl.defaultHeaders = [];
+        }
         return cl;
     }
 }

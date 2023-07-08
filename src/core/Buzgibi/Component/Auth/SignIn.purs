@@ -64,13 +64,14 @@ component =
     }
     where 
       handleAction Initialize = do
-        {jwtUser} <- getStore
-        when (isJust jwtUser) $ navigate Route.Home
+        {user} <- getStore
+        when (isJust user) $ navigate Route.Home
       handleAction (FillEmail s) = H.modify_ _ { email = Just s }
       handleAction (FillPassword s) = H.modify_ _ { password = Just s }        
       handleAction (MakeRequest ev) = do 
         H.liftEffect $ preventDefault ev
-        {email, password} <- H.get
+        s@{email, password} <- H.get
+        logDebug $ loc <> " state ---> " <> show s
         { config: Config {apiBuzgibiHost} } <- getStore
         let mkCred (Just email) (Just password) 
               | length password > 0 =
@@ -79,10 +80,10 @@ component =
             mkCred _ _ = Nothing 
         let cred = mkCred email password
         case cred of
-          Nothing -> do 
+          Nothing -> do
             Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
             logDebug $ loc <> "login or password is empty"
-          Just cred -> do 
+          Just cred -> do
             resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.login cred
             let onError e = 
                   H.modify_ _ { 
@@ -93,7 +94,7 @@ component =
               logDebug $ loc <> " jwt ---> " <> token
               H.liftEffect $ window >>= localStorage >>= setItem "buzgibi_jwt" token
               user <- H.liftEffect $ Jwt.parse token
-              updateStore $ UpdateJwtUser (Just user)
+              updateStore $ UpdateJwtUser (Just {jwtUser: user, token: BuzgibiBack.JWTToken token })
               navigate Route.Home
 
 render { email, password, errMsg} = 
@@ -109,11 +110,13 @@ render { email, password, errMsg} =
           [ 
             HPExt.type_ HPExt.InputEmail
           , HE.onValueInput FillEmail
+          , HPExt.value $ fromMaybe mempty email
           ]
       ,
           HH.input 
           [ HPExt.type_ HPExt.InputPassword
           , HE.onValueInput FillPassword
+          , HPExt.value $ fromMaybe mempty password
           ]
       ,   HH.input [ HPExt.type_ HPExt.InputSubmit]
       ]

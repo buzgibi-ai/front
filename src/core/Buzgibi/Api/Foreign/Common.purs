@@ -16,7 +16,7 @@ import Effect.Exception as E
 import Effect
 import Foreign.Object (Object)
 import Data.Either
-import Data.Function.Uncurried (Fn1)
+import Data.Function.Uncurried (Fn1, Fn2, runFn2)
 import Foreign (Foreign)
 import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Argonaut.Encode.Combinators
@@ -25,6 +25,9 @@ import Data.Argonaut.Decode (decodeJson, class DecodeJson)
 import Data.Argonaut.Decode.Error (JsonDecodeError (TypeMismatch))
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Generic.Rep (class Generic)
+import Data.Maybe (Maybe, fromMaybe)
+
+import Undefined
 
 foreign import data ApiClient :: Type
 foreign import data Response :: Type -> Type
@@ -45,11 +48,17 @@ foreign import _getDataFromObj
 getDataFromObj :: forall a b . Object a -> Effect (Either E.Error b)
 getDataFromObj = _getDataFromObj (Left <<< E.error) Right
 
-foreign import mkApiClient :: Fn1 String (Effect ApiClient)
+foreign import _mkApiClient :: Fn2 String String (Effect ApiClient)
+
+mkApiClient :: Maybe String -> String -> Effect ApiClient
+mkApiClient jwt = runFn2 _mkApiClient (fromMaybe undefined jwt)
 
 foreign import withError :: forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a 
 
 newtype JWTToken = JWTToken String
+
+instance Show JWTToken where 
+  show (JWTToken token) = "***token***"
 
 instance EncodeJson JWTToken where
   encodeJson (JWTToken token) = "token" := token ~> jsonEmptyObject

@@ -5,6 +5,7 @@
 module Store
   ( Action(..)
   , Store(..)
+  , User
   , initAppStore
   , printStore
   , reduce
@@ -44,6 +45,10 @@ import Cache as Cache
 import Concurrent.Channel as Async
 import Crypto.Jwt (JwtUser)
 
+
+type User = { jwtUser :: JwtUser, token :: BuzgibiBack.JWTToken }
+
+
 -- | We can now construct our central state which will be available to all
 -- | components (if they opt-in).
 -- |
@@ -61,7 +66,7 @@ type Store =
      , langVar ::  AVar Lang
      , telegramVar :: Async.Channel String String
      , logLevel :: LogLevel
-     , jwtUser :: Maybe JwtUser
+     , user :: Maybe User
      }
 
 printStore store = 
@@ -75,7 +80,7 @@ printStore store =
   ", langVar: <AVar>" <>
   ", telegramVar: <AVar>" <>
   ", logLevel: " <> show (_.logLevel store) <> 
-  ", jwtUser:  " <> show (_.jwtUser store) <> " }"
+  ", user:  " <> show (_.user store) <> " }"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that
@@ -87,7 +92,7 @@ printStore store =
 data Action = 
        WriteError Error
      | WriteTranslationToCache BuzgibiBack.Translation String
-     | UpdateJwtUser (Maybe JwtUser)
+     | UpdateJwtUser (Maybe User)
 
 -- | Finally, we'll map this action to a state update in a function called a
 -- | 'reducer'. If you're curious to learn more, see the `halogen-store`
@@ -95,7 +100,7 @@ data Action =
 reduce :: Store -> Action -> Store
 reduce store (WriteError err) = store { error = Just err }
 reduce store (WriteTranslationToCache x hash) = store {  cache = Cache.writeTranslation x hash (_.cache store) }
-reduce store (UpdateJwtUser user) = store { jwtUser = user }
+reduce store (UpdateJwtUser user) = store { user = user }
 
 initAppStore :: String -> Maybe BuzgibiBack.JWTToken -> Aff (Either Excep.Error BuzgibiBack.Init)
 initAppStore host token = Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.init token

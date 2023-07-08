@@ -50,12 +50,12 @@ component =
     }
     where 
       handleAction Initialize = do
-        {jwtUser} <- getStore
+        {user} <- getStore
         void $ initTranslation loc \hash translation -> 
           H.modify_ _ {
               menu = BuzgibiBack.getTranslationMenu translation
             , hash = hash
-            , isAuth = isJust jwtUser }
+            , isAuth = isJust user }
         { menu, hash } <- H.get
         logDebug $ loc <> " menu: ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash

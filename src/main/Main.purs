@@ -113,7 +113,7 @@ main cfg = do
                 , langVar: langVar
                 , telegramVar: telVar
                 , logLevel: logLevel
-                , jwtUser: user
+                , user: user
                 }
 
           -- With our app environment ready to go, we can prepare the router to run as our root component.
@@ -183,7 +183,7 @@ setCssLink sha mkHref file = do
       setAttribute "href" href link
       appendChild (toNode (unsafeCoerce link)) (toNode (unsafeCoerce head))
       pure $ Just unit
-    
+
   when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
 
 
@@ -193,7 +193,10 @@ withMaybe (Just a) = pure a
 
 getJWTfromStorage = window >>= localStorage >>= getItem "buzgibi_jwt"
 
-getCurrentUser jwt (Just Valid) = for jwt Jwt.parse
+getCurrentUser jwt (Just Valid) = 
+  for jwt \token -> do 
+    user <- Jwt.parse token 
+    pure $ { jwtUser: user, token: JWTToken token }
 getCurrentUser _ (Just Invalid) = (window >>= localStorage >>= removeItem "buzgibi_jwt") *> pure Nothing
 getCurrentUser _ (Just Skip) = pure Nothing 
 getCurrentUser _ _ = throwError $ Excep.error $ "value has been resolved into nothing"

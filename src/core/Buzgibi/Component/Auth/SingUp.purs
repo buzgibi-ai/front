@@ -78,8 +78,8 @@ component =
     }
   where
     handleAction Initialize = do 
-      {jwtUser} <- getStore
-      when (isJust jwtUser) $ navigate Route.Home
+      {user} <- getStore
+      when (isJust user) $ navigate Route.Home
     handleAction (MakeRequest ev) = do 
       H.liftEffect $ preventDefault ev
       logDebug $ loc <> "pass stregth ---> trying registering"
@@ -113,7 +113,7 @@ component =
               logDebug $ loc <> " jwt ---> " <> token
               H.liftEffect $ window >>= localStorage >>= setItem "buzgibi_jwt" token
               user <- H.liftEffect $ Jwt.parse $ coerce token
-              updateStore $ UpdateJwtUser (Just user)
+              updateStore $ UpdateJwtUser (Just {jwtUser: user, token: BuzgibiBack.JWTToken token })
               navigate Route.Home
     handleAction (FillEmail s) = H.modify_ _ { email = Just s }
     handleAction (FillPassword s) = do
