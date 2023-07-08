@@ -39,5 +39,5 @@ stringifyAuthType Jwt = "jwt"
 
 foreign import _login :: Fn4 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) String Credentials AuthApi (AC.EffectFnAff (Object ResponseAuthToken))
 
-login :: AuthType -> Credentials -> AuthApi -> (AC.EffectFnAff (Object ResponseAuthToken))
-login authType = runFn4 _login withError (stringifyAuthType authType)
+login :: Credentials -> AuthApi -> (AC.EffectFnAff (Object ResponseAuthToken))
+login = runFn4 _login withError (stringifyAuthType Jwt)

@@ -87,6 +87,7 @@ printStore store =
 data Action = 
        WriteError Error
      | WriteTranslationToCache BuzgibiBack.Translation String
+     | UpdateJwtUser (Maybe JwtUser)
 
 -- | Finally, we'll map this action to a state update in a function called a
 -- | 'reducer'. If you're curious to learn more, see the `halogen-store`
@@ -94,6 +95,7 @@ data Action =
 reduce :: Store -> Action -> Store
 reduce store (WriteError err) = store { error = Just err }
 reduce store (WriteTranslationToCache x hash) = store {  cache = Cache.writeTranslation x hash (_.cache store) }
+reduce store (UpdateJwtUser user) = store { jwtUser = user }
 
 initAppStore :: String -> Maybe BuzgibiBack.JWTToken -> Aff (Either Excep.Error BuzgibiBack.Init)
 initAppStore host token = Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.init token

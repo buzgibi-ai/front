@@ -15,6 +15,7 @@ import Buzgibi.Api.Foreign.Request.Handler (onFailure)
 import Buzgibi.Data.Config (Config (..))
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Data.Route as Route
+import Buzgibi.Component.Async as Async
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -25,12 +26,15 @@ import Halogen.HTML.Events as HE
 import Web.Event.Event (preventDefault, Event)
 import Data.Traversable (for)
 import Data.String (length)
-import Buzgibi.Component.Async as Async
-import Halogen.Store.Monad (getStore)
+import Halogen.Store.Monad (getStore, updateStore)
 import Effect.Exception (message)
 import Web.HTML.Window (localStorage)
 import Web.Storage.Storage (setItem)
 import Web.HTML (window)
+import Store (Action (UpdateJwtUser))
+import Crypto.Jwt as Jwt
+import Safe.Coerce
+
 
 import Undefined
 
@@ -105,9 +109,11 @@ component =
                   ,  password = Nothing
                   ,  reapatedPassword = Nothing
                   ,  strength = Nothing}
-            onFailure resp onError \token -> do 
+            onFailure resp onError \(token :: String) -> do 
               logDebug $ loc <> " jwt ---> " <> token
               H.liftEffect $ window >>= localStorage >>= setItem "buzgibi_jwt" token
+              user <- H.liftEffect $ Jwt.parse $ coerce token
+              updateStore $ UpdateJwtUser (Just user)
               navigate Route.Home
     handleAction (FillEmail s) = H.modify_ _ { email = Just s }
     handleAction (FillPassword s) = do
