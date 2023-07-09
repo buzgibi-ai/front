@@ -8,7 +8,6 @@ import Buzgibi.Component.HTML.Utils (css)
 import Buzgibi.Component.Lang as Lang
 import Buzgibi.Component.Async as Async
 import Buzgibi.Data.Route (Route)
-import Buzgibi.Component.Auth.User as Auth.User
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -23,7 +22,6 @@ html route pl w =
       HH.div [css "logo-container"] []
   ,   HH.div [css "menu-container"] [showMenu route pl w]
   ,   HH.div [css "lang-container"] [HH.div_ [HH.slot_ Lang.proxy unit Lang.component unit]]
-  ,   HH.div [css "user-header-container"] [HH.slot_ Auth.User.proxy unit Auth.User.component unit]
   ,   HH.div_ [HH.slot_ Async.proxy unit Async.component unit]
   ]
 

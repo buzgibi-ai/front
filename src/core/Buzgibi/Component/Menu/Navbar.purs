@@ -10,6 +10,7 @@ import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Component.Subscription.Logout as Logout
+import Buzgibi.Component.Auth.User as Auth.User
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -21,7 +22,7 @@ import Effect.Aff as Aff
 import Data.Map as Map
 import Data.Maybe (Maybe (..), fromMaybe, isJust)
 import Halogen.Store.Monad (getStore)
-import Data.Array (concatMap)
+import Data.Array (concatMap, snoc)
 
 import Undefined
 
@@ -74,7 +75,9 @@ component =
 render { route, menu, isAuth } = 
   HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] 
   [HH.ul [css "navbar-nav mr-auto"] 
-   (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )]
+   ((concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) ) `snoc` 
+   HH.slot_ Auth.User.proxy unit Auth.User.component unit)
+  ]
 
 mkItem _ _ xs  _ _ | Map.isEmpty xs = [HH.li_ [HH.text "loading.."]]
 mkItem isAuth route xs applyStyle idx =

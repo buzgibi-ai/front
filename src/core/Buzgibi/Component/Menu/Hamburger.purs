@@ -29,7 +29,7 @@ proxy = Proxy :: _ "hamburger"
 
 loc = "Buzgibi.Component.HTML.Menu.Hamburger"
 
-data Action = Initialize | LangChange String (Map.Map String String) | Finalize
+data Action = Initialize | LangChange String (Map.Map String String) | Finalize | ShowAuth
 
 type State = 
      { route :: Route
