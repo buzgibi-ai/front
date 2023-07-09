@@ -15,7 +15,6 @@ import Buzgibi.Api.Foreign.Request.Handler (onFailure)
 import Buzgibi.Data.Config (Config (..))
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Data.Route as Route
-import Buzgibi.Component.Async as Async
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -86,7 +85,7 @@ component =
       {email, password, reapatedPassword} <- H.get
       if password /= reapatedPassword
       then do 
-        Async.send $ Async.mkOrdinary "passwords mismatch" Async.Info Nothing
+        H.modify_ _ { errMsg = Just "passwords mismatch" }
         logDebug $ loc <> "passwords mismatch"
       else do 
         { config: Config {apiBuzgibiHost} } <- getStore
@@ -98,7 +97,7 @@ component =
         let cred = mkCred email password
         case cred of
           Nothing -> do 
-            Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
+            H.modify_ _ { errMsg = Just "login or password is empty" }
             logDebug $ loc <> "login or password is empty"
           Just cred -> do 
             resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.register cred
@@ -124,20 +123,23 @@ component =
 render { email, password, reapatedPassword, strength, errMsg} = 
   HH.div_ 
   [
+      if isNothing errMsg 
+      then HH.div_ []
+      else HH.div_ [HH.text (fromMaybe undefined errMsg)]
+  ,    
       HH.form [ HE.onSubmit MakeRequest]
       [    
           HH.input 
           [ 
             HPExt.type_ HPExt.InputEmail
           , HE.onValueInput FillEmail
+          , HPExt.value $ fromMaybe mempty email
           ]
-      ,   if isNothing errMsg 
-          then HH.div_ []
-          else HH.div_ [HH.text (fromMaybe undefined errMsg)]
       ,
           HH.input 
           [ HPExt.type_ HPExt.InputPassword
           , HE.onValueInput FillPassword
+          , HPExt.value $ fromMaybe mempty password
           ]
       ,   if isNothing password || 
              (map length password == Just 0)
@@ -147,6 +149,7 @@ render { email, password, reapatedPassword, strength, errMsg} =
           HH.input 
           [ HPExt.type_ HPExt.InputPassword
           , HE.onValueInput FillRepeatedPassword
+          , HPExt.value $ fromMaybe mempty reapatedPassword
           ]
       ,   HH.input [ HPExt.type_ HPExt.InputSubmit]
       ]

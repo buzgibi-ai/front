@@ -15,7 +15,6 @@ import Buzgibi.Api.Foreign.Request.Handler (onFailure)
 import Buzgibi.Data.Config (Config (..))
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Data.Route as Route
-import Buzgibi.Component.Async as Async
 import Buzgibi.Capability.LogMessages (logDebug)
 
 import Halogen as H
@@ -81,7 +80,7 @@ component =
         let cred = mkCred email password
         case cred of
           Nothing -> do
-            Async.send $ Async.mkOrdinary "login or password is empty" Async.Info Nothing
+            H.modify_ _ { errMsg = Just "login or password is empty" }
             logDebug $ loc <> "login or password is empty"
           Just cred -> do
             resp <- Request.make apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.login cred
