@@ -22,6 +22,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , getShaCSSCommit
   , getShaCommit
   , getToTelegram
+  , getTranslationCopyright
   , getTranslationMenu
   , getTranslationPage
   , init
@@ -164,3 +165,5 @@ foreign import _getTranslationPage :: Translation -> Array MapPageText
 getTranslationPage :: Translation -> Map.Map String String
 getTranslationPage = Map.fromFoldable <<< map toTpl <<< _getTranslationPage
   where toTpl x = Tuple (_getKeyText x) (_getValText x)
+
+foreign import getTranslationCopyright :: Translation -> String

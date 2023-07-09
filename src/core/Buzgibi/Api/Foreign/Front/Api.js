@@ -123,3 +123,7 @@ export const _getTranslationPage = obj => {
 export const _showMapMenuText = menu => {
     return "{ key: " + menu.getKey() + ", value: " + menu.getValue() + " }";
 }
+
+export const getTranslationCopyright = (obj) => {
+    return "COPYRIGHT © 2023 Buz Gibi App - ALL RIGHTS RESERVED.";
+}

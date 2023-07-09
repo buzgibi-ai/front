@@ -66,7 +66,10 @@ component =
         logDebug $ loc <> " hash: ---> " <> hash
         H.modify_ _ { hash = hash, menu = xs }
 
-render { route, menu, isAuth } = HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] [HH.ul [css "navbar-nav mr-auto"] (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
+render { route, menu, isAuth } = 
+  HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] 
+  [HH.ul [css "navbar-nav mr-auto"] 
+   (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
 
 mkItem _ _ xs  _ _ | Map.isEmpty xs = [HH.li_ [HH.text "loading.."]]
 mkItem isAuth route xs applyStyle idx =
