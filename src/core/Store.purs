@@ -81,7 +81,8 @@ printStore store =
   ", langVar: <AVar>" <>
   ", telegramVar: <AVar>" <>
   ", logLevel: " <> show (_.logLevel store) <> 
-  ", user:  " <> show (_.user store) <> " }"
+  ", user:  " <> show (_.user store) <> 
+  ", isLogoutVa: <AVar> }"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that

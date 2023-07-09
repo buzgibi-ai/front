@@ -10,6 +10,7 @@ import Prelude
 import Effect (Effect)
 
 -- {
+--   "email": "test@tes.com"
 --   "ident": 5,
 --   "jwtClaims": {
 --     "exp": 1689663223.369714,
@@ -18,6 +19,6 @@ import Effect (Effect)
 -- }
 type JwtClaims = { exp :: Int, iat :: Int }
 
-type JwtUser = { ident :: Int, jwtClaims :: JwtClaims }
+type JwtUser = { ident :: Int, email :: String, jwtClaims :: JwtClaims }
 
 foreign import parse :: String -> Effect JwtUser

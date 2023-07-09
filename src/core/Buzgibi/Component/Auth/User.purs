@@ -49,7 +49,7 @@ component =
     where 
       handleAction Initialize = do
         {user} <- getStore 
-        for_ user $ const $ H.modify_ _ { email = Just "test" }
+        for_ user \{jwtUser: {email}} -> H.modify_ _ { email = Just email }
       handleAction (MakeRequest ev) = do 
         H.liftEffect $ preventDefault ev
         { config: Config {apiBuzgibiHost}, user, isLogoutVar } <- getStore
@@ -69,8 +69,7 @@ render { email: Just email } =
   [  HE.onSubmit MakeRequest
   ,  css "form-inline"
   ] 
-  [ 
-    HH.text "test" 
+  [ HH.text email
   , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "logout"]
   ] 
 render { email: Nothing } = HH.div_ []
