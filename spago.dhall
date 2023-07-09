@@ -46,6 +46,7 @@
   , "nullable"
   , "channel"
   , "web-storage"
+  , "control"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
