@@ -12,7 +12,7 @@ import Data.Maybe (Maybe (..))
 
 subscribe loc goCompHandle = 
   void $ H.fork $ forever $ do
-  H.liftAff $ Aff.delay $ Aff.Milliseconds 1000.0
+  H.liftAff $ Aff.delay $ Aff.Milliseconds 500.0
   { isLogoutVar } <- getStore
   isLogout <- H.liftEffect $ Async.tryTake isLogoutVar
   for_ isLogout $ const goCompHandle

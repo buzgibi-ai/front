@@ -65,11 +65,12 @@ component =
           Nothing -> pure unit
 
 render { email: Just email } = 
-  HH.div_
-  [
-      HH.text email
-  ,   HH.form 
-      [ HE.onSubmit MakeRequest] [HH.input 
-      [ HPExt.type_ HPExt.InputSubmit, HPExt.value "logout"]] 
-  ]
+  HH.form 
+  [  HE.onSubmit MakeRequest
+  ,  css "form-inline"
+  ] 
+  [ 
+    HH.text "test" 
+  , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "logout"]
+  ] 
 render { email: Nothing } = HH.div_ []

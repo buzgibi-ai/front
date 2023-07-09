@@ -75,7 +75,7 @@ component =
 render { route, menu, isAuth } = 
   HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] 
   [HH.ul [css "navbar-nav mr-auto"] 
-   ((concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) ) `snoc` 
+   ((concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) ) `snoc` 
    HH.slot_ Auth.User.proxy unit Auth.User.component unit)
   ]
 
