@@ -37,7 +37,7 @@ component =
     handleAction Initialize = do
       void $ initTranslation loc \hash translation ->
         H.modify_ _ { copyright = BuzgibiBack.getTranslationCopyright translation }
-      Translation.load loc $ \hash translation -> 
+      Translation.subscribe loc $ \hash translation -> 
         handleAction $ LangChange hash $ BuzgibiBack.getTranslationCopyright translation  
     handleAction (LangChange _ new) = H.modify_ _ { copyright = new } 
 

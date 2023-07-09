@@ -1,8 +1,6 @@
-module Buzgibi.Component.Subscription.Translation (load) where
+module Buzgibi.Component.Subscription.Translation (subscribe) where
 
 import Prelude
-
-import Buzgibi.Capability.LogMessages (logDebug)
 
 import Halogen as H
 import Control.Monad.Rec.Class (forever)
@@ -13,7 +11,7 @@ import Data.Traversable (for_)
 import Cache (readTranslation)
 import Data.Maybe (Maybe (..))
 
-load loc goCompHandle = 
+subscribe loc goCompHandle = 
   void $ H.fork $ forever $ do
   H.liftAff $ Aff.delay $ Aff.Milliseconds 500.0
   { cache } <- getStore

@@ -10,6 +10,8 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack 
 import Buzgibi.Data.Config (Config (..))
 import Buzgibi.Api.Foreign.Request.Handler (withError) 
+import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Capability.LogMessages (logDebug)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -24,6 +26,7 @@ import Store (Action (UpdateJwtUser))
 import Web.HTML.Window (localStorage)
 import Web.Storage.Storage (removeItem)
 import Web.HTML (window)
+import Effect.AVar (tryPut) as Async
 
 import Undefined
 
@@ -49,7 +52,7 @@ component =
         for_ user $ const $ H.modify_ _ { email = Just "test" }
       handleAction (MakeRequest ev) = do 
         H.liftEffect $ preventDefault ev
-        { config: Config {apiBuzgibiHost}, user } <- getStore
+        { config: Config {apiBuzgibiHost}, user, isLogoutVar } <- getStore
         case user of 
           Just { token } -> do 
             resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.logout
@@ -57,10 +60,12 @@ component =
               H.liftEffect $ window >>= localStorage >>= removeItem "buzgibi_jwt"
               H.modify_ _ { email = Nothing }
               updateStore $ UpdateJwtUser Nothing
-          Nothing -> pure unit     
+              res <- H.liftEffect $ Async.tryPut unit isLogoutVar
+              logDebug $ loc <> " if avar operaion succeeded ---> " <> show res
+          Nothing -> pure unit
 
 render { email: Just email } = 
-  HH.div_ 
+  HH.div_
   [
       HH.text email
   ,   HH.form 

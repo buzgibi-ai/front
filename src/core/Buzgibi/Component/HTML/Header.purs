@@ -23,7 +23,7 @@ html route pl w =
       HH.div [css "logo-container"] []
   ,   HH.div [css "menu-container"] [showMenu route pl w]
   ,   HH.div [css "lang-container"] [HH.div_ [HH.slot_ Lang.proxy unit Lang.component unit]]
-  ,   HH.div_ [HH.slot_ Auth.User.proxy unit Auth.User.component unit]
+  ,   HH.div [css "user-header-container"] [HH.slot_ Auth.User.proxy unit Auth.User.component unit]
   ,   HH.div_ [HH.slot_ Async.proxy unit Async.component unit]
   ]
 

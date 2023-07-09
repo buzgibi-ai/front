@@ -125,5 +125,5 @@ export const _showMapMenuText = menu => {
 }
 
 export const getTranslationCopyright = (obj) => {
-    return "COPYRIGHT © 2023 Buz Gibi App - ALL RIGHTS RESERVED.";
+    return obj.getCopyright();
 }

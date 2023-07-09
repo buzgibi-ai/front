@@ -90,7 +90,7 @@ component mkBody =
 
         Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.Home)
 
-        Translation.load loc $ \hash translation -> 
+        Translation.subscribe loc $ \hash translation -> 
           handleAction $ LangChange hash $ BuzgibiBack.getTranslationPage translation
 
       handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
@@ -100,5 +100,5 @@ component mkBody =
         {start} <- H.get
         sendComponentTime start end loc
 
-content (Just x ) = HH.text x
+content (Just _ ) = HH.text "test"
 content Nothing = HH.text "translation not found"

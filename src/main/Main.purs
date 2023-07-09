@@ -32,7 +32,7 @@ import Store.Types (readPlatform)
 import Effect.Exception as Excep
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Data.Either (Either (..))
-import Effect.AVar (new) as Async
+import Effect.AVar (new, empty) as Async
 import Effect.Console (infoShow, logShow)
 import Web.DOM.Document (getElementsByTagName, createElement)
 import Web.DOM.HTMLCollection (item)
@@ -89,6 +89,8 @@ main cfg = do
 
           platform <- H.liftEffect $ withMaybe _platform
 
+          isLogoutVar <- H.liftEffect Async.empty
+
           when (logLevel == Dev) $ 
             H.liftEffect $ do 
               infoShow $ "init --> " <> show init
@@ -114,6 +116,7 @@ main cfg = do
                 , telegramVar: telVar
                 , logLevel: logLevel
                 , user: user
+                , isLogoutVar: isLogoutVar
                 }
 
           -- With our app environment ready to go, we can prepare the router to run as our root component.

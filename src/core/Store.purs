@@ -67,6 +67,7 @@ type Store =
      , telegramVar :: Async.Channel String String
      , logLevel :: LogLevel
      , user :: Maybe User
+     , isLogoutVar :: AVar Unit
      }
 
 printStore store = 

@@ -9,6 +9,7 @@ import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Component.Menu.Navbar ( mkItem )
+import Buzgibi.Component.Subscription.Logout as Logout
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -28,7 +29,7 @@ proxy = Proxy :: _ "hamburger"
 
 loc = "Buzgibi.Component.HTML.Menu.Hamburger"
 
-data Action = Initialize | LangChange String (Map.Map String String)
+data Action = Initialize | LangChange String (Map.Map String String) | Finalize
 
 type State = 
      { route :: Route
@@ -45,6 +46,7 @@ component =
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = pure Initialize
+      , finalize = pure Finalize
       }
     }
     where 
@@ -58,15 +60,17 @@ component =
         { menu, hash } <- H.get
         logDebug $ loc <> " ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash
-        Translation.load loc $ \hash translation -> 
+        Translation.subscribe loc $ \hash translation -> 
           handleAction $ LangChange hash $ BuzgibiBack.getTranslationMenu translation
+        Logout.subscribe loc $ handleAction ShowAuth   
       handleAction (LangChange hash xs) = do 
         logDebug $ loc <> " ---> " <> show xs
         logDebug $ loc <> " hash: ---> " <> hash
         H.modify_ _ { hash = hash, menu = xs }
-     
+      handleAction Finalize = logDebug $ loc <> " ---> hamburger vanished"
+      handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
 -- I piggyback on the following implementation https://codepen.io/alvarotrigo/pen/PoJGObg
-render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]   
+render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )]   
   
 addFontStyle el = HH.div [] [el]

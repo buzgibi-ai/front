@@ -9,6 +9,7 @@ import Buzgibi.Capability.LogMessages (logDebug, logError)
 import Buzgibi.Component.Subscription.Translation as Translation 
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.Utils (initTranslation)
+import Buzgibi.Component.Subscription.Logout as Logout
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -29,7 +30,7 @@ proxy = Proxy :: _ "navbar"
 
 loc = "Buzgibi.Component.HTML.Menu.Navbar"
 
-data Action = Initialize | LangChange String (Map.Map String String)
+data Action = Initialize | LangChange String (Map.Map String String) | Finalize | ShowAuth
 
 type State = 
      { route :: Route
@@ -46,6 +47,7 @@ component =
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = pure Initialize
+      , finalize = pure Finalize
       }
     }
     where 
@@ -59,17 +61,20 @@ component =
         { menu, hash } <- H.get
         logDebug $ loc <> " menu: ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash
-        Translation.load loc $ \hash translation -> 
+        Translation.subscribe loc $ \hash translation -> 
           handleAction $ LangChange hash $ BuzgibiBack.getTranslationMenu translation
+        Logout.subscribe loc $ handleAction ShowAuth
       handleAction (LangChange hash xs) = do 
         logDebug $ loc <> " ---> " <> show xs
         logDebug $ loc <> " hash: ---> " <> hash
         H.modify_ _ { hash = hash, menu = xs }
+      handleAction Finalize = logDebug $ loc <> " ---> nav bar vanished"
+      handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
 render { route, menu, isAuth } = 
   HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] 
   [HH.ul [css "navbar-nav mr-auto"] 
-   (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
+   (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )]
 
 mkItem _ _ xs  _ _ | Map.isEmpty xs = [HH.li_ [HH.text "loading.."]]
 mkItem isAuth route xs applyStyle idx =
