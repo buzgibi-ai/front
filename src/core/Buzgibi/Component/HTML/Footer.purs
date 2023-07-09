@@ -9,5 +9,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
 html = 
-  HH.div [css "page-footer", HP.style "text-align: center"] 
-  [ HH.slot_ Cookie.proxy unit Cookie.component unit ]
+  HH.div [css "bottom-container"] 
+  [
+      HH.text "COPYRIGHT © 2023 Buz Gibi App - ALL RIGHTS RESERVED." 
+  ,   HH.slot_ Cookie.proxy unit Cookie.component unit
+  ]

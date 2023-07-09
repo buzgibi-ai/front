@@ -28,21 +28,4 @@ type BodyHtml =
 mkBodyHtml { header, footer } route platform width content = 
   HH.div_ [ header route platform width, footer, contentWrapper content ]
 
-contentWrapper content =
-  HH.table [HPExt.style "margin: 0 auto; width:100%;"]
-  [
-      HH.thead_ 
-      [
-         HH.tr [HPExt.style "width:100%;"]
-         [
-             HH.td_ [HH.div [css "page-header-space"] []]
-         ]
-      ]
-  ,   HH.tbody_
-      [
-         HH.tr [HPExt.style "width:100%;height:900px"]
-         [
-            HH.td_ [HH.div [css "content-wrapper"] [content]] 
-         ]
-      ]
-  ]
+contentWrapper content = HH.div [css "content"] [content]

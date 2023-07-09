@@ -66,18 +66,18 @@ component =
         logDebug $ loc <> " hash: ---> " <> hash
         H.modify_ _ { hash = hash, menu = xs }
 
--- taken from: https://codepen.io/albizan/pen/mMWdWZ
-render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
+render { route, menu, isAuth } = HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] [HH.ul [css "navbar-nav mr-auto"] (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) )]
 
 mkItem _ _ xs  _ _ | Map.isEmpty xs = [HH.li_ [HH.text "loading.."]]
 mkItem isAuth route xs applyStyle idx =
   if (mkRoute idx == SignUp || mkRoute idx == SignIn) && isAuth
   then []
   else
-    [HH.li_ 
+    [HH.li [css "nav-item"]
     [
         HH.a 
-        [ safeHref (mkRoute idx)
+        [ css "nav-link"
+        , safeHref (mkRoute idx)
         , isDisabled (mkRoute idx == route)
         ] 
         [el]
@@ -89,4 +89,4 @@ mkItem isAuth route xs applyStyle idx =
     title = fromMaybe (show (mkRoute idx)) $ Map.lookup (show (mkRoute idx)) xs
     el = applyStyle $ HH.text title
 
-addFontStyle el = HH.div_ [el]
+addFontStyle el = HH.div [ HPExt.style "font-size:20px" ] [el]

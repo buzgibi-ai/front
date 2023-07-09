@@ -4,5 +4,5 @@
     "telegramHost": "https://api.telegram.org/",
     "apiBuzgibiHost": "https://api.buzgibi.app",
     "cssLink": "https://cdn.jsdelivr.net/gh/buzgibi-ai/front-css@",
-    "cssFiles": ["load-app", "captcha"]
+    "cssFiles": ["error", "alert", "miscellaneous", "main"]
 }
