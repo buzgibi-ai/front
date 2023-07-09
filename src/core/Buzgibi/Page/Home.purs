@@ -29,6 +29,7 @@ import Halogen.Store.Monad (getStore)
 import Data.Map as Map
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime) 
+import Halogen.Html.Raw.Render as H
 
 import Undefined
 
@@ -100,5 +101,5 @@ component mkBody =
         {start} <- H.get
         sendComponentTime start end loc
 
-content (Just _ ) = HH.text "test"
+content (Just body) = H.render_ body
 content Nothing = HH.text "translation not found"
