@@ -137,7 +137,7 @@ render { email, password, reapatedPassword, strength, errMsg} =
                       [
                           HH.div [css "section text-center"]
                           [
-                              HH.h4 [css "mb-4 pb-3", HPExt.style "margin-top: 30px;"] [HH.text "Sign In"]
+                              HH.h4 [css "mb-4 pb-3", HPExt.style "margin-top: 30px;"] [HH.text "Sign Up"]
                           ,   if isNothing errMsg 
                               then HH.div_ []
                               else HH.div [HPExt.style "margin-bottom: 10px;"] [HH.span [HPExt.style "color: red"] [HH.text (fromMaybe undefined errMsg)]]

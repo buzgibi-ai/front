@@ -70,6 +70,6 @@ render { email: Just email } =
   ,  css "form-inline"
   ] 
   [ HH.text email
-  , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "logout"]
+  , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "Sign out"]
   ] 
 render { email: Nothing } = HH.div_ []
