@@ -70,6 +70,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
               cd back
-              docker-compose stop front
-              docker image rm -f europe-west3-docker.pkg.dev/buzgibi/front/front
-              docker-compose up front -d    
+              ./deploy/stop.sh
+              rm .env
+              ./deploy/start.sh
