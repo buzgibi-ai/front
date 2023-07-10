@@ -16,6 +16,7 @@ import Buzgibi.Data.Config (Config (..))
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Data.Route as Route
 import Buzgibi.Capability.LogMessages (logDebug)
+import Buzgibi.Component.HTML.Utils (css, safeHref)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -97,26 +98,58 @@ component =
               navigate Route.Home
 
 render { email, password, errMsg} = 
-  HH.div_ 
+  HH.div [css "col-12 text-center align-self-center py-5"]
   [
-      if isNothing errMsg 
-      then HH.div_ []
-      else HH.div_ [HH.text (fromMaybe undefined errMsg)]
-  ,        
-      HH.form [ HE.onSubmit MakeRequest]
-      [    
-          HH.input 
-          [ 
-            HPExt.type_ HPExt.InputEmail
-          , HE.onValueInput FillEmail
-          , HPExt.value $ fromMaybe mempty email
-          ]
-      ,
-          HH.input 
-          [ HPExt.type_ HPExt.InputPassword
-          , HE.onValueInput FillPassword
-          , HPExt.value $ fromMaybe mempty password
-          ]
-      ,   HH.input [ HPExt.type_ HPExt.InputSubmit]
+      HH.div [css "section pb-5 pt-5 pt-sm-2 text-center"]
+      [
+          HH.div [css "card-3d-wrap mx-auto"]
+          [
+              HH.div [css "card-3d-wrapper"]
+              [
+                  HH.div [css "card-front"]
+                  [
+                      HH.div [css "center-wrap"]
+                      [
+                          HH.div [css "section text-center"]
+                          [
+                              HH.h4 [css "mb-4 pb-3", HPExt.style "margin-top: 30px;"] [HH.text "Sign In"]
+                          ,   if isNothing errMsg 
+                              then HH.div_ []
+                              else HH.div [HPExt.style "margin-bottom: 10px;"] [HH.span [HPExt.style "color: red"] [HH.text (fromMaybe undefined errMsg)]]
+                          ,   HH.form [ HE.onSubmit MakeRequest]
+                              [
+                                  HH.div [css "form-group"]
+                                  [
+                                      HH.input 
+                                      [ 
+                                          css "form-style"
+                                      ,   HPExt.type_ HPExt.InputEmail
+                                      ,   HE.onValueInput FillEmail
+                                      ,   HPExt.value $ fromMaybe mempty email
+                                      ,   HPExt.placeholder "email"
+                                      ]
+                                  ,   HH.i [css "input-icon uil uil-at"] [] 
+                                  ]
+                              ,
+                                  HH.div [css "form-group mt-2"]
+                                  [
+                                      HH.input 
+                                      [ 
+                                          css "form-style"
+                                      ,   HPExt.type_ HPExt.InputPassword
+                                      ,   HE.onValueInput FillPassword
+                                      ,   HPExt.value $ fromMaybe mempty password
+                                      ,   HPExt.placeholder "password"
+                                      ]
+                                  ,   HH.i [css "input-icon uil uil-lock-alt"] [] 
+                                  ]
+                              ,   HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit"]
+                              ,   HH.p [css "mb-0 mt-4 text-center"] [HH.a [css "link", safeHref Route.SignUp] [HH.text "Sign Up"] ]
+                              ]       
+                          ]
+                      ]
+                  ]
+              ]  
+          ]   
       ]
   ]
