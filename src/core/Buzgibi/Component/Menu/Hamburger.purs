@@ -70,7 +70,13 @@ component =
       handleAction Finalize = logDebug $ loc <> " ---> hamburger vanished"
       handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
--- I piggyback on the following implementation https://codepen.io/alvarotrigo/pen/PoJGObg
-render { route, menu, isAuth } = HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )]   
+-- I piggyback on the following implementation https://codepen.io/fclaw/pen/eYQejgp
+render { route, menu, isAuth } =
+  HH.div [css "menu-wrap"]
+  [
+      HH.input [HPExt.type_ InputCheckbox,  css "toggler"]
+  ,   HH.div [css "hamburger"] [HH.div_ []]
+  ,   HH.div [css "menu"] [ HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )] ]       
+  ]   
   
-addFontStyle el = HH.div [] [el]
+addFontStyle el = HH.div [HPExt.style "font-size: 30px"] [el]
