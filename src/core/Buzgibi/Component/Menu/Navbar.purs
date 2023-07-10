@@ -73,7 +73,7 @@ component =
       handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
 render { route, menu, isAuth } = 
-  HH.nav [css "navbar navbar-expand-lg navbar-light bg-light"] 
+  HH.nav [css "navbar navbar-expand-lg navbar-light"] 
   [HH.ul [css "navbar-nav mr-auto"] 
    ((concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) ) `snoc` 
    HH.slot_ Auth.User.proxy unit Auth.User.component unit)
