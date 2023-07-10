@@ -22,8 +22,8 @@ import Halogen.Store.Monad (getStore)
 import Effect.Aff as Aff
 import Data.Map as Map
 import Halogen.Store.Monad (getStore)
-import Data.Maybe (isJust)
-import Data.Array (concatMap)
+import Data.Maybe (isJust, Maybe (..))
+import Data.Array (concatMap, (:))
 
 proxy = Proxy :: _ "hamburger"
 
@@ -36,12 +36,13 @@ type State =
      , menu :: Map.Map String String
      , hash :: String
      , isAuth :: Boolean
+     , email :: Maybe String
      }
 
 component =
   H.mkComponent
     { initialState:
-      \{ route } -> { route: route, menu: Map.empty, hash: mempty, isAuth: false }
+      \{ route } -> { route: route, menu: Map.empty, hash: mempty, isAuth: false, email: Nothing }
     , render: render
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -56,7 +57,8 @@ component =
           H.modify_ _ { 
               hash = hash
             , menu = BuzgibiBack.getTranslationMenu translation
-            , isAuth = isJust user  }
+            , isAuth = isJust user
+            , email = user <#> \{jwtUser: {email}} -> email }
         { menu, hash } <- H.get
         logDebug $ loc <> " ---> " <> show (Map.keys menu)
         logDebug $ loc <> " hash: ---> " <> hash
@@ -71,12 +73,13 @@ component =
       handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
 -- I piggyback on the following implementation https://codepen.io/fclaw/pen/eYQejgp
-render { route, menu, isAuth } =
+render { route, menu, isAuth, email } =
   HH.div [css "menu-wrap"]
   [
       HH.input [HPExt.type_ InputCheckbox,  css "toggler"]
   ,   HH.div [css "hamburger"] [HH.div_ []]
-  ,   HH.div [css "menu"] [ HH.div_ [HH.ul_ (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn) )] ]       
+  ,   HH.div [css "menu"] [ HH.div_ [HH.ul_  $ mkUser email : (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn))  ] ]       
   ]   
-  
-addFontStyle el = HH.div [HPExt.style "font-size: 30px"] [el]
+  where mkUser (Just x)  = HH.li_ [HH.text x]
+        mkUser Nothing = HH.li_ []
+addFontStyle el = HH.div [HPExt.style "font-size: 30px; text-align: center"] [el]
