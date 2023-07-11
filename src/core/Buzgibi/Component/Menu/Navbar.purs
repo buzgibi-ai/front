@@ -100,4 +100,4 @@ mkItem isAuth route xs applyStyle idx =
     title = fromMaybe (show (mkRoute idx)) $ Map.lookup (show (mkRoute idx)) xs
     el = applyStyle $ HH.text title
 
-addFontStyle el = HH.div [ HPExt.style "font-size:20px" ] [el]
+addFontStyle el = HH.div [ HPExt.style "font-size:20px; text-align:center" ] [el]

@@ -72,4 +72,4 @@ jobs:
               cd back
               ./deploy/stop.sh
               rm .env
-              ./deploy/start.sh
+              ./deploy/start.sh $HOME/registry-token

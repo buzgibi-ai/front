@@ -5,13 +5,15 @@ module Buzgibi.Api.Foreign.Front.Api
   , Init
   , MapMenuText
   , MapMessengerText
-  , MapPageText
+  , MapPageMapTextText
+  , MapTextText
   , Meta
   , MetaPage(..)
   , ResponseCookie
   , ResponseMeta
   , ResponseTranslation
   , Translation
+  , TranslationPageMap
   , getCookies
   , getCookiesInit
   , getIsCaptcha
@@ -30,6 +32,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , mkFrontApi
   , mkLogReq
   , sendLog
+  , translationLookup
   )
   where
 
@@ -54,9 +57,14 @@ import Effect (Effect)
 import Data.Map as Map
 import Data.Either (Either)
 import Effect.Exception as E
+import Data.Array (concatMap)
+
+import Undefined
+
 
 foreign import data MapMenuText :: Type
-foreign import data MapPageText :: Type
+foreign import data MapPageMapTextText :: Type
+foreign import data MapTextText :: Type
 foreign import data FrontApi :: Type
 foreign import data Translation :: Type
 foreign import data FrontendLogRequest :: Type
@@ -160,10 +168,22 @@ foreign import _showMapMenuText :: MapMenuText -> String
 instance Show MapMenuText where
   show = _showMapMenuText
 
-foreign import _getTranslationPage :: Translation -> Array MapPageText
+type TranslationPageItem = { key :: String, value :: Array MapTextText}
 
-getTranslationPage :: Translation -> Map.Map String String
-getTranslationPage = Map.fromFoldable <<< map toTpl <<< _getTranslationPage
-  where toTpl x = Tuple (_getKeyText x) (_getValText x)
+foreign import _getTranslationPage :: Translation -> Array MapPageMapTextText
+foreign import _getTranslationPageItem :: MapPageMapTextText -> TranslationPageItem
 
+type TranslationPageMap = Map.Map String (Map.Map String String)
+
+getTranslationPage :: Translation -> TranslationPageMap 
+getTranslationPage translation =
+  let xs = map _getTranslationPageItem $ _getTranslationPage translation
+      xs' = xs <#> \{key, value} -> 
+              Tuple key $ Map.fromFoldable $ 
+                value <#> \x -> 
+                  Tuple (_getKeyText x) (_getValText x)
+  in Map.fromFoldable xs'
+  
 foreign import getTranslationCopyright :: Translation -> String
+
+translationLookup page el = join <<< map (Map.lookup el) <<< Map.lookup page

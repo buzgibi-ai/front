@@ -40,7 +40,7 @@ loc = "Buzgibi.Page.Home"
 data Action = 
        Initialize 
      | WinResize Int 
-     | LangChange String (Map.Map String String)
+     | LangChange String BuzgibiBack.TranslationPageMap
      | Finalize
 
 type State = 
@@ -79,11 +79,12 @@ component mkBody =
 
         logDebug $ loc <> " component has started at " <> show tm
 
-        void $ initTranslation loc \hash translation ->
+        void $ initTranslation loc \hash translation -> do 
+          logDebug $ loc <> " translation ---> " <> show (BuzgibiBack.getTranslationPage translation)
           H.modify_ _ { 
               platform = pure platform
            ,  winWidth = pure w
-           , body = Map.lookup "home" $ BuzgibiBack.getTranslationPage translation
+           , body = BuzgibiBack.translationLookup "home" "headline" $ BuzgibiBack.getTranslationPage translation
            , hash = hash
            , start = tm  }
 
@@ -95,7 +96,7 @@ component mkBody =
           handleAction $ LangChange hash $ BuzgibiBack.getTranslationPage translation
 
       handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
-      handleAction (LangChange _ xs) = H.modify_ _ { body = Map.lookup "home" xs }
+      handleAction (LangChange _ xs) = H.modify_ _ { body = BuzgibiBack.translationLookup "home" "headline" xs }
       handleAction Finalize = do
         end <- H.liftEffect getTimestamp
         {start} <- H.get

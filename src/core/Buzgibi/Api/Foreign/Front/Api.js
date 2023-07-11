@@ -120,6 +120,11 @@ export const _getTranslationPage = obj => {
     return obj.getPage();
 }
 
+export const _getTranslationPageItem = (obj) => {
+    let item = { key: obj.getKey(), value: obj.getValue() }
+    return item;
+}
+
 export const _showMapMenuText = menu => {
     return "{ key: " + menu.getKey() + ", value: " + menu.getValue() + " }";
 }
