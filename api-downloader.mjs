@@ -14,14 +14,15 @@ const file = fs.createWriteStream(target);
 var options = {
     host: url,
     port: 443,
-    path: '/swagger',
+    method: 'GET',
+    path: '/swagger.json',
     // authentication headers
     headers: {
-       'Authorization': 'Basic ' + cred
+       'Authorization': 'Basic ' + new Buffer(cred).toString('base64')
     }   
  };
 
-https.get(options, function(response) {
+const req = https.get(options, function(response) {
    response.pipe(file);
 
    // after download completed close file stream
@@ -29,4 +30,8 @@ https.get(options, function(response) {
        file.close();
        console.log("Download Completed");
    });
+});
+
+req.on('error', (error) => {
+   console.log('An error', error);
 });

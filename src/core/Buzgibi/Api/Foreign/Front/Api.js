@@ -121,7 +121,10 @@ export const _getTranslationPage = obj => {
 }
 
 export const _getTranslationPageItem = (obj) => {
-    let item = { key: obj.getKey(), value: obj.getValue() }
+    let item = {
+        key: obj.getKey(),
+        value: obj.getValue()
+    }
     return item;
 }
 

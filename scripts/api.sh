@@ -42,10 +42,7 @@ else
   pass="${API_PASS_ENV}"
 fi
 
-
-credentials=$(echo -ne "$login:$pass" | base64 --wrap 0)
-
-echo "credentials --> $credentials"
+credentials="$login:$pass"
 
 generate() { 
   node api-downloader.mjs $url $file $credentials

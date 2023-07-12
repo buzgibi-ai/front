@@ -12,7 +12,7 @@
     "test": "spago tes",
     "serve": "node esbuild-serve.mjs",
     "bundle": "./scripts/bundle.sh",
-    "api": "./scripts/api.sh https://api.buzgibi.app/swagger.json api-back.json BuzgibiBack"
+    "api": "./scripts/api.sh api.buzgibi.app api-back.json BuzgibiBack"
   },
   "dependencies": {
     "babel": "^6.23.0",
