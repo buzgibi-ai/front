@@ -4,6 +4,11 @@ url=$1
 file=$2
 api=$3
 
+oops() {
+    echo "$0:" "$@" >&2
+    exit 1
+}
+
 abort()
 {
     echo >&2 '
@@ -25,8 +30,25 @@ echo >&2 '
 ************
 '
 
+if [[ -z "${API_LOGIN_ENV}" ]]; then
+  oops "no API_LOGIN_ENV is set. cannot proceed"
+else
+  login="${API_LOGIN_ENV}"
+fi
+
+if [[ -z "${API_PASS_ENV}" ]]; then
+  oops "no API_PASS_ENV is set. cannot proceed"
+else
+  pass="${API_PASS_ENV}"
+fi
+
+
+credentials=$(echo -ne "$login:$pass" | base64 --wrap 0)
+
+echo "credentials --> $credentials"
+
 generate() { 
-  node api-downloader.mjs $url $file
+  node api-downloader.mjs $url $file $credentials
   openapi-generator-cli \
   generate -i $file -g javascript -o src/core/Buzgibi/Api/Foreign/$api \
   --additional-properties=usePromises=true,emitModelMethods=true

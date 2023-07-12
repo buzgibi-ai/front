@@ -24,6 +24,12 @@ ENV PATH="/home/nix/bin:${PATH}"
 
 FROM base as front-build
 
+ARG api_login
+ARG api_pass
+
+ENV API_LOGIN_ENV ${api_login}
+ENV API_PASS_ENV ${api_pass}
+
 WORKDIR /build
 
 COPY --chown=nix:nix . .
