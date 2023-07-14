@@ -1,0 +1,82 @@
+module Buzgibi.Page.User.Enquiry
+  ( Action(..)
+  , component
+  , proxy
+  )
+  where
+
+import Prelude
+
+import Buzgibi.Data.Config
+import Buzgibi.Page.Subscription.WinResize as WinResize
+import Buzgibi.Capability.LogMessages (logDebug)
+import Buzgibi.Data.Route as Route
+import Buzgibi.Document.Meta as Meta
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
+
+import Halogen as H
+import Halogen.HTML as HH
+import Type.Proxy (Proxy(..))
+import Web.HTML.HTMLDocument (setTitle)
+import Web.HTML.Window (document, innerWidth)
+import Web.HTML (window)
+import Type.Proxy (Proxy(..))
+import Store (Action (WriteError))
+import Store.Types (Platform)
+import Data.Maybe
+import Halogen.Store.Monad (getStore)
+import System.Time (getTimestamp)
+import Statistics (sendComponentTime) 
+
+proxy = Proxy :: _ "user_enquiry"
+
+loc = "Buzgibi.Page.User.Enquiry"
+
+data Action = 
+       Initialize 
+     | WinResize Int
+     | Finalize
+
+type State = 
+     { winWidth :: Maybe Int
+     , platform :: Maybe Platform
+     , start :: Int
+     }
+
+component mkBody = 
+  H.mkComponent
+  { initialState: const { winWidth: Nothing, platform: Nothing, start: 0 }
+    , render: render mkBody
+    , eval: H.mkEval H.defaultEval
+      { handleAction = handleAction
+      , initialize = pure Initialize
+      , finalize = pure Finalize
+      }
+  }
+  where
+    handleAction Initialize = do
+      H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Eqnuiry"
+      { platform, config: Config {apiBuzgibiHost: host}, async } <- getStore
+      w <- H.liftEffect $ window >>= innerWidth
+
+      tm <- H.liftEffect getTimestamp
+
+      logDebug $ loc <> " component has started at " <> show tm
+
+      H.modify_ _ { 
+          platform = pure platform
+        , winWidth = pure w
+        , start = tm  }
+
+      void $ H.subscribe =<< WinResize.subscribe WinResize
+
+      Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserEnquiry)
+
+    handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
+    handleAction Finalize = do
+      end <- H.liftEffect getTimestamp
+      {start} <- H.get
+      sendComponentTime start end loc
+
+render mkBody {winWidth: Just w, platform: Just p} =  HH.div_ [mkBody p w (HH.text "user.enquiry") ]
+render _ _ = HH.div_ []

@@ -35,6 +35,7 @@ import Buzgibi.Component.Auth.SignUp as SignUp
 import Buzgibi.Component.Auth.SignIn as SignIn
 import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
+import Buzgibi.Page.User.Enquiry as User.Enquiry
 
 import Data.Either (hush, Either (..))
 import Data.Foldable (elem)
@@ -74,6 +75,7 @@ type ChildSlots =
   , error404 :: OpaqueSlot Unit
   , auth_container_sign_in :: OpaqueSlot Unit
   , auth_container_sign_up :: OpaqueSlot Unit
+  , user_enquiry :: OpaqueSlot Unit
   )
 
 component
@@ -150,5 +152,6 @@ render { route: Just r@SignUp } =
   HH.slot_ Auth.proxy_sign_up unit 
   (Auth.component (Body.mkBodyHtml params r) SignUp.slot) 
   {route: Route.SignUp, title: "SignUp"}
+render { route: Just r@UserEnquiry } = HH.slot_ User.Enquiry.proxy unit (User.Enquiry.component (Body.mkBodyHtml params r)) unit
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
