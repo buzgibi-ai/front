@@ -5,7 +5,7 @@ export const _mkApiClient = function(jwt, host) {
         let cl = new e.ApiClient(host);
         if (jwt !== undefined) {
             cl.defaultHeaders = {
-                Authorization: 'Bearer ' + jwt
+                Authorization: 'Token ' + jwt
             };
         } else {
             cl.defaultHeaders = [];

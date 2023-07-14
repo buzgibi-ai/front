@@ -47,6 +47,7 @@
   , "channel"
   , "web-storage"
   , "control"
+  , "integers"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
