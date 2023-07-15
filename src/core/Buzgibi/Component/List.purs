@@ -63,7 +63,7 @@ component =
         Just { jwtUser: {ident: userId} } -> 
           H.liftAff $ do
             resp <- AX.get AX.blob $ apiBuzgibiHost <> "/file/download/" <> show userId <> "/raw/" <> show ident
-            withAffjax "Buzgibi.Component.Root.Fork.Telegram:fork" async resp $ pure <<< flip downloadBlob name
+            withAffjax loc async resp $ pure <<< flip downloadBlob name
         Nothing -> pure unit
 
 render { list: [] } = HH.text "you haven't the history to be shown" 
