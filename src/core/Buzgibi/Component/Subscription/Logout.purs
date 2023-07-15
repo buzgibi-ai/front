@@ -14,5 +14,5 @@ subscribe loc goCompHandle =
   void $ H.fork $ forever $ do
   H.liftAff $ Aff.delay $ Aff.Milliseconds 500.0
   { isLogoutVar } <- getStore
-  isLogout <- H.liftEffect $ Async.tryTake isLogoutVar
+  isLogout <- H.liftEffect $ Async.tryRead isLogoutVar
   for_ isLogout $ const goCompHandle

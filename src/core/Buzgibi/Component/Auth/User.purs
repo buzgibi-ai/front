@@ -26,7 +26,8 @@ import Store (Action (UpdateJwtUser))
 import Web.HTML.Window (localStorage)
 import Web.Storage.Storage (removeItem)
 import Web.HTML (window)
-import Effect.AVar (tryPut) as Async
+import Effect.AVar (tryPut, tryTake) as Async
+import Effect.Aff as Aff
 
 import Undefined
 
@@ -36,7 +37,7 @@ proxy = Proxy :: _ "auth_user"
 
 type State = { email :: Maybe String }
 
-data Action = Initialize | MakeRequest Event
+data Action = Initialize | MakeRequest Event | Finalize
 
 component =
   H.mkComponent
@@ -44,7 +45,8 @@ component =
     , render: render
     , eval: H.mkEval H.defaultEval 
       { handleAction = handleAction
-      , initialize = pure Initialize }
+      , initialize = pure Initialize
+      , finalize = pure Finalize }
     }
     where 
       handleAction Initialize = do
@@ -63,6 +65,11 @@ component =
               res <- H.liftEffect $ Async.tryPut unit isLogoutVar
               logDebug $ loc <> " if avar operaion succeeded ---> " <> show res
           Nothing -> pure unit
+      handleAction Finalize = do 
+        H.liftAff $ Aff.delay $ Aff.Milliseconds 500.0
+        { isLogoutVar } <- getStore
+        void $ H.liftEffect $ Async.tryTake isLogoutVar
+        logDebug $ loc <> " ----> logout var has been emptied"
 
 render { email: Just email } = 
   HH.form 
