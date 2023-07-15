@@ -14,6 +14,7 @@ import Buzgibi.Data.Config
 import Buzgibi.Component.HTML.Utils (css)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
+import Buzgibi.Component.Pagination as Pagination 
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -27,18 +28,19 @@ import Affjax.Web as AX
 import Affjax.ResponseFormat as AX
 import Affjax.RequestBody as AXB
 import File.Blob (downloadBlob)
+import Data.Array (snoc)
 
 proxy = Proxy :: _ "list"
 
 loc = "Buzgibi.Component.List"
 
-type State = { list :: Array BuzgibiBack.HistoryItem }
+type State = { list :: Array BuzgibiBack.HistoryItem, isNext :: Boolean }
 
 data Action = Initialize | Download Int String Event
 
 component = 
   H.mkComponent
-  { initialState: const { list: [] }
+  { initialState: const { list: [], isNext: false }
     , render: render
     , eval: H.mkEval H.defaultEval
       {  handleAction = handleAction
@@ -51,7 +53,7 @@ component =
       case user of 
         Just { token } -> do
           resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory Nothing
-          withError resp \{ items } ->  H.modify_ _ { list = items }
+          withError resp \{ items, isnextpage } ->  H.modify_ _ { list = items, isNext = isnextpage }
         Nothing -> pure unit
     handleAction (Download ident name ev) = do
       H.liftEffect $ preventDefault ev
@@ -65,9 +67,9 @@ component =
         Nothing -> pure unit
 
 render { list: [] } = HH.text "you haven't the history to be shown" 
-render { list } = 
-  HH.div [css "history-item-container"] $ 
-    list <#> \{ident, name, timestamp} -> 
+render { list, isNext } = 
+  HH.div [css "history-item-container"] $
+  (list <#> \{ident, name, timestamp} -> 
       HH.div [HPExt.style "margin-top: 10px"] 
       [
           HH.form [ HE.onSubmit $ Download ident name]
@@ -80,3 +82,4 @@ render { list } =
               ]
           ]
       ]
+  ) `snoc` HH.div [HPExt.style "margin-top: 10px"] [HH.slot_ Pagination.proxy unit Pagination.component { currenPage: 1, isNext: isNext }]

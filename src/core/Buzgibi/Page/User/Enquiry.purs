@@ -18,6 +18,7 @@ import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Component.List as List
+import Buzgibi.Component.Subscription.Logout as Logout
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -35,6 +36,8 @@ import Halogen.Store.Monad (getStore)
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime)
 import Data.Int (toNumber)
+import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
+import Web.Event.Event (preventDefault)
 
 proxy = Proxy :: _ "user_enquiry"
 
@@ -44,8 +47,9 @@ data Action =
        Initialize 
      | WinResize Int
      | Finalize
-     | Submit
-     | FillEnquiry String 
+     | Submit MouseEvent
+     | FillEnquiry String
+     | ToHome
 
 type State = 
      { winWidth :: Maybe Int
@@ -85,13 +89,16 @@ component mkBody =
 
       Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserEnquiry)
 
+      Logout.subscribe loc $ handleAction ToHome
+
     handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
     handleAction (FillEnquiry s) = H.modify_ _ { enquiry = Just s }
     handleAction Finalize = do
       end <- H.liftEffect getTimestamp
       {start} <- H.get
       sendComponentTime start end loc
-    handleAction Submit = do 
+    handleAction (Submit ev) = do 
+      H.liftEffect $ preventDefault $ toEvent ev
       { config: Config {apiBuzgibiHost}, user } <- getStore
       {enquiry} <- H.get
       let req = { enquiry: fromMaybe mempty enquiry, location: { latitude: toNumber 0, longitude: toNumber 0 } }
@@ -102,6 +109,7 @@ component mkBody =
             H.modify_ _ { enquiry = Nothing }
             logDebug $ loc <> " ---> enquiry has been sent"
         Nothing -> pure unit
+    handleAction ToHome = navigate Route.Home
 
 render mkBody {winWidth: Just w, platform: Just p, enquiry} = 
   HH.div_ [mkBody p w (HH.div_ [searchBar enquiry, HH.div [css "list-container"] [HH.slot_ List.proxy unit List.component unit]]) ]
@@ -119,6 +127,6 @@ searchBar enquiry =
            Just x -> HPExt.value x
            Nothing -> HPExt.placeholder "What can I help you with today?"
      ]
- ,   HH.a [HPExt.href "#", HE.onClick $ const Submit] [HH.img [css "search-icon", HPExt.src "http://www.endlessicons.com/wp-content/uploads/2012/12/search-icon.png"]]    
+ ,   HH.a [HPExt.href "#", HE.onClick Submit] [HH.img [css "search-icon", HPExt.src "http://www.endlessicons.com/wp-content/uploads/2012/12/search-icon.png"]]    
  ]
 
