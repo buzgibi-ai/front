@@ -139,4 +139,4 @@ withAffjax :: forall a . String -> Async.Channel Async Async -> Either AX.Error 
 withAffjax loc async (Left e) _ = void $ Async.send (_.output async) $ mkException (error (AX.printError e)) loc
 withAffjax _ _ (Right {body, status: (AX.StatusCode 200)}) goWithResp = goWithResp body
 withAffjax _ _ (Right {body, status: (AX.StatusCode 202)}) goWithResp = goWithResp body
-withAffjax loc async (Right {status: (AX.StatusCode code)}) _ = void $ Async.send (_.output async) $ mkException (error ("telegram has responded with status " <> show code)) loc
+withAffjax loc async (Right {status: (AX.StatusCode code)}) _ = void $ Async.send (_.output async) $ mkException (error ("server has responded with status " <> show code)) loc
