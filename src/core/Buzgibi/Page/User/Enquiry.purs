@@ -17,6 +17,7 @@ import Buzgibi.Component.HTML.Utils (css)
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
+import Buzgibi.Component.List as List
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -102,7 +103,8 @@ component mkBody =
             logDebug $ loc <> " ---> enquiry has been sent"
         Nothing -> pure unit
 
-render mkBody {winWidth: Just w, platform: Just p, enquiry} =  HH.div_ [mkBody p w (searchBar enquiry) ]
+render mkBody {winWidth: Just w, platform: Just p, enquiry} = 
+  HH.div_ [mkBody p w (HH.div_ [searchBar enquiry, HH.div [css "list-container"] [HH.slot_ List.proxy unit List.component unit]]) ]
 render _ _ = HH.div_ []
 
 searchBar enquiry = 

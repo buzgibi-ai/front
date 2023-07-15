@@ -15,7 +15,9 @@ import Buzgibi.Document.Meta as Meta
 import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Data.Config
+import Buzgibi.Component.HTML.Utils (css, safeHref, whenElem)
 
+import Halogen.HTML.Properties.Extended as HPExt
 import Halogen as H
 import Halogen.HTML as HH
 import Web.HTML.HTMLDocument (setTitle)
@@ -49,6 +51,7 @@ type State =
      , body :: Maybe String
      , hash :: String
      , start :: Int
+     , isAuth :: Boolean
      }
 
 component mkBody =
@@ -58,7 +61,8 @@ component mkBody =
       , platform: Nothing
       , body: Nothing
       , hash: mempty
-      , start: 0 }
+      , start: 0
+      , isAuth: false }
     , render: render
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -67,12 +71,12 @@ component mkBody =
       }
     }
     where 
-      render {winWidth: Just w, platform: Just p, body: body} = 
-        HH.div_ [mkBody p w (content body) ]
+      render {winWidth: Just w, platform: Just p, body: body, isAuth} = 
+        HH.div_ [mkBody p w (content body isAuth) ]
       render _ = HH.div_ []
       handleAction Initialize = do
         H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Home"
-        { platform, config: Config {apiBuzgibiHost: host}, async } <- getStore
+        { platform, config: Config {apiBuzgibiHost: host}, async, user } <- getStore
         w <- H.liftEffect $ window >>= innerWidth
 
         tm <- H.liftEffect getTimestamp
@@ -86,7 +90,8 @@ component mkBody =
            ,  winWidth = pure w
            , body = BuzgibiBack.translationLookup "home" "headline" $ BuzgibiBack.getTranslationPage translation
            , hash = hash
-           , start = tm  }
+           , start = tm
+           , isAuth = isJust user }
 
         void $ H.subscribe =<< WinResize.subscribe WinResize
 
@@ -102,5 +107,18 @@ component mkBody =
         {start} <- H.get
         sendComponentTime start end loc
 
-content (Just body) = H.render_ body
-content Nothing = HH.text "translation not found"
+content (Just body) isAuth = 
+  HH.div_ 
+  [
+      H.render_ body
+  ,   whenElem isAuth $ HH.div_ 
+      [
+          HH.a 
+          [ css "nav-link"
+          , HPExt.style "font-style: 30px"
+          , safeHref Route.UserEnquiry
+          ] 
+          [HH.text "make an enquiry"]
+      ]
+  ]
+content Nothing _ = HH.text "translation not found"

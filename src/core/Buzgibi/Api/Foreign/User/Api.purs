@@ -1,7 +1,10 @@
 module Buzgibi.Api.Foreign.User.Api
   ( Enquiry
+  , History
+  , HistoryItem
   , Location
   , UserApi
+  , getHistory
   , makeEnquiry
   , mkUserApi
   )
@@ -18,6 +21,7 @@ import Foreign.Object (Object)
 import Foreign (Foreign)
 import Data.Either (Either)
 import Effect.Exception as E
+import Data.Maybe (Maybe, fromMaybe)
 
 foreign import data UserApi :: Type
 
@@ -31,3 +35,15 @@ foreign import _makeEnquiry :: Fn3 (forall a . Foreign -> (Foreign -> Either E.E
 
 makeEnquiry :: Enquiry -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
 makeEnquiry = runFn3 _makeEnquiry withError
+
+type HistoryItem = { ident :: Int, name :: String, timestamp :: String }
+
+type History = { items :: Array HistoryItem, isnextpage :: Boolean }
+
+type Page = { page :: Int }
+
+foreign import _getHistory :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Page UserApi (AC.EffectFnAff (Object (Response History)))
+
+getHistory :: Maybe Page -> UserApi -> (AC.EffectFnAff (Object (Response History)))
+getHistory page = runFn3 _getHistory withError (fromMaybe {page: 1} page)
+

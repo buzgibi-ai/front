@@ -13,3 +13,11 @@ export const _makeEnquiry = function(withError, enquiry, api) {
         })
     };
 }
+
+export const _getHistory = function(withError, page, api) {
+    return function(onError, onOk) {
+        api.userEnquiryHistoryGet(page).then(onOk).catch(resp => {
+            return withError(resp, onError)
+        })
+    };
+}

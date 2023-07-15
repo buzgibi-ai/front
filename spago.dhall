@@ -36,7 +36,6 @@
   , "foreign"
   , "foreign-object"
   , "bifunctors"
-  , "validation"
   , "strings"
   , "avar"
   , "ordered-collections"
@@ -48,6 +47,7 @@
   , "web-storage"
   , "control"
   , "integers"
+  , "web-file"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
