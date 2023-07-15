@@ -25,12 +25,13 @@ import Data.Enum (toEnum, fromEnum)
 import Effect.Aff.Class
 import Store (Action)
 import Effect.AVar as Async
+import AppM (AppM)
 
 proxy = Proxy :: _ "lang"
 
 loc = "Buzgibi.Component.Lang"
 
-component :: forall q i o m . MonadStore Action Store m => MonadAff m => LogMessages m => Now m => H.Component q i o m
+component :: forall q i o . MonadStore Action Store AppM => H.Component q i o AppM
 component =
   H.mkComponent
     { initialState: const { lang: 0 }

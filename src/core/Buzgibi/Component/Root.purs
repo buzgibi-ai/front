@@ -60,6 +60,7 @@ import Data.Foldable (for_)
 import Data.List (head)
 import Data.Map as Map
 import Routing.Duplex.Parser (RouteError (EndOfPath))
+import AppM (AppM)
 
 loc = " Buzgibi.Component.Root"
 
@@ -78,14 +79,7 @@ type ChildSlots =
   , user_enquiry :: OpaqueSlot Unit
   )
 
-component
-  :: forall m
-   . MonadAff m
-  => Navigate m
-  => LogMessages m
-  => Now m
-  => MonadStore Store.Action Store m
-  => H.Component Query Unit Void m
+component :: H.Component Query Unit Void AppM
 component = H.mkComponent
   { initialState: const { route: Nothing, lang: Eng }
   , render
@@ -96,7 +90,7 @@ component = H.mkComponent
       }
   }
   where
-  handleAction :: Action -> H.HalogenM State Action ChildSlots Void m Unit
+  handleAction :: Action -> H.HalogenM State Action ChildSlots Void AppM Unit
   handleAction Initialize = do
     logDebug $ loc <> " ---> root component init start .."
     store@{ config: Config {isCaptcha} } <- getStore
@@ -121,7 +115,7 @@ component = H.mkComponent
       Left EndOfPath -> navigate Home
       Left _ -> navigate Error404
   handleAction (LangChange lang) = H.modify_ _ { lang = lang }
-  handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void m (Maybe a)
+  handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void AppM (Maybe a)
   handleQuery (Navigate dest a) = do
     logDebug $ loc <> " ---> routing to " <> show dest
     store <- getStore
@@ -134,14 +128,7 @@ params =
   , footer: Footer.html
   }
 
-render :: forall m
-  . MonadAff m
-  => Navigate m
-  => LogMessages m
-  => Now m
-  => MonadStore Store.Action Store m
-  => State
-  -> H.ComponentHTML Action ChildSlots m
+render ::State -> H.ComponentHTML Action ChildSlots AppM
 render { route: Nothing } = HTML.Loading.html  
 render { route: Just r@Home } = HH.slot_ Home.proxy unit (Home.component (Body.mkBodyHtml params r)) unit
 render { route: Just r@SignIn } = 
