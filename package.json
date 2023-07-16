@@ -9,7 +9,7 @@
   },
   "scripts": {
     "clean": "rm -rf output-es node_modules output .spago app/*.js *.lock .cache src/core/Buzgibi/Api/Foreign/BuzgibiBack",
-    "test": "spago tes",
+    "test": "spago test",
     "serve": "node esbuild-serve.mjs",
     "bundle": "./scripts/bundle.sh",
     "api": "./scripts/api.sh api.buzgibi.app api-back.json BuzgibiBack"

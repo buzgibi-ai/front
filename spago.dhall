@@ -49,6 +49,7 @@
   , "integers"
   , "web-file"
   , "web-uievents"
+  , "assert"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
