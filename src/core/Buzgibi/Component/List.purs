@@ -32,7 +32,7 @@ import File.Blob (downloadBlob)
 import Data.Array (snoc)
 import Data.String (length, take)
 import Effect.AVar as Async
-import AppM (AppM)
+import DOM.HTML.Indexed.ScopeValue (ScopeValue (ScopeCol))
 
 proxy = Proxy :: _ "list"
 
@@ -81,18 +81,37 @@ component =
 
 render { list: [] } = HH.text "you haven't the history to be shown" 
 render { list, total, perpage } =
-  HH.div [css "history-item-container"] $
-  (list <#> \{ident, name, timestamp} -> 
-      HH.div [HPExt.style "margin-top: 10px"] 
+  HH.div 
+  [css "history-item-container"]
+  [
+      HH.table_
       [
-          HH.form [ HE.onSubmit $ Download ident name]
-          [ 
-              HH.input 
-              [ 
-                  HPExt.style "cursor: pointer"
-              ,   HPExt.type_ HPExt.InputSubmit
-              ,   HPExt.value $ if length name > 10 then take 10 name <> "..." else name 
-              ]
+          HH.thead_ 
+          [
+              HH.th [HPExt.scope ScopeCol] [HH.text "enquiry"]
+          ,   HH.th [HPExt.scope ScopeCol] [HH.text "time"]
+          ,   HH.th [HPExt.scope ScopeCol] [HH.text "report"]    
           ]
+      ,   HH.tbody_
+            (list <#> \{ident, name, timestamp} -> 
+                HH.tr_
+                [
+                    HH.td [HPExt.dataLabel "enquiry" ] [HH.text (if length name > 20 then take 20 name else name)]
+                ,   HH.td [HPExt.dataLabel "time" ] [HH.text timestamp]
+                ,   HH.td [HPExt.dataLabel "time" ]
+                    [ 
+                        HH.form [ HE.onSubmit $ Download ident name]
+                        [ 
+                            HH.input 
+                            [ 
+                                HPExt.style "cursor: pointer"
+                            ,   HPExt.type_ HPExt.InputSubmit
+                            ,   HPExt.value $ if length name > 10 then take 10 name <> "..." else name 
+                            ]
+                        ]
+                    ]
+                ]
+            ) 
       ]
-  ) `snoc` HH.div [HPExt.style "margin-top: 10px"] [HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage }]
+  ,   HH.div [HPExt.style "margin-top: 10px"] [HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage }]
+  ]

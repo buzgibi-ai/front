@@ -1,9 +1,10 @@
 module Halogen.HTML.Properties.Extended
-  ( module Properties
-  , role
+  ( ariaHidden
   , ariaLabel
   , dataDismiss
-  , ariaHidden
+  , dataLabel
+  , module Properties
+  , role
   )
   where
 
@@ -19,3 +20,4 @@ role = Properties.prop (PropName "role")
 ariaLabel = Properties.prop (PropName "aria-label")
 dataDismiss = Properties.prop (PropName "data-dismiss")
 ariaHidden = Properties.prop (PropName "aria-hidden")
+dataLabel = Properties.prop (PropName "data-label")
