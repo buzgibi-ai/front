@@ -1,15 +1,15 @@
 module Main (main) where
 
-import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (>>>), (*>))
+import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>))
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
 import Buzgibi.Data.Config as Cfg
-import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookiesInit, getJwtStatus, JWTStatus (..))
+import Buzgibi.Api.Foreign.BuzgibiBack (getShaCSSCommit, getShaCommit, getCookiesInit, getJwtStatus, JWTStatus (..), JWTToken (..))
 import Buzgibi.Component.Lang.Data (Lang (..))
 import Buzgibi.Component.AppInitFailure as AppInitFailure 
 import Buzgibi.Data.Config
-import Buzgibi.Api.Foreign.BuzgibiBack (JWTToken (..))
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 
 import Effect (Effect)
 import Halogen.Aff as HA
@@ -27,10 +27,9 @@ import Data.Function.Uncurried (runFn1)
 import Web.HTML.Navigator (userAgent)
 import Web.HTML.Window (navigator, document, localStorage)
 import Web.HTML (window)
-import Store (initAppStore)
-import Store.Types (readPlatform)
+import Store (initAppStore, User)
+import Store.Types (readPlatform, LogLevel (Dev))
 import Effect.Exception as Excep
-import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Data.Either (Either (..))
 import Effect.AVar (new, empty) as Async
 import Effect.Console (infoShow, logShow)
@@ -45,7 +44,6 @@ import Unsafe.Coerce (unsafeCoerce)
 import Cache as Cache
 import Data.Foldable (for_)
 import Concurrent.Channel (newChannel) as Async
-import Store.Types (LogLevel (Dev))
 import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
 import Web.Storage.Storage (getItem, removeItem)
@@ -194,8 +192,10 @@ withMaybe :: forall a . Maybe a -> Effect a
 withMaybe Nothing = throwError $ Excep.error "value has been resolved into nothing"
 withMaybe (Just a) = pure a
 
+getJWTfromStorage :: Effect (Maybe String)
 getJWTfromStorage = window >>= localStorage >>= getItem "buzgibi_jwt"
 
+getCurrentUser :: Maybe String -> Maybe JWTStatus -> Effect (Maybe User)
 getCurrentUser jwt (Just Valid) = 
   for jwt \token -> do 
     user <- Jwt.parse token 
