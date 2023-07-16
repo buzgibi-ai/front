@@ -29,9 +29,9 @@ fork { mkBody, url_msg } = do
     res <- Async.recv $ _.input telegramVar
     for_ res \msg -> do
       resp <- AX.post AX.json url_msg (pure (mkBody msg))
-      withAffjax "Buzgibi.Component.Root.Fork.Telegram:fork" async resp $ const (pure unit)
+      withAffjax loc async resp $ const (pure unit)
 
-init = do 
+init = do
   logDebug $ (loc <> "init") <> " ---> telegram init start"
   { config: Config {telegramHost, telegramBot, telegramChat, toTelegram }} <- getStore
   let url_msg = telegramHost <> telegramBot <> "/sendMessage"

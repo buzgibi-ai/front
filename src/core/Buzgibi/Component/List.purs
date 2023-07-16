@@ -14,7 +14,8 @@ import Buzgibi.Data.Config
 import Buzgibi.Component.HTML.Utils (css)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
-import Buzgibi.Component.Pagination as Pagination 
+import Buzgibi.Component.Pagination as Pagination
+import Buzgibi.Component.Subscription.Pagination as Pagination
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -29,32 +30,43 @@ import Affjax.ResponseFormat as AX
 import Affjax.RequestBody as AXB
 import File.Blob (downloadBlob)
 import Data.Array (snoc)
+import Data.String (length, take)
+import Effect.AVar as Async
+import AppM (AppM)
 
 proxy = Proxy :: _ "list"
 
 loc = "Buzgibi.Component.List"
 
-type State = { list :: Array BuzgibiBack.HistoryItem, isNext :: Boolean }
+type State = 
+     { list :: Array BuzgibiBack.HistoryItem, 
+       total :: Int, 
+       perpage :: Int
+     }
 
-data Action = Initialize | Download Int String Event
+data Action = Initialize | Download Int String Event | Query Int
 
 component = 
   H.mkComponent
-  { initialState: const { list: [], isNext: false }
+  { initialState: const { list: [], total: 0, perpage: 0 }
     , render: render
     , eval: H.mkEval H.defaultEval
       {  handleAction = handleAction
       , initialize = pure Initialize
       }
   }
-  where 
-    handleAction Initialize = do 
+  where
+    getHistory page = do 
       { user, config: Config {apiBuzgibiHost} } <- getStore
       case user of 
         Just { token } -> do
-          resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory Nothing
-          withError resp \{ items, isnextpage } ->  H.modify_ _ { list = items, isNext = isnextpage }
+          resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory page
+          withError resp \{ items, total, perpage } ->  
+            H.modify_ _ { list = items, total = total, perpage = perpage }
         Nothing -> pure unit
+    handleAction Initialize = do
+      getHistory Nothing
+      Pagination.subscribe loc $ handleAction <<< Query
     handleAction (Download ident name ev) = do
       H.liftEffect $ preventDefault ev
       logDebug $ loc <> " ---> downloaded file " <> name
@@ -65,9 +77,10 @@ component =
             resp <- AX.get AX.blob $ apiBuzgibiHost <> "/file/download/" <> show userId <> "/raw/" <> show ident
             withAffjax loc async resp $ pure <<< flip downloadBlob name
         Nothing -> pure unit
+    handleAction (Query page) = getHistory $ Just { page: page }
 
 render { list: [] } = HH.text "you haven't the history to be shown" 
-render { list, isNext } = 
+render { list, total, perpage } =
   HH.div [css "history-item-container"] $
   (list <#> \{ident, name, timestamp} -> 
       HH.div [HPExt.style "margin-top: 10px"] 
@@ -78,8 +91,8 @@ render { list, isNext } =
               [ 
                   HPExt.style "cursor: pointer"
               ,   HPExt.type_ HPExt.InputSubmit
-              ,   HPExt.value name
+              ,   HPExt.value $ if length name > 10 then take 10 name <> "..." else name 
               ]
           ]
       ]
-  ) `snoc` HH.div [HPExt.style "margin-top: 10px"] [HH.slot_ Pagination.proxy unit Pagination.component { currenPage: 1, isNext: isNext }]
+  ) `snoc` HH.div [HPExt.style "margin-top: 10px"] [HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage }]

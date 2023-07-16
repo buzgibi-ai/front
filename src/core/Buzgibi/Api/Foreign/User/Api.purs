@@ -38,7 +38,7 @@ makeEnquiry = runFn3 _makeEnquiry withError
 
 type HistoryItem = { ident :: Int, name :: String, timestamp :: String }
 
-type History = { items :: Array HistoryItem, isnextpage :: Boolean }
+type History = { items :: Array HistoryItem, total :: Int, perpage :: Int }
 
 type Page = { page :: Int }
 

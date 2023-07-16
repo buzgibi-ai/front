@@ -68,6 +68,11 @@ type Store =
      , logLevel :: LogLevel
      , user :: Maybe User
      , isLogoutVar :: AVar Unit
+       --- for soem unexplicable reason the child-parent communicaton won't work
+       -- I didn't manage to get this feature working
+       -- ad-hoc approach is to employ Avar for passing something to a parent
+       --- reference to docs: https://purescript-halogen.github.io/purescript-halogen/guide/05-Parent-Child-Components.html#output-messages
+     , paginationVar :: AVar Int
      }
 
 printStore store = 
@@ -82,7 +87,8 @@ printStore store =
   ", telegramVar: <AVar>" <>
   ", logLevel: " <> show (_.logLevel store) <> 
   ", user:  " <> show (_.user store) <> 
-  ", isLogoutVa: <AVar> }"
+  ", isLogoutVa: <AVar> " <>  
+  ",paginationVar: <AVar> }"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that

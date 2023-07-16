@@ -89,6 +89,8 @@ main cfg = do
 
           isLogoutVar <- H.liftEffect Async.empty
 
+          paginationVar <- H.liftEffect Async.empty
+
           when (logLevel == Dev) $ 
             H.liftEffect $ do 
               infoShow $ "init --> " <> show init
@@ -115,6 +117,7 @@ main cfg = do
                 , logLevel: logLevel
                 , user: user
                 , isLogoutVar: isLogoutVar
+                , paginationVar: paginationVar
                 }
 
           -- With our app environment ready to go, we can prepare the router to run as our root component.
