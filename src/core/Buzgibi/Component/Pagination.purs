@@ -33,7 +33,7 @@ type Segment = { xs :: Array Int, next :: Maybe Int }
 
 type State = { currenPage :: Int, total :: Int, perpage :: Int, segment :: Maybe Segment }
 
-data Action = Initialize | Next Int MouseEvent
+data Action = Initialize | Next Int MouseEvent | Receive Input
 
 type Input = { total :: Int, perpage :: Int }
 
@@ -44,6 +44,7 @@ component =
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = pure Initialize
+      , receive = Just <<< Receive
       }
   }
   where 
@@ -58,6 +59,10 @@ component =
       H.modify_ _ { currenPage = curr, segment = calculateCurrentSegment curr total perpage }
       {paginationVar} <- getStore
       void $ H.liftEffect $ tryPut curr paginationVar
+    handleAction (Receive input) = do 
+      logDebug $ loc <> " ---> received from parent " <> show input
+      {currenPage, perpage} <- H.get
+      H.modify_ _ { total = input.total, segment = calculateCurrentSegment currenPage input.total perpage }
 
 render { segment: Nothing } = HH.div_ []
 render { currenPage, segment: Just { xs, next } } =
