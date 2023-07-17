@@ -36,7 +36,7 @@ import Data.Argonaut.Decode (class DecodeJson)
 data Route
   = Error500
   | Error404
-  | UserEnquiry
+  | UserSurvey
   | UserHistory
   | Home
   | SignUp
@@ -52,7 +52,7 @@ instance Show Route where
   show Error404 = "404"
   show SignUp = "signUp"
   show SignIn = "signIn"
-  show UserEnquiry = mempty
+  show UserSurvey = mempty
   show UserHistory = mempty
 
 instance Enum Route where
@@ -84,6 +84,6 @@ routeCodec = root $ sum
   , "Error404": "404" / noArgs
   , "SignUp": "auth" / "signUp" / noArgs
   , "SignIn": "auth" / "signIn" / noArgs
-  , "UserEnquiry": "user" / "enquiry" / noArgs
+  , "UserSurvey": "user" / "survey" / noArgs
   , "UserHistory": "user" / "history" / noArgs
   }

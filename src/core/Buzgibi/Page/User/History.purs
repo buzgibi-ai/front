@@ -78,7 +78,7 @@ component mkBody =
 
     void $ H.subscribe =<< WinResize.subscribe WinResize
 
-    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserEnquiry)
+    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserHistory)
 
     Logout.subscribe loc $ handleAction ToHome
 

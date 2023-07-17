@@ -1,4 +1,4 @@
-module Buzgibi.Page.User.Enquiry
+module Buzgibi.Page.User.Survey
   ( Action(..)
   , component
   , proxy
@@ -91,7 +91,7 @@ component mkBody =
 
     void $ H.subscribe =<< WinResize.subscribe WinResize
 
-    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserEnquiry)
+    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserSurvey)
 
     Logout.subscribe loc $ handleAction ToHome
 

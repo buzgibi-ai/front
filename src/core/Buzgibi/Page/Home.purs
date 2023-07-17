@@ -115,7 +115,7 @@ content (Just body) isAuth =
         [ HH.a
             [ css "nav-link"
             , HPExt.style "font-style: 30px"
-            , safeHref Route.UserEnquiry
+            , safeHref Route.UserSurvey
             ]
             [ HH.text "make an enquiry" ]
         ]
