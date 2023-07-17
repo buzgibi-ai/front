@@ -24,6 +24,7 @@ import Web.Event.Event (preventDefault)
 import Halogen.HTML.Events as HE
 import Halogen.Store.Monad (getStore)
 import Effect.AVar (tryPut)
+import Data.Int (rem)
 
 proxy = Proxy :: _ "pagination"
 
@@ -39,7 +40,11 @@ type Input = { total :: Int, perpage :: Int }
 
 component =
   H.mkComponent
-  { initialState: \{total, perpage} -> { currenPage: 1, total: total, perpage: perpage, segment: Nothing }
+  { initialState: \{total, perpage} -> 
+    { currenPage: 1, 
+      total: total, 
+      perpage: perpage, 
+      segment: Nothing }
     , render: render
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -51,7 +56,6 @@ component =
     handleAction Initialize = do
       {currenPage, total, perpage} <- H.get
       H.modify_ _ { segment = calculateCurrentSegment currenPage total perpage }
-      H.raise "ewvew"
     handleAction (Next curr ev) = do
       logDebug $ loc <> " ---> switch to page " <> show curr
       H.liftEffect $ preventDefault $ toEvent ev
@@ -61,8 +65,11 @@ component =
       void $ H.liftEffect $ tryPut curr paginationVar
     handleAction (Receive input) = do 
       logDebug $ loc <> " ---> received from parent " <> show input
-      {currenPage, perpage} <- H.get
-      H.modify_ _ { total = input.total, segment = calculateCurrentSegment currenPage input.total perpage }
+      {currenPage, perpage, total} <- H.get
+      when (rem input.total perpage == 1) $
+        H.modify_ _ { 
+          total = input.total, 
+          segment = calculateCurrentSegment currenPage input.total perpage }
 
 render { segment: Nothing } = HH.div_ []
 render { currenPage, segment: Just { xs, next } } =
