@@ -38,6 +38,7 @@ import Statistics (sendComponentTime)
 import Data.Int (toNumber)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 import Web.Event.Event (preventDefault)
+import Data.String (length)
 
 proxy = Proxy :: _ "user_enquiry"
 
@@ -60,7 +61,11 @@ type State =
 
 component mkBody = 
   H.mkComponent
-  { initialState: const { winWidth: Nothing, platform: Nothing, start: 0, enquiry: mempty }
+  { initialState: const 
+    { winWidth: Nothing, 
+      platform: Nothing, 
+      start: 0, 
+      enquiry: mempty }
     , render: render mkBody
     , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -99,23 +104,29 @@ component mkBody =
       sendComponentTime start end loc
     handleAction (Submit ev) = do 
       H.liftEffect $ preventDefault $ toEvent ev
-      { config: Config {apiBuzgibiHost}, user } <- getStore
       {enquiry} <- H.get
-      let req = { enquiry: fromMaybe mempty enquiry, location: { latitude: toNumber 0, longitude: toNumber 0 } }
-      case user of 
-        Just { token } -> do
-          resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.makeEnquiry req
-          withError resp \(_ :: Unit) -> do
-            H.modify_ _ { enquiry = Nothing }
-            logDebug $ loc <> " ---> enquiry has been sent"
-        Nothing -> pure unit
+      query enquiry
     handleAction ToHome = navigate Route.Home
+
+query Nothing = pure unit
+query (Just enquiry) | length enquiry == 0 = 
+  logDebug $ loc <> " ---> an empty enquiry has been detected"
+query (Just enquiry) = do
+  { config: Config {apiBuzgibiHost}, user } <- getStore
+  let req = { enquiry: enquiry, location: { latitude: toNumber 0, longitude: toNumber 0 } }
+  case user of 
+    Just { token } -> do
+      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.makeEnquiry req
+      withError resp \(_ :: Unit) -> do
+        H.modify_ _ { enquiry = Nothing }
+        logDebug $ loc <> " ---> enquiry has been sent"
+    Nothing -> pure unit
 
 render mkBody {winWidth: Just w, platform: Just p, enquiry} = 
   HH.div_ [mkBody p w (HH.div_ [searchBar enquiry, HH.div [css "list-container"] [HH.slot_ List.proxy unit List.component unit]]) ]
 render _ _ = HH.div_ []
 
-searchBar enquiry = 
+searchBar enquiry =
  HH.form [css "search-container"]
  [
      HH.input
@@ -129,4 +140,3 @@ searchBar enquiry =
      ]
  ,   HH.a [HPExt.href "#", HE.onClick Submit] [HH.img [css "search-icon", HPExt.src "http://www.endlessicons.com/wp-content/uploads/2012/12/search-icon.png"]]    
  ]
-
