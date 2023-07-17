@@ -29,7 +29,6 @@ import Data.Enum.Generic (genericFromEnum, genericToEnum, genericSucc, genericPr
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Argonaut.Decode (class DecodeJson)
 
-
 -- | We'll represent routes in our application with a simple sum type. As the application grows,
 -- | you might want to swap this out with an extensible sum type with `Variant` and have several
 -- | sub-sections. For our small MVP this type will work just fine and will prevent us from trying
@@ -38,10 +37,11 @@ data Route
   = Error500
   | Error404
   | UserEnquiry
+  | UserHistory
   | Home
   | SignUp
   | SignIn
- 
+
 derive instance genericRoute :: Generic Route _
 derive instance eqRoute :: Eq Route
 derive instance ordRoute :: Ord Route
@@ -53,23 +53,23 @@ instance Show Route where
   show SignUp = "signUp"
   show SignIn = "signIn"
   show UserEnquiry = mempty
- 
-instance Enum Route where 
-  succ = genericSucc
-  pred = genericPred 
+  show UserHistory = mempty
 
-instance BoundedEnum Route where 
+instance Enum Route where
+  succ = genericSucc
+  pred = genericPred
+
+instance BoundedEnum Route where
   cardinality = genericCardinality
   toEnum = genericToEnum
   fromEnum = genericFromEnum
 
-instance Bounded Route where 
+instance Bounded Route where
   top = SignIn
   bottom = Error500
 
-instance  DecodeJson Route where
+instance DecodeJson Route where
   decodeJson = genericDecodeJson
-
 
 -- | Next, we'll define a bidirectional codec for our route parsing. Our single codec will handle
 -- | both parsing browser locations and serializing our data type to a browser location. We'll skip
@@ -85,4 +85,5 @@ routeCodec = root $ sum
   , "SignUp": "auth" / "signUp" / noArgs
   , "SignIn": "auth" / "signIn" / noArgs
   , "UserEnquiry": "user" / "enquiry" / noArgs
+  , "UserHistory": "user" / "history" / noArgs
   }

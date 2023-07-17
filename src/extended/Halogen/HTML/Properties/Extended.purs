@@ -5,15 +5,13 @@ module Halogen.HTML.Properties.Extended
   , dataLabel
   , module Properties
   , role
-  )
-  where
+  ) where
 
 import Prelude
 
 import Halogen.HTML.Properties as Properties
 import Halogen.HTML as HH
-import Halogen.HTML.Core (PropName (..))
-
+import Halogen.HTML.Core (PropName(..))
 
 -- role :: forall r i. String -> Properties.IProp (role :: String | r) i
 role = Properties.prop (PropName "role")

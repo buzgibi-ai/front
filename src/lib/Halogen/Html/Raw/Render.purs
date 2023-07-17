@@ -27,13 +27,13 @@ elementToHtml mParentNs ele =
     (Array.fromFoldable $ map htmlAttributeToProp ele.attributes)
     children
   where
-    mCurNs = Array.find (\(HtmlAttribute k _) -> k == "xmlns") ele.attributes <#>
-      \(HtmlAttribute _ v) -> HH.Namespace v
-    mNs = mCurNs <|> mParentNs
-    children = ele.children <#> nodeToHtml mNs
-    ctor = case mNs of
-      Just ns -> HH.elementNS ns
-      Nothing -> HH.element
+  mCurNs = Array.find (\(HtmlAttribute k _) -> k == "xmlns") ele.attributes <#>
+    \(HtmlAttribute _ v) -> HH.Namespace v
+  mNs = mCurNs <|> mParentNs
+  children = ele.children <#> nodeToHtml mNs
+  ctor = case mNs of
+    Just ns -> HH.elementNS ns
+    Nothing -> HH.element
 
 nodeToHtml :: forall p i. Maybe HH.Namespace -> HtmlNode -> HH.HTML p i
 nodeToHtml mNs (HtmlElement ele) = elementToHtml mNs ele

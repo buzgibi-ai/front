@@ -3,8 +3,7 @@ module Buzgibi.Api.Foreign.Request
   , makeAuth
   , makeAuthWithResp
   , makeWithResp
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -26,48 +25,48 @@ import Data.Maybe
 import Safe.Coerce
 
 makeAuthWithResp
-  :: forall m api resp . 
-  MonadAff m =>
-  Maybe JWTToken -> 
-  String ->
-  (ApiClient -> Effect api) -> 
-  (api -> AC.EffectFnAff (Object (Response resp))) -> 
-  m (Either Error (Object (Response resp)))
+  :: forall m api resp
+   . MonadAff m
+  => Maybe JWTToken
+  -> String
+  -> (ApiClient -> Effect api)
+  -> (api -> AC.EffectFnAff (Object (Response resp)))
+  -> m (Either Error (Object (Response resp)))
 makeAuthWithResp token host mkApi runApi = do
-  let jwt = map coerce token 
+  let jwt = map coerce token
   api <- H.liftEffect $ do mkApiClient jwt host >>= mkApi
   H.liftAff $ try $ AC.fromEffectFnAff $ runApi api
 
 makeWithResp
-  :: forall m api resp . 
-  MonadAff m => 
-  String ->
-  (ApiClient -> Effect api) -> 
-  (api -> AC.EffectFnAff (Object (Response resp))) -> 
-  m (Either Error (Object (Response resp)))
+  :: forall m api resp
+   . MonadAff m
+  => String
+  -> (ApiClient -> Effect api)
+  -> (api -> AC.EffectFnAff (Object (Response resp)))
+  -> m (Either Error (Object (Response resp)))
 makeWithResp = makeAuthWithResp Nothing
 
 makeAuth
-  :: forall m api resp a . 
-  MonadAff m =>
-  Maybe JWTToken ->
-  String -> 
-  (ApiClient -> Effect api) -> 
-  (api -> AC.EffectFnAff (Object resp)) -> 
-  m (Either Error a)
+  :: forall m api resp a
+   . MonadAff m
+  => Maybe JWTToken
+  -> String
+  -> (ApiClient -> Effect api)
+  -> (api -> AC.EffectFnAff (Object resp))
+  -> m (Either Error a)
 makeAuth token host mkApi runApi = do
-  let jwt = map coerce token 
+  let jwt = map coerce token
   api <- H.liftEffect $ do mkApiClient jwt host >>= mkApi
   obj <- H.liftAff $ try $ AC.fromEffectFnAff $ runApi api
   val <- map join $ for obj (H.liftEffect <<< getDataFromObj)
   let msg = "wrong type has been recieved: `{success: null}``. `success` must always be populated with either value or error"
   pure $ join $ val <#> \(x :: Nullable a) -> maybe (Left (error msg)) Right $ toMaybe x
 
-make 
-  :: forall m api resp a . 
-  MonadAff m =>
-  String -> 
-  (ApiClient -> Effect api) -> 
-  (api -> AC.EffectFnAff (Object resp)) -> 
-  m (Either Error a)
+make
+  :: forall m api resp a
+   . MonadAff m
+  => String
+  -> (ApiClient -> Effect api)
+  -> (api -> AC.EffectFnAff (Object resp))
+  -> m (Either Error a)
 make = makeAuth Nothing

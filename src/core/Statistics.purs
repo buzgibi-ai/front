@@ -17,15 +17,16 @@ import Foreign (unsafeToForeign)
 import Data.Either
 import Effect.Exception (message)
 
-sendComponentTime start end component = do 
+sendComponentTime start end component = do
   logDebug "sendComponentTime enter .."
-  { config: Config {apiBuzgibiHost, sha256Commit} } <- getStore
-  let payload =  
-            "component" := component
-         ~> "totalTime" := (end - start)
-         ~> jsonEmptyObject
+  { config: Config { apiBuzgibiHost, sha256Commit } } <- getStore
+  let
+    payload =
+      "component" := component
+        ~> "totalTime" := (end - start)
+        ~> jsonEmptyObject
   req <- H.liftEffect $ runFn2 BuzgibiBack.mkLogReq sha256Commit (unsafeToForeign payload)
   resp <- makeWithResp apiBuzgibiHost BuzgibiBack.mkFrontApi $ BuzgibiBack.sendLog req
-  case resp of 
+  case resp of
     Right _ -> logDebug "ok"
     Left err -> logDebug $ "errr- >" <> message err

@@ -1,4 +1,4 @@
-module Buzgibi.Page.Error.Page500 ( component, proxy ) where
+module Buzgibi.Page.Error.Page500 (component, proxy) where
 
 import Prelude
 
@@ -31,27 +31,25 @@ component =
     { initialState: const { msg: mempty }
     , render: render
     , eval: H.mkEval H.defaultEval
-      { handleAction = handleAction
-      , initialize = pure Initialize 
-      }
+        { handleAction = handleAction
+        , initialize = pure Initialize
+        }
     }
-    where 
-       handleAction Initialize = do
-         H.liftEffect $ do 
-           win <- window
-           doc <- document win
-           bodym <- body doc
-           for_ bodym \body -> 
-             "body-error" `setClassName` toElement body
+  where
+  handleAction Initialize = do
+    H.liftEffect $ do
+      win <- window
+      doc <- document win
+      bodym <- body doc
+      for_ bodym \body ->
+        "body-error" `setClassName` toElement body
 
-         {error} <- getStore
-         when (isNothing error) $ navigate Error404
-         for_ error \e -> H.modify_ _ { msg = message e }
+    { error } <- getStore
+    when (isNothing error) $ navigate Error404
+    for_ error \e -> H.modify_ _ { msg = message e }
 
-
-render { msg } = 
-  HH.section [css "centered"] 
-  [ 
-      HH.h1_ [HH.text "Internal Server Error or Network failure"]
-  ,   HH.div [css "container"] [HH.span [HPExt.style "font-size:20px; color:red;"] [HH.text msg]]
-  ]
+render { msg } =
+  HH.section [ css "centered" ]
+    [ HH.h1_ [ HH.text "Internal Server Error or Network failure" ]
+    , HH.div [ css "container" ] [ HH.span [ HPExt.style "font-size:20px; color:red;" ] [ HH.text msg ] ]
+    ]

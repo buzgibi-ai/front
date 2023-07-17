@@ -5,8 +5,7 @@ module Buzgibi.Data.Config
   , setIsCaptcha
   , setShaCommit
   , setToTelegram
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -22,7 +21,7 @@ type ConfigVal =
   { telegramBot :: String
   , telegramChat :: String
   , telegramHost :: String
-  , toTelegram :: Boolean 
+  , toTelegram :: Boolean
   , apiBuzgibiHost :: String
   , sha256Commit :: String
   , cssLink :: String
@@ -36,33 +35,35 @@ newtype Config = Config ConfigVal
 getVal (Config v) = v
 
 instance EncodeJson Config where
-  encodeJson 
-    (Config { 
-        telegramBot
-      , telegramChat
-      , telegramHost
-      , toTelegram
-      , apiBuzgibiHost
-      , sha256Commit
-      , cssLink
-      , traceLocation
-      , cssFiles
-      , isCaptcha }) =
-       "telegramBot" := telegramBot ~>
-       "telegramChat" := telegramChat ~> 
-       "telegramHost" := telegramHost ~> 
-       "toTelegram" := toTelegram ~> 
-       "apiBuzgibiHost" := apiBuzgibiHost ~> 
-       "sha256Commit" := sha256Commit ~> 
-       "cssLink" := cssLink ~> 
-       "traceLocation" := traceLocation ~> 
-       "cssFiles" := cssFiles ~> 
-       "isCaptcha" := isCaptcha ~>
-       jsonEmptyObject
-    
+  encodeJson
+    ( Config
+        { telegramBot
+        , telegramChat
+        , telegramHost
+        , toTelegram
+        , apiBuzgibiHost
+        , sha256Commit
+        , cssLink
+        , traceLocation
+        , cssFiles
+        , isCaptcha
+        }
+    ) =
+    "telegramBot" := telegramBot
+      ~> "telegramChat" := telegramChat
+      ~> "telegramHost" := telegramHost
+      ~> "toTelegram" := toTelegram
+      ~> "apiBuzgibiHost" := apiBuzgibiHost
+      ~> "sha256Commit" := sha256Commit
+      ~> "cssLink" := cssLink
+      ~> "traceLocation" := traceLocation
+      ~> "cssFiles" := cssFiles
+      ~> "isCaptcha" := isCaptcha
+      ~>
+        jsonEmptyObject
 
 instance DecodeJson Config where
-  decodeJson json = do 
+  decodeJson json = do
     obj <- decodeJson json
     telegramBot <- obj .: "telegramBot"
     telegramChat <- obj .: "telegramChat"
@@ -79,7 +80,7 @@ instance DecodeJson Config where
 setShaCommit :: String -> Config -> Config
 setShaCommit x (Config cfg) = Config $ cfg { sha256Commit = x }
 
-setIsCaptcha :: Boolean -> Config -> Config 
+setIsCaptcha :: Boolean -> Config -> Config
 setIsCaptcha x (Config cfg) = Config $ cfg { isCaptcha = x }
 
 setToTelegram :: Boolean -> Config -> Config

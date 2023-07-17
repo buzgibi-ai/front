@@ -33,8 +33,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , mkLogReq
   , sendLog
   , translationLookup
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -49,8 +48,8 @@ import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Encode.Combinators
 import Data.Argonaut.Core (jsonEmptyObject)
-import Data.Tuple (Tuple (..))
-import Data.Maybe (Maybe (..), fromMaybe)
+import Data.Tuple (Tuple(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Undefined
 import Foreign (Foreign)
 import Effect (Effect)
@@ -60,7 +59,6 @@ import Effect.Exception as E
 import Data.Array (concatMap)
 
 import Undefined
-
 
 foreign import data MapMenuText :: Type
 foreign import data MapPageMapTextText :: Type
@@ -78,7 +76,7 @@ foreign import data MapMessengerText :: Type
 
 foreign import mkFrontApi :: Fn1 ApiClient (Effect FrontApi)
 
-foreign import _init :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object (Response Init)))
+foreign import _init :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object (Response Init)))
 
 init :: Maybe JWTToken -> FrontApi -> AC.EffectFnAff (Object (Response Init))
 init token = runFn3 _init withError (fromMaybe jsonEmptyObject (map encodeJson token))
@@ -107,19 +105,21 @@ getToTelegram = _getToTelegram Nothing Just
 foreign import _getJwtStatus :: Init -> String
 
 getJwtStatus :: Init -> Maybe JWTStatus
-getJwtStatus init = 
-  let st = _getJwtStatus init
-  in case st of 
-       "valid" -> Just Valid
-       "invalid" -> Just Invalid
-       "skip" -> Just Skip
-       _ -> Nothing
+getJwtStatus init =
+  let
+    st = _getJwtStatus init
+  in
+    case st of
+      "valid" -> Just Valid
+      "invalid" -> Just Invalid
+      "skip" -> Just Skip
+      _ -> Nothing
 
-foreign import _loadTranslation :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object ResponseTranslation))
+foreign import _loadTranslation :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object ResponseTranslation))
 
 foreign import mkLogReq :: Fn2 String Foreign (Effect FrontendLogRequest)
 
-foreign import _sendLog :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) FrontendLogRequest FrontApi (AC.EffectFnAff (Object (Response Unit)))
+foreign import _sendLog :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) FrontendLogRequest FrontApi (AC.EffectFnAff (Object (Response Unit)))
 
 sendLog :: FrontendLogRequest -> FrontApi -> AC.EffectFnAff (Object (Response Unit))
 sendLog = runFn3 _sendLog withError
@@ -129,7 +129,7 @@ instance Show Cookie where
 
 foreign import _showCookie :: Cookie -> String
 
-foreign import _getCookies :: Fn2 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) FrontApi (AC.EffectFnAff (Object ResponseCookie))
+foreign import _getCookies :: Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) FrontApi (AC.EffectFnAff (Object ResponseCookie))
 
 getCookies :: FrontApi -> AC.EffectFnAff (Object ResponseCookie)
 getCookies = runFn2 _getCookies withError
@@ -139,7 +139,7 @@ newtype MetaPage = MetaPage String
 instance EncodeJson MetaPage where
   encodeJson (MetaPage page) = "page" := page ~> jsonEmptyObject
 
-foreign import _getMeta :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object ResponseMeta))
+foreign import _getMeta :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Json FrontApi (AC.EffectFnAff (Object ResponseMeta))
 
 getMeta :: Maybe MetaPage -> FrontApi -> AC.EffectFnAff (Object ResponseMeta)
 getMeta page = runFn3 _getMeta withError (encodeJson (fromMaybe undefined page))
@@ -154,36 +154,39 @@ foreign import _showTranslation :: Translation -> String
 instance Show Translation where
   show = _showTranslation
 
-foreign import _getKeyText :: forall a . a -> String
-foreign import _getValText :: forall a . a -> String
+foreign import _getKeyText :: forall a. a -> String
+foreign import _getValText :: forall a. a -> String
 
 foreign import _getTranslationMenu :: Translation -> Array MapMenuText
 
 getTranslationMenu :: Translation -> Map.Map String String
 getTranslationMenu = Map.fromFoldable <<< map toTpl <<< _getTranslationMenu
-  where toTpl x = Tuple (_getKeyText x) (_getValText x) 
+  where
+  toTpl x = Tuple (_getKeyText x) (_getValText x)
 
 foreign import _showMapMenuText :: MapMenuText -> String
 
 instance Show MapMenuText where
   show = _showMapMenuText
 
-type TranslationPageItem = { key :: String, value :: Array MapTextText}
+type TranslationPageItem = { key :: String, value :: Array MapTextText }
 
 foreign import _getTranslationPage :: Translation -> Array MapPageMapTextText
 foreign import _getTranslationPageItem :: MapPageMapTextText -> TranslationPageItem
 
 type TranslationPageMap = Map.Map String (Map.Map String String)
 
-getTranslationPage :: Translation -> TranslationPageMap 
+getTranslationPage :: Translation -> TranslationPageMap
 getTranslationPage translation =
-  let xs = map _getTranslationPageItem $ _getTranslationPage translation
-      xs' = xs <#> \{key, value} -> 
-              Tuple key $ Map.fromFoldable $ 
-                value <#> \x -> 
-                  Tuple (_getKeyText x) (_getValText x)
-  in Map.fromFoldable xs'
-  
+  let
+    xs = map _getTranslationPageItem $ _getTranslationPage translation
+    xs' = xs <#> \{ key, value } ->
+      Tuple key $ Map.fromFoldable $
+        value <#> \x ->
+          Tuple (_getKeyText x) (_getValText x)
+  in
+    Map.fromFoldable xs'
+
 foreign import getTranslationCopyright :: Translation -> String
 
 translationLookup page el = join <<< map (Map.lookup el) <<< Map.lookup page

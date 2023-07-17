@@ -11,10 +11,10 @@ import Effect.Aff.Class (liftAff)
 import Web.HTML.Window (innerWidth)
 import Web.HTML (window)
 
-subscribe go = do 
+subscribe go = do
   { emitter, listener } <- H.liftEffect HS.create
-  void $ H.fork $ forever $ do 
-     liftAff $ Aff.delay $ Milliseconds 500.0
-     w <- H.liftEffect $ window >>= innerWidth
-     H.liftEffect $ HS.notify listener $ go w
+  void $ H.fork $ forever $ do
+    liftAff $ Aff.delay $ Milliseconds 500.0
+    w <- H.liftEffect $ window >>= innerWidth
+    H.liftEffect $ HS.notify listener $ go w
   pure emitter

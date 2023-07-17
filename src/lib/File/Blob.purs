@@ -6,4 +6,3 @@ import Web.File.Blob (Blob)
 
 foreign import downloadBlob :: Blob -> String -> Unit
 
-

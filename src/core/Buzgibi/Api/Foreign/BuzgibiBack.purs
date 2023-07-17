@@ -16,8 +16,7 @@ module Buzgibi.Api.Foreign.BuzgibiBack
   , module AuthApi
   , module UserApi
   , send
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -47,16 +46,16 @@ type SendGridSendMailRequestBody = { from :: String, personalization :: String, 
 
 foreign import mkSendGridSendMailRequest :: Fn1 SendGridSendMailRequestBody (Effect SendGridSendMailRequest)
 
-foreign import send :: forall a . Fn2 SendGridSendMailRequest ForeignApi (AC.EffectFnAff (Object (Response a)))
+foreign import send :: forall a. Fn2 SendGridSendMailRequest ForeignApi (AC.EffectFnAff (Object (Response a)))
 
 foreign import mkReCaptchaApi :: Fn1 ApiClient (Effect ReCaptchaApi)
 
-foreign import _goReCaptcha :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) String ReCaptchaApi (AC.EffectFnAff (Object (ResponseReCaptcha)))
+foreign import _goReCaptcha :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) String ReCaptchaApi (AC.EffectFnAff (Object (ResponseReCaptcha)))
 
 goReCaptcha :: String -> ReCaptchaApi -> AC.EffectFnAff (Object (ResponseReCaptcha))
 goReCaptcha = runFn3 _goReCaptcha Common.withError
 
 foreign import getSuccessReCaptcha :: ReCaptcha -> Boolean
 
-instance Show ReCaptcha where 
+instance Show ReCaptcha where
   show x = "{ success: " <> show (getSuccessReCaptcha x) <> " }"

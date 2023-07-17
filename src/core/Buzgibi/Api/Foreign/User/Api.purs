@@ -7,8 +7,7 @@ module Buzgibi.Api.Foreign.User.Api
   , getHistory
   , makeEnquiry
   , mkUserApi
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -27,11 +26,11 @@ foreign import data UserApi :: Type
 
 foreign import mkUserApi :: Fn1 ApiClient (Effect UserApi)
 
-type Location = { latitude :: Number, longitude :: Number  }
+type Location = { latitude :: Number, longitude :: Number }
 
 type Enquiry = { enquiry :: String, location :: Location }
 
-foreign import _makeEnquiry :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Enquiry UserApi (AC.EffectFnAff (Object (Response Unit)))
+foreign import _makeEnquiry :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Enquiry UserApi (AC.EffectFnAff (Object (Response Unit)))
 
 makeEnquiry :: Enquiry -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
 makeEnquiry = runFn3 _makeEnquiry withError
@@ -42,8 +41,8 @@ type History = { items :: Array HistoryItem, total :: Int, perpage :: Int }
 
 type Page = { page :: Int }
 
-foreign import _getHistory :: Fn3 (forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Page UserApi (AC.EffectFnAff (Object (Response History)))
+foreign import _getHistory :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Page UserApi (AC.EffectFnAff (Object (Response History)))
 
 getHistory :: Maybe Page -> UserApi -> (AC.EffectFnAff (Object (Response History)))
-getHistory page = runFn3 _getHistory withError (fromMaybe {page: 1} page)
+getHistory page = runFn3 _getHistory withError (fromMaybe { page: 1 } page)
 

@@ -26,7 +26,7 @@ import Buzgibi.Data.Log
 import Buzgibi.Data.Config
 
 import Store as Store
-import Store.Types (LogLevel (Prod))
+import Store.Types (LogLevel(Prod))
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -111,7 +111,7 @@ derive newtype instance Monad AppM
 derive newtype instance MonadEffect AppM
 derive newtype instance MonadAff AppM
 derive newtype instance MonadStore Store.Action Store.Store AppM
-derive newtype instance MonadError E.Error AppM 
+derive newtype instance MonadError E.Error AppM
 
 -- | Our app uses hash-based routing, so to navigate from place to place, we'll just set the hash.
 -- | Note how our navigation capability uses our routing data type rather than let you set any
@@ -125,23 +125,28 @@ instance Navigate AppM where
 -- | (`Dev`) or just important messages (`Prod`).
 instance LogMessages AppM where
   logMessage log = do
-    { config: Config {toTelegram}, telegramVar, logLevel } <- getStore
+    { config: Config { toTelegram }, telegramVar, logLevel } <- getStore
     let telegramLevel = reason log == Error || reason log == Info
-    when (toTelegram && 
-          telegramLevel) $ 
-      void $ liftAff $ void $ Async.send (_.output telegramVar) $ message log
-    let mkLog = 
-          case reason log of
-            Error -> C.errorShow
-            Info ->
-              if logLevel == Prod 
-              then const (pure unit)  
-              else C.infoShow
-            Debug -> 
-              if logLevel == Prod 
-              then const (pure unit) 
-              else C.logShow
-            Warn -> C.warnShow
+    when
+      ( toTelegram &&
+          telegramLevel
+      )
+      $ void
+      $ liftAff
+      $ void
+      $ Async.send (_.output telegramVar)
+      $ message log
+    let
+      mkLog =
+        case reason log of
+          Error -> C.errorShow
+          Info ->
+            if logLevel == Prod then const (pure unit)
+            else C.infoShow
+          Debug ->
+            if logLevel == Prod then const (pure unit)
+            else C.logShow
+          Warn -> C.warnShow
     H.liftEffect $ mkLog $ message log <> ", loc: " <> loc log
 
 -- | We're finally ready to write concrete implementations for each of our abstract capabilities.

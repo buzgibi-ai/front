@@ -9,7 +9,7 @@ import Buzgibi.Capability.LogMessages (logWarn)
 import Buzgibi.Component.Async as Async
 
 import Halogen as H
-import Data.Maybe (Maybe (Just))
+import Data.Maybe (Maybe(Just))
 import Effect.AVar as Async
 import Effect.Exception (message)
 import Web.DOM.Document (createElement, getElementsByTagName)
@@ -24,11 +24,11 @@ import Web.HTML.Window (document)
 import Web.HTML (window)
 import Data.Maybe (isNothing)
 
-set host var page = 
-  void $ H.fork $ do 
+set host var page =
+  void $ H.fork $ do
     resp <- Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.getMeta page
     onFailure resp showWarn \(x :: BuzgibiBack.Meta) -> do
-      res <- H.liftEffect do 
+      res <- H.liftEffect do
         let descrip = BuzgibiBack.getMetaDescription x
         win <- window
         doc <- map toDocument $ document win
@@ -42,9 +42,9 @@ set host var page =
           pure $ Just unit
       when (isNothing res) shoWWarnAppendFailure
   where
-    showWarn e = do 
-      logWarn $ "Buzgibi.Document.Meta: " <> message e
-      Async.send $ Async.mkOrdinary "meta cannot be loaded for this page" Async.Warning $ Just "Buzgibi.Document.Meta"
-    shoWWarnAppendFailure = do 
-      logWarn $ "Buzgibi.Document.Meta: meta cannot be latched to head"
-      Async.send $ Async.mkOrdinary "meta cannot be latched to head" Async.Warning $ Just "Buzgibi.Document.Meta"
+  showWarn e = do
+    logWarn $ "Buzgibi.Document.Meta: " <> message e
+    Async.send $ Async.mkOrdinary "meta cannot be loaded for this page" Async.Warning $ Just "Buzgibi.Document.Meta"
+  shoWWarnAppendFailure = do
+    logWarn $ "Buzgibi.Document.Meta: meta cannot be latched to head"
+    Async.send $ Async.mkOrdinary "meta cannot be latched to head" Async.Warning $ Just "Buzgibi.Document.Meta"

@@ -7,8 +7,7 @@
 module Buzgibi.Capability.Navigate
   ( class Navigate
   , navigate
-  )
-  where
+  ) where
 
 import Prelude
 

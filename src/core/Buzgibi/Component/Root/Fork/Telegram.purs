@@ -16,7 +16,7 @@ import Affjax.ResponseFormat as AX
 import Effect.Now as Now
 import Affjax.RequestBody as AXB
 import Data.FormURLEncoded as AXD
-import Data.Tuple (Tuple (..))
+import Data.Tuple (Tuple(..))
 import Data.Foldable (for_)
 
 loc = "Buzgibi.Component.Root.Fork.Telegram:"
@@ -33,13 +33,15 @@ fork { mkBody, url_msg } = do
 
 init = do
   logDebug $ (loc <> "init") <> " ---> telegram init start"
-  { config: Config {telegramHost, telegramBot, telegramChat, toTelegram }} <- getStore
+  { config: Config { telegramHost, telegramBot, telegramChat, toTelegram } } <- getStore
   let url_msg = telegramHost <> telegramBot <> "/sendMessage"
-  let mkBody msg =
-        AXB.FormURLEncoded $
-          AXD.FormURLEncoded
-            [ Tuple "chat_id" (pure telegramChat)
-            , Tuple "text" (pure ("`" <> msg <> "`"))
-            , Tuple "parse_mode" (pure "markdown")]
-  logDebug $ (loc <> "init") <> " ---> telegram init end"          
+  let
+    mkBody msg =
+      AXB.FormURLEncoded $
+        AXD.FormURLEncoded
+          [ Tuple "chat_id" (pure telegramChat)
+          , Tuple "text" (pure ("`" <> msg <> "`"))
+          , Tuple "parse_mode" (pure "markdown")
+          ]
+  logDebug $ (loc <> "init") <> " ---> telegram init end"
   pure { mkBody, url_msg }

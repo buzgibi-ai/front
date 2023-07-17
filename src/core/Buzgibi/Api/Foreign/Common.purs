@@ -6,9 +6,8 @@ module Buzgibi.Api.Foreign.Common
   , getDataFromObj
   , mkApiClient
   , withError
-  , JWTStatus (..)
-  )
-  where
+  , JWTStatus(..)
+  ) where
 
 import Prelude
 
@@ -22,7 +21,7 @@ import Data.Argonaut.Encode (encodeJson, class EncodeJson)
 import Data.Argonaut.Encode.Combinators
 import Data.Argonaut.Core (jsonEmptyObject)
 import Data.Argonaut.Decode (decodeJson, class DecodeJson)
-import Data.Argonaut.Decode.Error (JsonDecodeError (TypeMismatch))
+import Data.Argonaut.Decode.Error (JsonDecodeError(TypeMismatch))
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe, fromMaybe)
@@ -38,14 +37,14 @@ instance showError :: Show Error where
 
 foreign import _printError :: Error -> String
 
-foreign import _getDataFromObj 
-  :: forall a b . 
-  (String -> Either E.Error b) -> 
-  (b -> Either E.Error b) -> 
-  Object a -> 
-  Effect (Either E.Error b)
+foreign import _getDataFromObj
+  :: forall a b
+   . (String -> Either E.Error b)
+  -> (b -> Either E.Error b)
+  -> Object a
+  -> Effect (Either E.Error b)
 
-getDataFromObj :: forall a b . Object a -> Effect (Either E.Error b)
+getDataFromObj :: forall a b. Object a -> Effect (Either E.Error b)
 getDataFromObj = _getDataFromObj (Left <<< E.error) Right
 
 foreign import _mkApiClient :: Fn2 String String (Effect ApiClient)
@@ -53,11 +52,11 @@ foreign import _mkApiClient :: Fn2 String String (Effect ApiClient)
 mkApiClient :: Maybe String -> String -> Effect ApiClient
 mkApiClient jwt = runFn2 _mkApiClient (fromMaybe undefined jwt)
 
-foreign import withError :: forall a . Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a 
+foreign import withError :: forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a
 
 newtype JWTToken = JWTToken String
 
-instance Show JWTToken where 
+instance Show JWTToken where
   show (JWTToken token) = "***token***"
 
 instance EncodeJson JWTToken where

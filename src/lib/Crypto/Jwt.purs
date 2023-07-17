@@ -2,8 +2,7 @@ module Crypto.Jwt
   ( JwtClaims
   , JwtUser
   , parse
-  )
-  where
+  ) where
 
 import Prelude
 

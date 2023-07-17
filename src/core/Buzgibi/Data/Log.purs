@@ -28,7 +28,7 @@ import Prelude
 
 import Buzgibi.Capability.Now (class Now, nowDateTime)
 import Data.DateTime (DateTime)
-import Data.Either (either, Either (..))
+import Data.Either (either, Either(..))
 import Data.Foldable (fold)
 import Data.Formatter.DateTime (formatDateTime)
 import Data.Generic.Rep
@@ -38,8 +38,7 @@ import Affjax.ResponseFormat as AX
 import Effect.Aff.Class
 import Data.Argonaut.Core (stringify)
 import Data.Bifunctor (rmap)
-import Data.Maybe (Maybe (..))
-
+import Data.Maybe (Maybe(..))
 
 -- | Most of this module describes metadata that can be used to create a predictable logging
 -- | format that we can search later on or use to set filters in an external service like Splunk
@@ -98,27 +97,26 @@ mkLog :: forall m. Now m => MonadAff m => LogReason -> String -> m Log
 mkLog logReason inputMessage = do
   now <- nowDateTime
 
-  locResp <- 
-    if logReason == Info 
-    then map (rmap Just) $ liftAff $ AX.get AX.json "https://api.db-ip.com/v2/free/self"
+  locResp <-
+    if logReason == Info then map (rmap Just) $ liftAff $ AX.get AX.json "https://api.db-ip.com/v2/free/self"
     else pure $ Right Nothing
   let -- Will produce a header like "{DEBUG: 2018-10-25 11:25:29 AM]\nMessage contents..."
-      headerWith start = fold [ "[", start, ": ", formatTimestamp now, "]\n", inputMessage ]
+    headerWith start = fold [ "[", start, ": ", formatTimestamp now, "]\n", inputMessage ]
 
-      -- Writes the header with the correct log reason
-      formattedLog = headerWith case logReason of
-        Debug -> "DEBUG"
-        Info -> "INFO"
-        Warn -> "WARNING"
-        Error -> "ERROR"
-      loc = 
-        case locResp of 
-          Right (Just resp) -> stringify $  _.body resp
-          Right _ -> "loc cannot be determined." 
-          Left _ -> "loc cannot be determined" 
+    -- Writes the header with the correct log reason
+    formattedLog = headerWith case logReason of
+      Debug -> "DEBUG"
+      Info -> "INFO"
+      Warn -> "WARNING"
+      Error -> "ERROR"
+    loc =
+      case locResp of
+        Right (Just resp) -> stringify $ _.body resp
+        Right _ -> "loc cannot be determined."
+        Left _ -> "loc cannot be determined"
 
   pure $ Log { reason: logReason, timestamp: now, message: formattedLog, loc: loc }
 
   where
-     -- Will format "2018-10-25 11:25:29 AM"
-     formatTimestamp = either (const "(Failed to assign time)") identity <<< formatDateTime "YYYY-DD-MM hh:mm:ss a"
+  -- Will format "2018-10-25 11:25:29 AM"
+  formatTimestamp = either (const "(Failed to assign time)") identity <<< formatDateTime "YYYY-DD-MM hh:mm:ss a"

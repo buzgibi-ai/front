@@ -3,14 +3,13 @@ module Store.Types
   , Platform(..)
   , readLogLevel
   , readPlatform
-  )
-  where
+  ) where
 
 import Prelude
 
-import Data.Maybe (Maybe (..)) 
+import Data.Maybe (Maybe(..))
 import Data.Either (note, Either)
-import Data.Argonaut.Decode.Error (JsonDecodeError (UnexpectedValue))
+import Data.Argonaut.Decode.Error (JsonDecodeError(UnexpectedValue))
 import Data.Argonaut.Core (Json)
 import Data.Argonaut.Decode (class DecodeJson, decodeJson)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson)
@@ -26,7 +25,7 @@ readPlatform _ = Nothing
 
 instance Show Platform where
   show Desktop = "desktop"
-  show Mobile = "mobile" 
+  show Mobile = "mobile"
 
 data LogLevel = Dev | Prod
 
@@ -45,6 +44,6 @@ instance EncodeJson LogLevel where
   encodeJson = encodeJson <<< show
 
 instance DecodeJson LogLevel where
-  decodeJson json = do 
+  decodeJson json = do
     str <- decodeJson json :: Either JsonDecodeError String
     note (UnexpectedValue json) $ readLogLevel str
