@@ -6,9 +6,9 @@ export const mkUserApi = function(api) {
     }
 }
 
-export const _makeEnquiry = function(withError, enquiry, api) {
+export const _makeSurvey = function(withError, survey, api) {
     return function(onError, onOk) {
-        api.userEnquiryPost(enquiry).then(onOk).catch(resp => {
+        api.userSurveyPost(survey).then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };
@@ -16,7 +16,7 @@ export const _makeEnquiry = function(withError, enquiry, api) {
 
 export const _getHistory = function(withError, page, api) {
     return function(onError, onOk) {
-        api.userEnquiryHistoryGet(page).then(onOk).catch(resp => {
+        api.userSurveyHistoryGet(page).then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };

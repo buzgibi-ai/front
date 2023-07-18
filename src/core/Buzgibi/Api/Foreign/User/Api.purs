@@ -1,11 +1,11 @@
 module Buzgibi.Api.Foreign.User.Api
-  ( Enquiry
+  ( Survey
   , History
   , HistoryItem
   , Location
   , UserApi
   , getHistory
-  , makeEnquiry
+  , makeSurvey
   , mkUserApi
   ) where
 
@@ -28,12 +28,18 @@ foreign import mkUserApi :: Fn1 ApiClient (Effect UserApi)
 
 type Location = { latitude :: Number, longitude :: Number }
 
-type Enquiry = { enquiry :: String, location :: Location }
+type Survey = 
+     { survey :: String
+     , assessmentscore :: String
+     , category :: String
+     , phonesfileident :: Int
+     , location :: Location
+     }
 
-foreign import _makeEnquiry :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Enquiry UserApi (AC.EffectFnAff (Object (Response Unit)))
+foreign import _makeSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Survey UserApi (AC.EffectFnAff (Object (Response Unit)))
 
-makeEnquiry :: Enquiry -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
-makeEnquiry = runFn3 _makeEnquiry withError
+makeSurvey :: Survey -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
+makeSurvey = runFn3 _makeSurvey withError
 
 type HistoryItem = { ident :: Int, name :: String, timestamp :: String }
 

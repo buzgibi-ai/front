@@ -15,6 +15,7 @@ module Buzgibi.Api.Foreign.BuzgibiBack
   , module FrontApi
   , module AuthApi
   , module UserApi
+  , module FileApi
   , send
   ) where
 
@@ -25,6 +26,7 @@ import Buzgibi.Api.Foreign.Common
 import Buzgibi.Api.Foreign.Front.Api as FrontApi
 import Buzgibi.Api.Foreign.Auth.Api as AuthApi
 import Buzgibi.Api.Foreign.User.Api as UserApi
+import Buzgibi.Api.Foreign.File.Api as FileApi
 
 import Data.Function.Uncurried (Fn1, Fn2, Fn3, runFn3)
 import Effect (Effect)

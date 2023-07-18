@@ -17,11 +17,15 @@ import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Component.Subscription.Logout as Logout
+import Buzgibi.Data.Survey
+import Buzgibi.Page.User.Survey.File as File
+import Buzgibi.Component.Async as Async
 
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen.HTML.Events as HE
+import Halogen.Query.Input (RefLabel (..))
 import Type.Proxy (Proxy(..))
 import Web.HTML.HTMLDocument (setTitle)
 import Web.HTML.Window (document, innerWidth)
@@ -33,27 +37,35 @@ import Halogen.Store.Monad (getStore)
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime)
 import Data.Int (toNumber)
-import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
-import Web.Event.Event (preventDefault)
 import Data.String (length)
+import Web.File.File (File, name)
+import Web.Event.Event (preventDefault, Event)
+import Data.Array ((..))
+import Data.Traversable (for_, traverse_)
+import Data.Enum (fromEnum, toEnum)
+import Undefined
 
-proxy = Proxy :: _ "user_enquiry"
+proxy = Proxy :: _ "user_survey"
 
-loc = "Buzgibi.Page.User.Enquiry"
+loc = "Buzgibi.Page.User.Survey"
 
 data Action
   = Initialize
   | WinResize Int
   | Finalize
-  | Submit MouseEvent
-  | FillEnquiry String
+  | Upload (Array File)
   | ToHome
+  | MakeRequest Event
+  | SetCategory Int
+  | SetAssessmentScore Int
+  | SetSurvey String
 
 type State =
   { winWidth :: Maybe Int
   , platform :: Maybe Platform
   , start :: Int
-  , enquiry :: Maybe String
+  , survey :: Maybe BuzgibiBack.Survey
+  , isSurveyEmpty :: Boolean 
   }
 
 component mkBody =
@@ -62,7 +74,8 @@ component mkBody =
         { winWidth: Nothing
         , platform: Nothing
         , start: 0
-        , enquiry: mempty
+        , survey: Nothing
+        , isSurveyEmpty: false
         }
     , render: render mkBody
     , eval: H.mkEval H.defaultEval
@@ -96,44 +109,87 @@ component mkBody =
     Logout.subscribe loc $ handleAction ToHome
 
   handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
-  handleAction (FillEnquiry s) = H.modify_ _ { enquiry = Just s }
   handleAction Finalize = do
     end <- H.liftEffect getTimestamp
     { start } <- H.get
     sendComponentTime start end loc
-  handleAction (Submit ev) = do
-    H.liftEffect $ preventDefault $ toEvent ev
-    { enquiry } <- H.get
-    query enquiry
+  handleAction (Upload xs) = for_ xs uploadFile
   handleAction ToHome = navigate Route.Home
+  handleAction (MakeRequest ev) = do
+    H.liftEffect $ preventDefault ev
+    {survey} <- H.get
+    logDebug $ loc <> " ---> survey: " <> show survey
+    for_ survey submitSurvey
+  handleAction (SetCategory idx) = do
+    s <- H.get
+    let setCategory x = x { category = maybe undefined show (toEnum idx :: Maybe Category) }  
+    H.modify_ \s -> s { survey = map setCategory (_.survey s) }
+  handleAction (SetAssessmentScore idx) = do
+    s <- H.get
+    let setAssessmentScore x = x { assessmentscore = maybe undefined show (toEnum idx :: Maybe AssessmentScore) }  
+    H.modify_ \s -> s { survey = map setAssessmentScore (_.survey s) }
+  handleAction (SetSurvey val) = do 
+    s <- H.get
+    let setSurvey x = x { survey = val }  
+    H.modify_ \s -> s { survey = map setSurvey (_.survey s), isSurveyEmpty = false }
 
-query Nothing = pure unit
-query (Just enquiry) | length enquiry == 0 =
-  logDebug $ loc <> " ---> an empty enquiry has been detected"
-query (Just enquiry) = do
+uploadFile file = do
   { config: Config { apiBuzgibiHost }, user } <- getStore
-  let req = { enquiry: enquiry, location: { latitude: toNumber 0, longitude: toNumber 0 } }
-  case user of
-    Just { token } -> do
-      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.makeEnquiry req
-      withError resp \(_ :: Unit) -> do
-        H.modify_ _ { enquiry = Nothing }
-        logDebug $ loc <> " ---> enquiry has been sent"
-    Nothing -> pure unit
+  for_ user \{ token, jwtUser: {ident} } -> do
+    resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkFileApi $ 
+              BuzgibiBack.upload ("user" <> show (ident :: Int)) file
+    withError resp \(ident :: Int) -> do
+      let survey =
+            { survey: mempty :: String
+            , assessmentscore: show YN
+            , category: show CustomerSatisfaction
+            , phonesfileident: ident
+            , location: { latitude: toNumber 0, longitude: toNumber 0 }
+            }
+      H.modify_ _ { survey = pure survey }
+      logDebug $ loc <> " ---> file has been upload, id " <> show ident
 
-render mkBody { winWidth: Just w, platform: Just p, enquiry } =
-  HH.div_ [ mkBody p w (searchBar enquiry) ]
+submitSurvey survey = do
+  { config: Config { apiBuzgibiHost }, user } <- getStore
+  for_ user \{ token, jwtUser: {ident} } -> do
+    if (((<) 0) <<< length <<< _.survey) survey == true
+    then do  
+      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ 
+                BuzgibiBack.makeSurvey survey
+      withError resp \(ident :: Unit) -> do
+        H.getRef (RefLabel "file") >>= traverse_ (H.liftEffect <<< File.removeValue)
+        H.modify_ _ { survey = Nothing, isSurveyEmpty = false }
+        logDebug $ loc <> " ---> survey has been handed over"
+        Async.send $ Async.mkOrdinary "survey has been submitted" Async.Success Nothing
+    else H.modify_ _ { isSurveyEmpty = true }
+
+render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty } =
+  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty) ]
 render _ _ = HH.div_ []
 
-searchBar enquiry =
-  HH.form [ css "search-container" ]
-    [ HH.input
-        [ HPExt.type_ HPExt.InputText
-        , HE.onValueInput FillEnquiry
-        , HPExt.id "search-bar"
-        , case enquiry of
-            Just x -> HPExt.value x
-            Nothing -> HPExt.placeholder "What can I help you with today?"
-        ]
-    , HH.a [ HPExt.href "#", HE.onClick Submit ] [ HH.img [ css "search-icon", HPExt.src "http://www.endlessicons.com/wp-content/uploads/2012/12/search-icon.png" ] ]
-    ]
+surveyForm survey isSurveyEmpty =
+  HH.form [ css "search-container", HE.onSubmit MakeRequest ]
+  [
+      HH.div [css "form-group"]
+      [ 
+          HH.input
+          [ HPExt.type_ HPExt.InputFile
+          , HE.onFileUpload Upload
+          , css "form-control"
+          , HPExt.ref $ RefLabel "file"
+          ]
+      ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetCategory] $ 
+            (fromEnum CustomerSatisfaction .. fromEnum PoliticalPoll) <#> \x ->
+              HH.option_ [HH.text (show (fromMaybe undefined (toEnum x :: Maybe Category)))]
+      ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetAssessmentScore] $ 
+            (fromEnum YN .. fromEnum ScaleOf10) <#> \x ->
+              HH.option_ [HH.text (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore)))]
+      ,   HH.input
+          [ HPExt.type_ HPExt.InputText
+          , css $ "form-control " <> if isSurveyEmpty then "border border-danger" else mempty
+          , HE.onValueInput SetSurvey
+          , HPExt.value $ maybe mempty (_.survey) survey
+          ]
+      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]    
+      ]
+  ]

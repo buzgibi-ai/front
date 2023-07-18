@@ -76,7 +76,7 @@ type ChildSlots =
   , error404 :: OpaqueSlot Unit
   , auth_container_sign_in :: OpaqueSlot Unit
   , auth_container_sign_up :: OpaqueSlot Unit
-  , user_enquiry :: OpaqueSlot Unit
+  , user_survey :: OpaqueSlot Unit
   , user_history :: OpaqueSlot Unit
   )
 
