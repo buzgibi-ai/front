@@ -53,14 +53,14 @@ makeAuth
   -> String
   -> (ApiClient -> Effect api)
   -> (api -> AC.EffectFnAff (Object resp))
-  -> m (Either Error a)
+  -> m (Either Error (Success a))
 makeAuth token host mkApi runApi = do
   let jwt = map coerce token
   api <- H.liftEffect $ do mkApiClient jwt host >>= mkApi
   obj <- H.liftAff $ try $ AC.fromEffectFnAff $ runApi api
   val <- map join $ for obj (H.liftEffect <<< getDataFromObj)
   let msg = "wrong type has been recieved: `{success: null}``. `success` must always be populated with either value or error"
-  pure $ join $ val <#> \(x :: Nullable a) -> maybe (Left (error msg)) Right $ toMaybe x
+  pure $ val  -- <#> \(x :: Success a) -> maybe (Left (error msg)) Right $ toMaybe x
 
 make
   :: forall m api resp a
@@ -68,5 +68,5 @@ make
   => String
   -> (ApiClient -> Effect api)
   -> (api -> AC.EffectFnAff (Object resp))
-  -> m (Either Error a)
+  -> m (Either Error (Success a))
 make = makeAuth Nothing

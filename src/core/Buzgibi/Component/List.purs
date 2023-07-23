@@ -60,7 +60,7 @@ component =
     case user of
       Just { token } -> do
         resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory page
-        withError resp \{ items, total, perpage } ->
+        withError resp \{ success: { items, total, perpage } } ->
           H.modify_ _ { list = items, total = total, perpage = perpage }
       Nothing -> pure unit
   handleAction Initialize = do

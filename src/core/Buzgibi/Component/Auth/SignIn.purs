@@ -93,7 +93,7 @@ component =
               , email = Nothing
               , password = Nothing
               }
-        onFailure resp onError \(token :: String) -> do
+        onFailure resp onError \{ success: token :: String } -> do
           logDebug $ loc <> " jwt ---> " <> token
           H.liftEffect $ window >>= localStorage >>= setItem "buzgibi_jwt" token
           user <- H.liftEffect $ Jwt.parse token

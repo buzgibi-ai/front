@@ -58,7 +58,7 @@ component =
     case user of
       Just { token } -> do
         resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.logout
-        withError resp \(_ :: Unit) -> do
+        withError resp \{ success: _ :: Unit } -> do
           H.liftEffect $ window >>= localStorage >>= removeItem "buzgibi_jwt"
           H.modify_ _ { email = Nothing }
           updateStore $ UpdateJwtUser Nothing

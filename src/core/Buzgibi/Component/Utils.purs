@@ -29,7 +29,7 @@ withCaptcha true onFailure onSuccess = do
   resp <- Request.make host BuzgibiBack.mkReCaptchaApi $
     BuzgibiBack.goReCaptcha "6Ld138ImAAAAAEB8Ba7V5QTvfFhq433MsF5hZV4v"
   logDebug $ "captcha resp --> " <> show resp
-  withError resp \(captcha :: BuzgibiBack.ReCaptcha) -> do
+  withError resp \{ success: captcha :: BuzgibiBack.ReCaptcha } -> do
     let res = BuzgibiBack.getSuccessReCaptcha captcha
     case res of
       true -> onSuccess

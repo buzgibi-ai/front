@@ -27,7 +27,7 @@ import Data.Maybe (isNothing)
 set host var page =
   void $ H.fork $ do
     resp <- Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.getMeta page
-    onFailure resp showWarn \(x :: BuzgibiBack.Meta) -> do
+    onFailure resp showWarn \{ success: x :: BuzgibiBack.Meta } -> do
       res <- H.liftEffect do
         let descrip = BuzgibiBack.getMetaDescription x
         win <- window

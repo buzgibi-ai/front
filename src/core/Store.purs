@@ -116,4 +116,4 @@ reduce store (WriteTranslationToCache x hash) = store { cache = Cache.writeTrans
 reduce store (UpdateJwtUser user) = store { user = user }
 
 initAppStore :: String -> Maybe BuzgibiBack.JWTToken -> Aff (Either Excep.Error BuzgibiBack.Init)
-initAppStore host token = Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.init token
+initAppStore host token = map (map _.success) $ Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.init token

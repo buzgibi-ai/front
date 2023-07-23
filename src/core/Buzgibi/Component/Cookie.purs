@@ -46,9 +46,9 @@ component =
                 when (isJust res) $ H.modify_ _ { close = true }
               Close -> do
                 { config: Config { apiBuzgibiHost: host } } <- getStore
-                resp :: Either Error (Array BuzgibiBack.Cookie) <-
+                resp :: Either Error (BuzgibiBack.Success (Array BuzgibiBack.Cookie)) <-
                   Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.getCookies
-                withError resp \xs -> do
+                withError resp \{ success: xs } -> do
                   for_ xs \cookie -> do
                     H.liftEffect $ Cookie.set cookie
                     logDebug $ "cookie " <> show cookie <> " has been set"

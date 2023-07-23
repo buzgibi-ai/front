@@ -1,13 +1,15 @@
 module Buzgibi.Api.Foreign.Common
   ( ApiClient
   , Error
+  , JWTStatus(..)
   , JWTToken(..)
   , Response
+  , Success (..)
   , getDataFromObj
   , mkApiClient
   , withError
-  , JWTStatus(..)
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -37,14 +39,16 @@ instance showError :: Show Error where
 
 foreign import _printError :: Error -> String
 
+type Success a = { success :: a, warnings :: Array String }
+
 foreign import _getDataFromObj
   :: forall a b
    . (String -> Either E.Error b)
-  -> (b -> Either E.Error b)
+  -> (Success b -> Either E.Error (Success b))
   -> Object a
   -> Effect (Either E.Error b)
 
-getDataFromObj :: forall a b. Object a -> Effect (Either E.Error b)
+getDataFromObj :: forall a b. Object a -> Effect (Either E.Error (Success b))
 getDataFromObj = _getDataFromObj (Left <<< E.error) Right
 
 foreign import _mkApiClient :: Fn2 String String (Effect ApiClient)

@@ -41,6 +41,7 @@ import Data.String (length)
 import Web.File.File (File, name)
 import Web.Event.Event (preventDefault, Event)
 import Data.Array ((..))
+import Data.Array (length) as A
 import Data.Traversable (for_, traverse_)
 import Data.Enum (fromEnum, toEnum)
 import Undefined
@@ -137,8 +138,8 @@ uploadFile file = do
   { config: Config { apiBuzgibiHost }, user } <- getStore
   for_ user \{ token, jwtUser: {ident} } -> do
     resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkFileApi $ 
-              BuzgibiBack.upload ("user" <> show (ident :: Int)) file
-    withError resp \(ident :: Int) -> do
+              BuzgibiBack.upload "survey" file
+    withError resp \{ success: ident :: Int } -> do
       let survey =
             { survey: mempty :: String
             , assessmentscore: show YN
@@ -156,11 +157,13 @@ submitSurvey survey = do
     then do  
       resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ 
                 BuzgibiBack.makeSurvey survey
-      withError resp \(ident :: Unit) -> do
+      withError resp \{ success: ident :: Unit, warnings } -> do
         H.getRef (RefLabel "file") >>= traverse_ (H.liftEffect <<< File.removeValue)
         H.modify_ _ { survey = Nothing, isSurveyEmpty = false }
         logDebug $ loc <> " ---> survey has been handed over"
-        Async.send $ Async.mkOrdinary "survey has been submitted" Async.Success Nothing
+        if A.length warnings > 0 then
+          for_ warnings \w -> Async.send $ Async.mkOrdinary w Async.Warning Nothing
+        else Async.send $ Async.mkOrdinary "survey has been submitted" Async.Success Nothing
     else H.modify_ _ { isSurveyEmpty = true }
 
 render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty } =

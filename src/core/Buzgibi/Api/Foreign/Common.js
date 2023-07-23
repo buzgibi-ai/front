@@ -24,9 +24,22 @@ export const _getDataFromObj = left => right => resp => {
         });
         return tmp;
     }
+
+    let warnMsg = (xs) => {
+        tmp = [];
+        xs.forEach(e => {
+            tmp.push(e.getMessage());
+        });
+        return tmp;
+    }
+
     let err = resp.getErrors() !== undefined ? errMsg(resp.getErrors()) : 'malformed resp: ' + JSON.stringify(resp);
+    let warns = resp.getWarnings() !== undefined ? warnMsg(resp.getWarnings()) : [];
+    const obj = new Object();
+    obj.success = success;
+    obj.warnings = warns;
     return () => {
-        return success !== undefined ? right(success) : left(err);
+        return success !== undefined ? right(obj) : left(err);
     };
 }
 

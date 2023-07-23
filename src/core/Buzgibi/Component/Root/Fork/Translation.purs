@@ -35,7 +35,7 @@ fork goRootHandle =
         logDebug $ loc <> " ---> " <> show income
         resp <- Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.loadTranslation income
         Request.onFailure resp (Async.send <<< flip Async.mkException loc)
-          \translation -> do
+          \{ success: translation } -> do
             hash <- H.liftEffect $ createHash translation
             updateStore $ WriteTranslationToCache translation hash
             logDebug $ loc <> " ---> translation cache has been updated, hash: " <> hash
@@ -46,7 +46,7 @@ init = do
   res <- H.liftEffect $ Async.tryRead langVar
   for_ res \lang -> do
     resp <- Request.make host BuzgibiBack.mkFrontApi $ BuzgibiBack.loadTranslation lang
-    Request.withError resp $ \translation -> do
+    Request.withError resp $ \{ success: translation } -> do
       hash <- H.liftEffect $ createHash translation
       logDebug $ loc <> " ---> translation cache has been created, hash: " <> hash
       updateStore $ WriteTranslationToCache translation hash
