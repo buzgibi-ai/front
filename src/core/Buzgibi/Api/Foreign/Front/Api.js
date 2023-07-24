@@ -120,6 +120,10 @@ export const _getTranslationPage = obj => {
     return obj.getPage();
 }
 
+export const _getTranslationEndpoints = obj => {
+    return obj.getEndpoints();
+}
+
 export const _getTranslationPageItem = (obj) => {
     let item = {
         key: obj.getKey(),

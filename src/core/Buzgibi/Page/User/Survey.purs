@@ -20,6 +20,7 @@ import Buzgibi.Component.Subscription.Logout as Logout
 import Buzgibi.Data.Survey
 import Buzgibi.Page.User.Survey.File as File
 import Buzgibi.Component.Async as Async
+import Buzgibi.Component.Subscription.Translation as Translation
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -45,6 +46,8 @@ import Data.Array (length) as A
 import Data.Traversable (for_, traverse_)
 import Data.Enum (fromEnum, toEnum)
 import Undefined
+import Data.Map as Map
+import Control.Alt ((<|>))
 
 proxy = Proxy :: _ "user_survey"
 
@@ -60,13 +63,17 @@ data Action
   | SetCategory Int
   | SetAssessmentScore Int
   | SetSurvey String
+  | LangChange (Map.Map String String)
 
 type State =
   { winWidth :: Maybe Int
   , platform :: Maybe Platform
   , start :: Int
   , survey :: Maybe BuzgibiBack.Survey
-  , isSurveyEmpty :: Boolean 
+  , isSurveyEmpty :: Boolean
+  , hash :: String
+  , constants :: Map.Map String String
+  , error :: Maybe String
   }
 
 component mkBody =
@@ -77,6 +84,9 @@ component mkBody =
         , start: 0
         , survey: Nothing
         , isSurveyEmpty: false
+        , hash: mempty
+        , constants: Map.empty
+        , error: Nothing
         }
     , render: render mkBody
     , eval: H.mkEval H.defaultEval
@@ -89,7 +99,7 @@ component mkBody =
   handleAction Initialize = do
     { user } <- getStore
     when (isNothing user) $ navigate Route.Home
-    H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Enquiry"
+    H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Survey"
     { platform, config: Config { apiBuzgibiHost: host }, async } <- getStore
     w <- H.liftEffect $ window >>= innerWidth
 
@@ -108,6 +118,13 @@ component mkBody =
     Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserSurvey)
 
     Logout.subscribe loc $ handleAction ToHome
+
+    Translation.subscribe loc $ \_ translation -> do
+      let warns = 
+             fromMaybe undefined $ 
+               Map.lookup "makeSurvey" $ 
+                 BuzgibiBack.getTranslationEndpoints translation
+      handleAction $ LangChange warns
 
   handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
   handleAction Finalize = do
@@ -133,6 +150,7 @@ component mkBody =
     s <- H.get
     let setSurvey x = x { survey = val }  
     H.modify_ \s -> s { survey = map setSurvey (_.survey s), isSurveyEmpty = false }
+  handleAction (LangChange xs) = H.modify_ _ { constants = xs }  
 
 uploadFile file = do
   { config: Config { apiBuzgibiHost }, user } <- getStore
@@ -147,7 +165,7 @@ uploadFile file = do
             , phonesfileident: ident
             , location: { latitude: toNumber 0, longitude: toNumber 0 }
             }
-      H.modify_ _ { survey = pure survey }
+      H.modify_ _ { survey = pure survey, error = Nothing }
       logDebug $ loc <> " ---> file has been upload, id " <> show ident
 
 submitSurvey survey = do
@@ -161,21 +179,29 @@ submitSurvey survey = do
         H.getRef (RefLabel "file") >>= traverse_ (H.liftEffect <<< File.removeValue)
         H.modify_ _ { survey = Nothing, isSurveyEmpty = false }
         logDebug $ loc <> " ---> survey has been handed over"
+        {constants} <- H.get
+        let submitted = fromMaybe undefined $ Map.lookup "submitted" constants
         if A.length warnings > 0 then
-          for_ warnings \w -> Async.send $ Async.mkOrdinary w Async.Warning Nothing
-        else Async.send $ Async.mkOrdinary "survey has been submitted" Async.Success Nothing
+          for_ warnings \key ->
+            if key == "truncated_to_30" then
+              do let value = fromMaybe undefined $ Map.lookup key constants
+                 Async.send $ Async.mkOrdinary value Async.Warning Nothing
+                 Async.send $ Async.mkOrdinary submitted Async.Success Nothing
+            else H.modify_ _ { error = Map.lookup key constants } 
+        else Async.send $ Async.mkOrdinary submitted Async.Success Nothing
     else H.modify_ _ { isSurveyEmpty = true }
 
-render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty } =
-  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty) ]
+render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error } =
+  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error) ]
 render _ _ = HH.div_ []
 
-surveyForm survey isSurveyEmpty =
+surveyForm survey isSurveyEmpty error =
   HH.form [ css "search-container", HE.onSubmit MakeRequest ]
   [
       HH.div [css "form-group"]
-      [ 
-          HH.input
+      [
+          HH.div [HPExt.style "color:red"] [HH.text (fromMaybe mempty error)] 
+      ,   HH.input
           [ HPExt.type_ HPExt.InputFile
           , HE.onFileUpload Upload
           , css "form-control"

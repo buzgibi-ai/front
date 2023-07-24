@@ -41,7 +41,7 @@ loc = "Buzgibi.Page.Home"
 data Action
   = Initialize
   | WinResize Int
-  | LangChange String BuzgibiBack.TranslationPageMap
+  | LangChange String BuzgibiBack.TranslationItemMap
   | Finalize
 
 type State =

@@ -13,7 +13,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , ResponseMeta
   , ResponseTranslation
   , Translation
-  , TranslationPageMap
+  , TranslationItemMap
   , getCookies
   , getCookiesInit
   , getIsCaptcha
@@ -25,6 +25,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , getShaCommit
   , getToTelegram
   , getTranslationCopyright
+  , getTranslationEndpoints
   , getTranslationMenu
   , getTranslationPage
   , init
@@ -33,7 +34,8 @@ module Buzgibi.Api.Foreign.Front.Api
   , mkLogReq
   , sendLog
   , translationLookup
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -62,6 +64,7 @@ import Undefined
 
 foreign import data MapMenuText :: Type
 foreign import data MapPageMapTextText :: Type
+foreign import data MapEndpointsMapTextText :: Type
 foreign import data MapTextText :: Type
 foreign import data FrontApi :: Type
 foreign import data Translation :: Type
@@ -172,14 +175,27 @@ instance Show MapMenuText where
 type TranslationPageItem = { key :: String, value :: Array MapTextText }
 
 foreign import _getTranslationPage :: Translation -> Array MapPageMapTextText
-foreign import _getTranslationPageItem :: MapPageMapTextText -> TranslationPageItem
+foreign import _getTranslationEndpoints :: Translation -> Array MapEndpointsMapTextText
 
-type TranslationPageMap = Map.Map String (Map.Map String String)
+foreign import _getTranslationPageItem :: forall a . a -> TranslationPageItem
 
-getTranslationPage :: Translation -> TranslationPageMap
+type TranslationItemMap = Map.Map String (Map.Map String String)
+
+getTranslationPage :: Translation -> TranslationItemMap
 getTranslationPage translation =
   let
     xs = map _getTranslationPageItem $ _getTranslationPage translation
+    xs' = xs <#> \{ key, value } ->
+      Tuple key $ Map.fromFoldable $
+        value <#> \x ->
+          Tuple (_getKeyText x) (_getValText x)
+  in
+    Map.fromFoldable xs'
+
+getTranslationEndpoints :: Translation -> TranslationItemMap
+getTranslationEndpoints translation =
+  let
+    xs = map _getTranslationPageItem $ _getTranslationEndpoints translation
     xs' = xs <#> \{ key, value } ->
       Tuple key $ Map.fromFoldable $
         value <#> \x ->
