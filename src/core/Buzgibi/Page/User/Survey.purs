@@ -191,11 +191,11 @@ submitSurvey survey = do
         else Async.send $ Async.mkOrdinary submitted Async.Success Nothing
     else H.modify_ _ { isSurveyEmpty = true }
 
-render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error } =
-  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error) ]
+render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error, constants } =
+  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error constants) ]
 render _ _ = HH.div_ []
 
-surveyForm survey isSurveyEmpty error =
+surveyForm survey isSurveyEmpty error constants =
   HH.form [ css "search-container", HE.onSubmit MakeRequest ]
   [
       HH.div [css "form-group"]
@@ -209,10 +209,10 @@ surveyForm survey isSurveyEmpty error =
           ]
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetCategory] $ 
             (fromEnum CustomerSatisfaction .. fromEnum PoliticalPoll) <#> \x ->
-              HH.option_ [HH.text (show (fromMaybe undefined (toEnum x :: Maybe Category)))]
+              HH.option_ [HH.text (fromMaybe "loading.." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe Category))) constants))]
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetAssessmentScore] $ 
             (fromEnum YN .. fromEnum ScaleOf10) <#> \x ->
-              HH.option_ [HH.text (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore)))]
+              HH.option_ [HH.text (fromMaybe "loading.." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore))) constants))]
       ,   HH.input
           [ HPExt.type_ HPExt.InputText
           , css $ "form-control " <> if isSurveyEmpty then "border border-danger" else mempty
