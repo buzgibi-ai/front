@@ -15,6 +15,7 @@ import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Data.Config
 import Buzgibi.Component.HTML.Utils (css, safeHref, whenElem)
+import Buzgibi.Component.Subscription.Logout as Logout
 
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen as H
@@ -43,6 +44,7 @@ data Action
   | WinResize Int
   | LangChange String BuzgibiBack.TranslationItemMap
   | Finalize
+  | Logout
 
 type State =
   { winWidth :: Maybe Int
@@ -101,12 +103,15 @@ component mkBody =
     Translation.subscribe loc $ \hash translation ->
       handleAction $ LangChange hash $ BuzgibiBack.getTranslationPage translation
 
+    Logout.subscribe loc $ handleAction Logout
+
   handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
   handleAction (LangChange _ xs) = H.modify_ _ { body = BuzgibiBack.translationLookup "home" "headline" xs }
   handleAction Finalize = do
     end <- H.liftEffect getTimestamp
     { start } <- H.get
     sendComponentTime start end loc
+  handleAction Logout = H.modify_ _ { isAuth = false }
 
 content (Just body) isAuth =
   HH.div_
