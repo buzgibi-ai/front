@@ -17,6 +17,7 @@ export const _makeSurvey = function(withError, survey, api) {
 export const _getHistory = function(withError, page, api) {
     return function(onError, onOk) {
         api.userSurveyHistoryGet(page).then(onOk).catch(resp => {
+            console.log(resp);
             return withError(resp, onError)
         })
     };

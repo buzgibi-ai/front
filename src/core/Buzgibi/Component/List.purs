@@ -10,11 +10,12 @@ import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Component.HTML.Utils (css, maybeElem)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
 import Buzgibi.Component.Pagination as Pagination
 import Buzgibi.Component.Subscription.Pagination as Pagination
+import Buzgibi.Component.Async as Async
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -32,13 +33,14 @@ import Data.Array (snoc)
 import Data.String (length, take)
 import Effect.AVar as Async
 import DOM.HTML.Indexed.ScopeValue (ScopeValue(ScopeCol))
+import Foreign (isUndefined, unsafeFromForeign)
 
 proxy = Proxy :: _ "list"
 
 loc = "Buzgibi.Component.List"
 
 type State =
-  { list :: Array BuzgibiBack.HistoryItem
+  { list :: Array BuzgibiBack.WithFieldStatusHistoryItem
   , total :: Int
   , perpage :: Int
   }
@@ -86,22 +88,27 @@ render { list, total, perpage } =
         [ HH.thead_
             [ HH.th [ HPExt.scope ScopeCol ] [ HH.text "enquiry" ]
             , HH.th [ HPExt.scope ScopeCol ] [ HH.text "time" ]
+            , HH.th [ HPExt.scope ScopeCol ] [ HH.text "status" ]
             , HH.th [ HPExt.scope ScopeCol ] [ HH.text "report" ]
             ]
         , HH.tbody_
-            ( list <#> \{ ident, name, timestamp } ->
+            ( list <#> \{ ident, name, timestamp, status } ->
                 HH.tr_
                   [ HH.td [ HPExt.dataLabel "enquiry" ] [ HH.text (if length name > 20 then take 20 name else name) ]
                   , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
-                  , HH.td [ HPExt.dataLabel "time" ]
-                      [ HH.form [ HE.onSubmit $ Download ident name ]
-                          [ HH.input
-                              [ HPExt.style "cursor: pointer"
-                              , HPExt.type_ HPExt.InputSubmit
-                              , HPExt.value $ if length name > 10 then take 10 name <> "..." else name
+                  , HH.td [ HPExt.dataLabel "status" ] [ HH.text status ]
+                  , HH.td [ HPExt.dataLabel "report" ] $
+                      if isUndefined ident
+                      then [HH.div_ [HH.text "-"]] 
+                      else 
+                          [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign ident) :: Int) name ]
+                              [ HH.input
+                                  [ HPExt.style "cursor: pointer"
+                                  , HPExt.type_ HPExt.InputSubmit
+                                  , HPExt.value $ if length name > 10 then take 10 name <> "..." else name
+                                  ]
                               ]
                           ]
-                      ]
                   ]
             )
         ]

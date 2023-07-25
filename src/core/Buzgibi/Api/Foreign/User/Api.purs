@@ -1,13 +1,15 @@
 module Buzgibi.Api.Foreign.User.Api
-  ( Survey
-  , History
-  , HistoryItem
+  ( History
   , Location
+  , Survey
   , UserApi
+  , WithFieldStatusHistoryItem
   , getHistory
   , makeSurvey
   , mkUserApi
-  ) where
+  , printWithFieldStatusHistoryItem
+  )
+  where
 
 import Prelude
 
@@ -41,9 +43,12 @@ foreign import _makeSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Err
 makeSurvey :: Survey -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
 makeSurvey = runFn3 _makeSurvey withError
 
-type HistoryItem = { ident :: Int, name :: String, timestamp :: String }
+type WithFieldStatusHistoryItem = { ident :: Foreign, status :: String, name :: String, timestamp :: String }
 
-type History = { items :: Array HistoryItem, total :: Int, perpage :: Int }
+printWithFieldStatusHistoryItem {ident, status, name, timestamp} = 
+  "{ident: " <> show ident <>  ", status: " <> status <> ", name: " <> name <> ", timestamp" <> timestamp <> "}"
+
+type History = { items :: Array WithFieldStatusHistoryItem, total :: Int, perpage :: Int }
 
 type Page = { page :: Int }
 
