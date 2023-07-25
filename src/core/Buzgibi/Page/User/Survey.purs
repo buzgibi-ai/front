@@ -219,6 +219,6 @@ surveyForm survey isSurveyEmpty error constants =
           , HE.onValueInput SetSurvey
           , HPExt.value $ maybe mempty (_.survey) survey
           ]
-      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]    
+      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "loading.." (Map.lookup "submit" constants)) ]    
       ]
   ]
