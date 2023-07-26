@@ -74,6 +74,7 @@ type State =
   , hash :: String
   , constants :: Map.Map String String
   , error :: Maybe String
+  , isTest :: Boolean
   }
 
 component mkBody =
@@ -87,6 +88,7 @@ component mkBody =
         , hash: mempty
         , constants: Map.empty
         , error: Nothing
+        , isTest: false
         }
     , render: render mkBody
     , eval: H.mkEval H.defaultEval
@@ -97,7 +99,7 @@ component mkBody =
     }
   where
   handleAction Initialize = do
-    { user } <- getStore
+    { user, isTest } <- getStore
     when (isNothing user) $ navigate Route.Home
     H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Survey"
     { platform, config: Config { apiBuzgibiHost: host }, async } <- getStore
@@ -111,6 +113,7 @@ component mkBody =
       { platform = pure platform
       , winWidth = pure w
       , start = tm
+      , isTest = isTest
       }
 
     void $ H.subscribe =<< WinResize.subscribe WinResize
@@ -191,8 +194,9 @@ submitSurvey survey = do
         else Async.send $ Async.mkOrdinary submitted Async.Success Nothing
     else H.modify_ _ { isSurveyEmpty = true }
 
-render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error, constants } =
-  HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error constants) ]
+render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error, constants, isTest }
+  | isTest = HH.div_ [ mkBody p w (HH.text "we will be informing you when product is ready!") ]
+  | otherwise = HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error constants) ]
 render _ _ = HH.div_ []
 
 surveyForm survey isSurveyEmpty error constants =

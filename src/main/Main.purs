@@ -121,6 +121,7 @@ main cfg = do
             , user: user
             , isLogoutVar: isLogoutVar
             , paginationVar: paginationVar
+            , isTest: fromMaybe false (BuzgibiBack.getIsTest init)
             }
 
         -- With our app environment ready to go, we can prepare the router to run as our root component.

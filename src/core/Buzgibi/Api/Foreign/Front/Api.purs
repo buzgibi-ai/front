@@ -17,6 +17,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , getCookies
   , getCookiesInit
   , getIsCaptcha
+  , getIsTest
   , getJwtStatus
   , getLogLevel
   , getMeta
@@ -95,6 +96,7 @@ foreign import getCookiesInit :: Init -> Array String
 foreign import _getIsCaptcha :: Maybe Boolean -> (Boolean -> Maybe Boolean) -> Init -> Maybe Boolean
 foreign import _getToTelegram :: Maybe Boolean -> (Boolean -> Maybe Boolean) -> Init -> Maybe Boolean
 foreign import _getLogLevel :: Init -> String
+foreign import _getIsTest :: Maybe Boolean -> (Boolean -> Maybe Boolean) -> Init -> Maybe Boolean
 
 getLogLevel :: Init -> Maybe LogLevel
 getLogLevel = readLogLevel <<< _getLogLevel
@@ -104,6 +106,9 @@ getIsCaptcha = _getIsCaptcha Nothing Just
 
 getToTelegram :: Init -> Maybe Boolean
 getToTelegram = _getToTelegram Nothing Just
+
+getIsTest :: Init -> Maybe Boolean
+getIsTest = _getIsTest Nothing Just
 
 foreign import _getJwtStatus :: Init -> String
 

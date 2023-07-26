@@ -70,6 +70,7 @@ type Store =
   -- ad-hoc approach is to employ Avar for passing something to a parent
   --- reference to docs: https://purescript-halogen.github.io/purescript-halogen/guide/05-Parent-Child-Components.html#output-messages
   , paginationVar :: AVar Int
+  , isTest :: Boolean
   }
 
 printStore store =
@@ -93,7 +94,9 @@ printStore store =
     <> show (_.user store)
     <> ", isLogoutVa: <AVar> "
     <>
-      ",paginationVar: <AVar> }"
+      ",paginationVar: <AVar>"
+    <>  ", isTest: " 
+    <> show (_.isTest store)
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that
