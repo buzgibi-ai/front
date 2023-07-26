@@ -10,12 +10,14 @@ import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Utils (css, maybeElem)
+import Buzgibi.Component.HTML.Utils (css)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
 import Buzgibi.Component.Pagination as Pagination
 import Buzgibi.Component.Subscription.Pagination as Pagination
 import Buzgibi.Component.Async as Async
+import Buzgibi.Component.Subscription.Translation as Translation
+import Buzgibi.Component.Utils (initTranslation)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -34,6 +36,9 @@ import Data.String (length, take)
 import Effect.AVar as Async
 import DOM.HTML.Indexed.ScopeValue (ScopeValue(ScopeCol))
 import Foreign (isUndefined, unsafeFromForeign)
+import Data.Map as Map
+import Data.Maybe (fromMaybe, maybe)
+import Undefined
 
 proxy = Proxy :: _ "list"
 
@@ -43,13 +48,15 @@ type State =
   { list :: Array BuzgibiBack.WithFieldStatusHistoryItem
   , total :: Int
   , perpage :: Int
+  , hash :: String
+  , constants :: Map.Map String String
   }
 
-data Action = Initialize | Download Int String Event | Query Int
+data Action = Initialize | Download Int String Event | Query Int | LangChange String (Map.Map String String)
 
 component =
   H.mkComponent
-    { initialState: const { list: [], total: 0, perpage: 0 }
+    { initialState: const { list: [], total: 0, perpage: 0, hash: mempty :: String, constants: Map.empty }
     , render: render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -66,8 +73,21 @@ component =
           H.modify_ _ { list = items, total = total, perpage = perpage }
       Nothing -> pure unit
   handleAction Initialize = do
+    void $ initTranslation loc \hash translation -> do
+      let tableTitles = 
+            fromMaybe undefined $ 
+              Map.lookup "history" $ 
+                BuzgibiBack.getTranslationEndpoints translation
+      H.modify_ _ { hash = hash, constants = tableTitles }  
     getHistory Nothing
     Pagination.subscribe loc $ handleAction <<< Query
+    Translation.subscribe loc $ \hash translation ->
+      let tableTitles = 
+            fromMaybe undefined $ 
+              Map.lookup "history" $ 
+                BuzgibiBack.getTranslationEndpoints translation
+      in handleAction $ LangChange hash tableTitles
+
   handleAction (Download ident name ev) = do
     H.liftEffect $ preventDefault ev
     logDebug $ loc <> " ---> downloaded file " <> name
@@ -79,38 +99,39 @@ component =
           withAffjax loc async resp $ pure <<< flip downloadBlob name
       Nothing -> pure unit
   handleAction (Query page) = getHistory $ Just { page: page }
+  handleAction (LangChange hash xs) = H.modify_ _ { constants = xs, hash = hash }
 
 render { list: [] } = HH.text "you haven't the history to be shown"
-render { list, total, perpage } =
+render { list, total, perpage, constants } =
   HH.div
-    [ css "history-item-container" ]
-    [ HH.table_
-        [ HH.thead_
-            [ HH.th [ HPExt.scope ScopeCol ] [ HH.text "enquiry" ]
-            , HH.th [ HPExt.scope ScopeCol ] [ HH.text "time" ]
-            , HH.th [ HPExt.scope ScopeCol ] [ HH.text "status" ]
-            , HH.th [ HPExt.scope ScopeCol ] [ HH.text "report" ]
-            ]
-        , HH.tbody_
-            ( list <#> \{ ident, name, timestamp, status } ->
-                HH.tr_
-                  [ HH.td [ HPExt.dataLabel "enquiry" ] [ HH.text (if length name > 20 then take 20 name else name) ]
-                  , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
-                  , HH.td [ HPExt.dataLabel "status" ] [ HH.text status ]
-                  , HH.td [ HPExt.dataLabel "report" ] $
-                      if isUndefined ident
-                      then [HH.div_ [HH.text "-"]] 
-                      else 
-                          [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign ident) :: Int) name ]
-                              [ HH.input
-                                  [ HPExt.style "cursor: pointer"
-                                  , HPExt.type_ HPExt.InputSubmit
-                                  , HPExt.value $ if length name > 10 then take 10 name <> "..." else name
-                                  ]
-                              ]
-                          ]
-                  ]
-            )
-        ]
-    , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage } ]
-    ]
+  [ css "history-item-container" ]
+  [ HH.table_
+      [ HH.thead_
+          [ HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "title" constants) ]
+          , HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "time" constants) ]
+          , HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "status" constants) ]
+          , HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "report" constants) ]
+          ]
+      , HH.tbody_
+          ( list <#> \{ ident, name, timestamp, status } ->
+              HH.tr_
+                [ HH.td [ HPExt.dataLabel "title" ] [ HH.text (if length name > 20 then take 20 name else name) ]
+                , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
+                , HH.td [ HPExt.dataLabel "status" ] [ HH.text status ]
+                , HH.td [ HPExt.dataLabel "report" ] $
+                    if isUndefined ident
+                    then [HH.div_ [HH.text "-"]] 
+                    else 
+                        [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign ident) :: Int) name ]
+                            [ HH.input
+                                [ HPExt.style "cursor: pointer"
+                                , HPExt.type_ HPExt.InputSubmit
+                                , HPExt.value $ if length name > 10 then take 10 name <> "..." else name
+                                ]
+                            ]
+                        ]
+                ]
+          )
+      ]
+  , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage } ]
+  ]

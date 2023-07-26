@@ -80,7 +80,7 @@ render { route, menu, isAuth } =
         )
     ]
 
-mkItem _ _ xs _ _ | Map.isEmpty xs = [ HH.li_ [ HH.text "loading.." ] ]
+mkItem _ _ xs _ _ | Map.isEmpty xs = [ HH.li_ [ HH.text "..." ] ]
 mkItem isAuth route xs applyStyle idx =
   if (mkRoute idx == SignUp || mkRoute idx == SignIn) && isAuth then []
   else

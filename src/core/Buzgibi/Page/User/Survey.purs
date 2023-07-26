@@ -213,16 +213,16 @@ surveyForm survey isSurveyEmpty error constants =
           ]
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetCategory] $ 
             (fromEnum CustomerSatisfaction .. fromEnum PoliticalPoll) <#> \x ->
-              HH.option_ [HH.text (fromMaybe "loading.." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe Category))) constants))]
+              HH.option_ [HH.text (fromMaybe "..." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe Category))) constants))]
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetAssessmentScore] $ 
             (fromEnum YN .. fromEnum ScaleOf10) <#> \x ->
-              HH.option_ [HH.text (fromMaybe "loading.." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore))) constants))]
+              HH.option_ [HH.text (fromMaybe "..." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore))) constants))]
       ,   HH.input
           [ HPExt.type_ HPExt.InputText
           , css $ "form-control " <> if isSurveyEmpty then "border border-danger" else mempty
           , HE.onValueInput SetSurvey
           , HPExt.value $ maybe mempty (_.survey) survey
           ]
-      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "loading.." (Map.lookup "submit" constants)) ]    
+      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "..." (Map.lookup "submit" constants)) ]    
       ]
   ]
