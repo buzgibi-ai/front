@@ -22,7 +22,7 @@ import Halogen.Store.Monad (getStore)
 import Effect.Aff as Aff
 import Data.Map as Map
 import Halogen.Store.Monad (getStore)
-import Data.Maybe (isJust, Maybe(..))
+import Data.Maybe (isJust, Maybe(..), fromMaybe)
 import Data.Array (concatMap, (:))
 
 proxy = Proxy :: _ "hamburger"
@@ -78,10 +78,12 @@ render { route, menu, isAuth, email } =
   HH.div [ css "menu-wrap" ]
     [ HH.input [ HPExt.type_ InputCheckbox, css "toggler" ]
     , HH.div [ css "hamburger" ] [ HH.div_ [] ]
-    , HH.div [ css "menu" ] [ HH.div_ [ HH.ul_ $ mkUser email : (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn)) ] ]
+    , HH.div [ css "menu" ] [ HH.div_ [ HH.ul_ $ mkUser email : (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn)) <> [mkHistoryRef isAuth] ] ]
     ]
   where
   mkUser (Just x) = HH.li_ [ HH.text x ]
   mkUser Nothing = HH.li_ []
+  mkHistoryRef false = HH.li_ []
+  mkHistoryRef true = HH.li_ [HH.a [css "nav-link", safeHref UserHistory] [addFontStyle (HH.text (fromMaybe "..." (Map.lookup "history" menu)))] ]
 
 addFontStyle el = HH.div [ HPExt.style "font-size: 30px; text-align: center" ] [ el ]
