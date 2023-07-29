@@ -42,14 +42,14 @@ loc = "Buzgibi.Page.Home"
 data Action
   = Initialize
   | WinResize Int
-  | LangChange String BuzgibiBack.TranslationItemMap
+  | LangChange String (Map.Map String String)
   | Finalize
   | Logout
 
 type State =
   { winWidth :: Maybe Int
   , platform :: Maybe Platform
-  , body :: Maybe String
+  , constants :: Map.Map String String
   , hash :: String
   , start :: Int
   , isAuth :: Boolean
@@ -60,7 +60,7 @@ component mkBody =
     { initialState: const
         { winWidth: Nothing
         , platform: Nothing
-        , body: Nothing
+        , constants: Map.empty
         , hash: mempty
         , start: 0
         , isAuth: false
@@ -73,8 +73,8 @@ component mkBody =
         }
     }
   where
-  render { winWidth: Just w, platform: Just p, body: body, isAuth } =
-    HH.div_ [ mkBody p w (content body isAuth) ]
+  render { winWidth: Just w, platform: Just p, constants: constants, isAuth } =
+    HH.div_ [ mkBody p w (content constants isAuth) ]
   render _ = HH.div_ []
   handleAction Initialize = do
     H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Home"
@@ -87,10 +87,14 @@ component mkBody =
 
     void $ initTranslation loc \hash translation -> do
       logDebug $ loc <> " translation ---> " <> show (BuzgibiBack.getTranslationPage translation)
+      let constants = 
+             fromMaybe undefined $ 
+               Map.lookup "home" $ 
+                 BuzgibiBack.getTranslationPage translation
       H.modify_ _
         { platform = pure platform
         , winWidth = pure w
-        , body = BuzgibiBack.translationLookup "home" "headline" $ BuzgibiBack.getTranslationPage translation
+        , constants = constants
         , hash = hash
         , start = tm
         , isAuth = isJust user
@@ -100,29 +104,32 @@ component mkBody =
 
     Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.Home)
 
-    Translation.subscribe loc $ \hash translation ->
-      handleAction $ LangChange hash $ BuzgibiBack.getTranslationPage translation
+    Translation.subscribe loc $ \hash translation -> do
+      let warns = 
+            fromMaybe undefined $ 
+              Map.lookup "home" $ 
+                BuzgibiBack.getTranslationPage translation
+      handleAction $ LangChange hash warns
 
     Logout.subscribe loc $ handleAction Logout
 
   handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
-  handleAction (LangChange _ xs) = H.modify_ _ { body = BuzgibiBack.translationLookup "home" "headline" xs }
+  handleAction (LangChange hash xs) = H.modify_ _ { constants = xs, hash = hash }
   handleAction Finalize = do
     end <- H.liftEffect getTimestamp
     { start } <- H.get
     sendComponentTime start end loc
   handleAction Logout = H.modify_ _ { isAuth = false }
 
-content (Just body) isAuth =
+content constants isAuth =
   HH.div_
-    [ H.render_ body
+    [ H.render_ $ fromMaybe undefined $ Map.lookup "headline" constants
     , whenElem isAuth $ HH.div_
         [ HH.a
             [ css "nav-link"
             , HPExt.style "font-style: 30px"
             , safeHref Route.UserSurvey
             ]
-            [ HH.text "make an enquiry" ]
+            [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
         ]
     ]
-content Nothing _ = HH.text "translation not found"

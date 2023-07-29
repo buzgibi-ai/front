@@ -37,7 +37,7 @@ import Effect.AVar as Async
 import DOM.HTML.Indexed.ScopeValue (ScopeValue(ScopeCol))
 import Foreign (isUndefined, unsafeFromForeign)
 import Data.Map as Map
-import Data.Maybe (fromMaybe, maybe)
+import Data.Maybe (fromMaybe)
 import Undefined
 
 proxy = Proxy :: _ "list"
@@ -74,19 +74,20 @@ component =
       Nothing -> pure unit
   handleAction Initialize = do
     void $ initTranslation loc \hash translation -> do
-      let tableTitles = 
+      let constants = 
             fromMaybe undefined $ 
               Map.lookup "history" $ 
                 BuzgibiBack.getTranslationEndpoints translation
-      H.modify_ _ { hash = hash, constants = tableTitles }  
+      logDebug $ loc <> " ---> conttants " <> show constants          
+      H.modify_ _ { hash = hash, constants = constants }
     getHistory Nothing
     Pagination.subscribe loc $ handleAction <<< Query
     Translation.subscribe loc $ \hash translation ->
-      let tableTitles = 
+      let constants = 
             fromMaybe undefined $ 
               Map.lookup "history" $ 
                 BuzgibiBack.getTranslationEndpoints translation
-      in handleAction $ LangChange hash tableTitles
+      in handleAction $ LangChange hash constants
 
   handleAction (Download ident name ev) = do
     H.liftEffect $ preventDefault ev
@@ -117,10 +118,10 @@ render { list, total, perpage, constants } =
               HH.tr_
                 [ HH.td [ HPExt.dataLabel "title" ] [ HH.text (if length name > 20 then take 20 name else name) ]
                 , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
-                , HH.td [ HPExt.dataLabel "status" ] [ HH.text status ]
+                , HH.td [ HPExt.dataLabel "status" ] [ HH.text $ fromMaybe "..." (Map.lookup status constants) ]
                 , HH.td [ HPExt.dataLabel "report" ] $
                     if isUndefined ident
-                    then [HH.div_ [HH.text "-"]] 
+                    then [HH.div_ [HH.text "-"]]
                     else 
                         [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign ident) :: Int) name ]
                             [ HH.input

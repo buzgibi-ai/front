@@ -25,7 +25,7 @@ import Buzgibi.Component.HTML.Header as Header
 import Buzgibi.Component.HTML.Footer as Footer
 import Buzgibi.Component.HTML.Body as Body
 import Buzgibi.Component.Lang.Data (Lang(..))
-import Buzgibi.Component.Async as Async
+import Buzgibi.Component.Async (Level(..), mkOrdinary, send) as Async
 import Buzgibi.Component.Root.Fork.Translation as Fork.Translation
 import Buzgibi.Component.Root.Fork.Telegram as Fork.Telegram
 import Buzgibi.Component.HTML.Loading as HTML.Loading
@@ -38,7 +38,7 @@ import Buzgibi.Page.User.Survey as User.Survey
 import Buzgibi.Page.User.History as User.History
 
 import Data.Either (hush, Either(..))
-import Data.Foldable (elem)
+import Data.Foldable (elem, for_)
 import Data.Maybe (Maybe(..), fromMaybe, isJust)
 import Effect.Aff.Class (class MonadAff)
 import Halogen (liftEffect)
@@ -49,14 +49,9 @@ import Halogen.Store.Monad (class MonadStore, getStore)
 import Halogen.Store.Select (selectEq)
 import Routing.Duplex as RD
 import Routing.Hash (getHash)
-import Type.Proxy (Proxy(..))
-import Undefined
 import Halogen.HTML.Properties as HP
-import Store (Store, printStore)
-import Store as Store
-import Store.Types (Platform)
+import Store (printStore)
 import Effect.AVar as Async
-import Data.Foldable (for_)
 import Data.List (head)
 import Data.Map as Map
 import Routing.Duplex.Parser (RouteError(EndOfPath))
