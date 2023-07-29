@@ -89,5 +89,5 @@ component mkBody =
     sendComponentTime start end loc
   handleAction ToHome = navigate Route.Home
 
-render mkBody { winWidth: Just w, platform: Just p } = HH.div_ [ mkBody p w (HH.slot_ List.proxy unit List.component unit) ]
+render mkBody { winWidth: Just w, platform: Just p } = mkBody p w (HH.slot_ List.proxy unit List.component unit)
 render _ _ = HH.div_ []

@@ -10,7 +10,7 @@ import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Component.HTML.Utils (css, safeHref)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
 import Buzgibi.Component.Pagination as Pagination
@@ -18,6 +18,7 @@ import Buzgibi.Component.Subscription.Pagination as Pagination
 import Buzgibi.Component.Async as Async
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Component.Utils (initTranslation)
+import Buzgibi.Data.Route (Route (UserSurvey))
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -135,4 +136,12 @@ render { list, total, perpage, constants } =
           )
       ]
   , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage } ]
+  , HH.div_
+    [
+        HH.a
+        [ css "nav-link"
+        , safeHref UserSurvey
+        ]
+        [ HH.text $ fromMaybe "..." (Map.lookup "makeSurvey" constants) ]
+    ]
   ]
