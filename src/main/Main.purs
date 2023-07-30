@@ -90,7 +90,7 @@ main cfg = do
 
         isLogoutVar <- H.liftEffect Async.empty
 
-        paginationVar <- H.liftEffect $ Ref.new 1
+        paginationVar <- H.liftEffect $ Ref.new (Just 1)
 
         when (logLevel == Dev)
           $ H.liftEffect

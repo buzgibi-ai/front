@@ -38,7 +38,7 @@ import Effect.AVar as Async
 import DOM.HTML.Indexed.ScopeValue (ScopeValue(ScopeCol))
 import Foreign (isUndefined, unsafeFromForeign)
 import Data.Map as Map
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, maybe)
 import Undefined
 
 proxy = Proxy :: _ "list"
@@ -51,13 +51,21 @@ type State =
   , perpage :: Int
   , hash :: String
   , constants :: Map.Map String String
+  , currPage :: Int
   }
 
 data Action = Initialize | Download Int String Event | Query Int | LangChange String (Map.Map String String)
 
 component =
   H.mkComponent
-    { initialState: const { list: [], total: 0, perpage: 0, hash: mempty :: String, constants: Map.empty }
+    { initialState: \{page} -> 
+      { list: [], 
+        total: 0, 
+        perpage: 0, 
+        hash: mempty :: String, 
+        constants: 
+        Map.empty, 
+        currPage: page }
     , render: render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -73,7 +81,7 @@ component =
         logDebug $ loc <> " ---> get history for page " <> show page
         withError resp \{ success: { items, total, perpage } } -> do 
           logDebug $ loc <> " ---> get history items " <> joinWith "," (map BuzgibiBack.printWithFieldStatusHistoryItem items) <> " for page " <> show page
-          H.modify_ _ { list = items, total = total, perpage = perpage }
+          H.modify_ _ { list = items, total = total, perpage = perpage, currPage = maybe 1 _.page page  }
       Nothing -> pure unit
   handleAction Initialize = do
     void $ initTranslation loc \hash translation -> do
@@ -83,7 +91,8 @@ component =
                 BuzgibiBack.getTranslationEndpoints translation
       logDebug $ loc <> " ---> conttants " <> show constants          
       H.modify_ _ { hash = hash, constants = constants }
-    getHistory Nothing
+    {currPage} <- H.get
+    getHistory $ Just { page: currPage }
     Pagination.subscribe loc $ handleAction <<< Query
     Translation.subscribe loc $ \hash translation ->
       let constants = 
@@ -106,7 +115,7 @@ component =
   handleAction (LangChange hash xs) = H.modify_ _ { constants = xs, hash = hash }
 
 render { list: [] } = HH.text "you haven't the history to be shown"
-render { list, total, perpage, constants } =
+render { list, total, perpage, constants, currPage } =
   HH.div
   [ css "history-item-container" ]
   [ HH.table_
@@ -137,7 +146,7 @@ render { list, total, perpage, constants } =
                 ]
           )
       ]
-  , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage } ]
+  , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage, page: currPage } ]
   , HH.div_
     [
         HH.a

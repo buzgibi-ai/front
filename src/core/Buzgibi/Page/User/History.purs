@@ -31,6 +31,7 @@ import Data.Maybe
 import Halogen.Store.Monad (getStore)
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime)
+import Data.Int (fromString)
 
 proxy = Proxy :: _ "user_history"
 
@@ -42,14 +43,16 @@ type State =
   { winWidth :: Maybe Int
   , platform :: Maybe Platform
   , start :: Int
+  , page :: Int
   }
 
 component mkBody =
   H.mkComponent
-    { initialState: const
+    { initialState: \{page} ->
         { winWidth: Nothing
         , platform: Nothing
         , start: 0
+        , page: fromMaybe 1 (fromString page)
         }
     , render: render mkBody
     , eval: H.mkEval H.defaultEval
@@ -70,15 +73,13 @@ component mkBody =
 
     logDebug $ loc <> " component has started at " <> show tm
 
-    H.modify_ _
-      { platform = pure platform
-      , winWidth = pure w
-      , start = tm
-      }
+    {page} <- H.get
+
+    H.modify_ _ { platform = pure platform, winWidth = pure w, start = tm }
 
     void $ H.subscribe =<< WinResize.subscribe WinResize
 
-    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.UserHistory)
+    Meta.set host async $ pure $ BuzgibiBack.MetaPage (show (Route.UserHistory mempty))
 
     Logout.subscribe loc $ handleAction ToHome
 
@@ -89,5 +90,5 @@ component mkBody =
     sendComponentTime start end loc
   handleAction ToHome = navigate Route.Home
 
-render mkBody { winWidth: Just w, platform: Just p } = mkBody p w (HH.slot_ List.proxy unit List.component unit)
+render mkBody { winWidth: Just w, platform: Just p, page } = mkBody p w (HH.slot_ List.proxy unit List.component {page: page})
 render _ _ = HH.div_ []

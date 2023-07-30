@@ -70,7 +70,7 @@ type Store =
   -- I didn't manage to get this feature working
   -- ad-hoc approach is to employ Avar for passing something to a parent
   --- reference to docs: https://purescript-halogen.github.io/purescript-halogen/guide/05-Parent-Child-Components.html#output-messages
-  , paginationVar :: Ref Int
+  , paginationVar :: Ref (Maybe Int)
   , isTest :: Boolean
   }
 

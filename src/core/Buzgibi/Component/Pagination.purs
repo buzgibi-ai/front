@@ -7,8 +7,9 @@ module Buzgibi.Component.Pagination
 
 import Prelude
 
-import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Component.HTML.Utils (css, safeHref)
 import Buzgibi.Capability.LogMessages (logDebug)
+import Buzgibi.Data.Route (Route (UserHistory), routeCodec)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -24,6 +25,10 @@ import Halogen.HTML.Events as HE
 import Halogen.Store.Monad (getStore)
 import Effect.Ref as Ref
 import Data.Int (rem)
+import Web.HTML.History (state, replaceState, DocumentTitle (..), URL (..))
+import Web.HTML.Window (history)
+import Web.HTML (window)
+import Routing.Duplex (print)
 
 proxy = Proxy :: _ "pagination"
 
@@ -35,12 +40,12 @@ type State = { currenPage :: Int, total :: Int, perpage :: Int, segment :: Maybe
 
 data Action = Initialize | Next Int MouseEvent | Receive Input
 
-type Input = { total :: Int, perpage :: Int }
+type Input = { total :: Int, perpage :: Int, page :: Int }
 
 component =
   H.mkComponent
-    { initialState: \{ total, perpage } ->
-        { currenPage: 1
+    { initialState: \{ total, perpage, page } ->
+        { currenPage: page
         , total: total
         , perpage: perpage
         , segment: Nothing
@@ -57,12 +62,13 @@ component =
     { currenPage, total, perpage } <- H.get
     H.modify_ _ { segment = calculateCurrentSegment currenPage total perpage }
   handleAction (Next curr ev) = do
+    H.liftEffect $ pushBrowserToNextPage curr
     logDebug $ loc <> " ---> switch to page " <> show curr
     H.liftEffect $ preventDefault $ toEvent ev
     { total, perpage } <- H.get
     H.modify_ _ { currenPage = curr, segment = calculateCurrentSegment curr total perpage }
     { paginationVar } <- getStore
-    void $ H.liftEffect $ Ref.modify_ (const curr) paginationVar
+    void $ H.liftEffect $ Ref.modify_ (const (Just curr)) paginationVar
   handleAction (Receive input) = do
     logDebug $ loc <> " ---> received from parent " <> show input
     { currenPage, perpage, total } <- H.get
@@ -71,6 +77,11 @@ component =
         { total = input.total
         , segment = calculateCurrentSegment currenPage input.total perpage
         }
+  pushBrowserToNextPage page = do 
+    win <- window
+    history <- history win
+    s <- state history
+    replaceState s (DocumentTitle "User | History") (URL ("#" <> print routeCodec (UserHistory (show page)))) history     
 
 render { segment: Nothing } = HH.div_ []
 render { currenPage, segment: Just { xs, next } } =
@@ -81,7 +92,7 @@ render { currenPage, segment: Just { xs, next } } =
             ( xs <#> \page ->
                 HH.li
                   [ css ("page-item " <> if currenPage == page then "disabled" else mempty) ]
-                  [ HH.a [ css ("page-link" <> if currenPage == page then " text-light bg-dark" else mempty), HPExt.href "#", HE.onClick (Next page) ]
+                  [ HH.a [ css ("page-link" <> if currenPage == page then " text-light bg-dark" else mempty), safeHref (UserHistory (show page)), HE.onClick (Next page) ]
                       [ HH.text (show page) ]
                   ]
             )
@@ -101,5 +112,5 @@ calculateCurrentSegment curr total perPage =
   in
     flip map xsm \xs -> { xs: xs, next: next }
 
-makeCorner (Just page) label = HH.li [ css "page-item" ] [ HH.a [ css "page-link", HPExt.href "#", HE.onClick $ Next page ] [ HH.text label ] ]
+makeCorner (Just page) label = HH.li [ css "page-item" ] [ HH.a [ css "page-link", safeHref (UserHistory (show page)), HE.onClick $ Next page ] [ HH.text label ] ]
 makeCorner Nothing label = HH.li [ css "page-item disabled" ] [ HH.a [ css "page-link", HPExt.href "#" ] [ HH.text label ] ]

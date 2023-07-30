@@ -194,7 +194,7 @@ submitSurvey survey = do
         else Async.send $ Async.mkOrdinary submitted Async.Success Nothing
     else H.modify_ _ { isSurveyEmpty = true }
 
-render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error, constants, isTest }
+render mkBody { winWidth: Just w, platform: Just p, survey, isSurveyEmpty, error, constants, isTest } =
   | isTest = HH.div_ [ mkBody p w (HH.text $ fromMaybe "..." $ Map.lookup "announcement" constants) ]
   | otherwise = HH.div_ [ mkBody p w (surveyForm survey isSurveyEmpty error constants) ]
 render _ _ = HH.div_ []

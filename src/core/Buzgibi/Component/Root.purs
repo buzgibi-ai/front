@@ -137,6 +137,6 @@ render { route: Just r@SignUp } =
     (Auth.component (Body.mkBodyHtml params r) SignUp.slot)
     { route: Route.SignUp, title: "SignUp" }
 render { route: Just r@UserSurvey } = HH.slot_ User.Survey.proxy unit (User.Survey.component (Body.mkBodyHtml params r)) unit
-render { route: Just r@UserHistory } = HH.slot_ User.History.proxy unit (User.History.component (Body.mkBodyHtml params r)) unit
+render { route: Just r@(UserHistory page)} = HH.slot_ User.History.proxy unit (User.History.component (Body.mkBodyHtml params r)) {page: page}
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit

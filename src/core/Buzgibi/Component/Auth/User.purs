@@ -11,7 +11,7 @@ import Buzgibi.Data.Config (Config(..))
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Component.HTML.Utils (css, safeHref)
 import Buzgibi.Capability.LogMessages (logDebug)
-import Buzgibi.Data.Route (Route (..))
+import Buzgibi.Data.Route (Route (..), defUserHistoryParam)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -81,7 +81,7 @@ render { email: Just email } =
     [ 
         HH.a
         [ css "nav-link"
-        , safeHref UserHistory
+        , safeHref (UserHistory defUserHistoryParam)
         ]
         [ HH.text $ takeWhile ((/=) '@') email ]
     , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "Sign out" ]

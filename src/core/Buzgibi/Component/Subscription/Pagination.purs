@@ -8,10 +8,13 @@ import Effect.Aff as Aff
 import Halogen.Store.Monad (getStore)
 import Data.Maybe (Maybe(..))
 import Effect.Ref as Ref
+import Data.Traversable (for_)
 
 subscribe loc goCompHandle =
   void $ H.fork $ forever $ do
     H.liftAff $ Aff.delay $ Aff.Milliseconds 500.0
     { paginationVar } <- getStore
-    H.liftEffect (Ref.read paginationVar) >>= goCompHandle
-    
+    page <- H.liftEffect $ Ref.read paginationVar
+    for_ page \p -> do
+      H.liftEffect $ Ref.write Nothing paginationVar
+      goCompHandle p

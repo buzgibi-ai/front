@@ -11,14 +11,16 @@
 -- | https://github.com/natefaubion/purescript-routing-duplex/tree/v0.2.0
 module Buzgibi.Data.Route
   ( Route(..)
+  , defUserHistoryParam
   , routeCodec
-  ) where
+  )
+  where
 
 import Prelude hiding ((/))
 
 import Data.Either (note)
 import Data.Generic.Rep (class Generic)
-import Routing.Duplex (RouteDuplex', as, root, segment, param)
+import Routing.Duplex (RouteDuplex', as, root, segment, param, default)
 import Routing.Duplex.Generic (noArgs, sum)
 import Routing.Duplex.Generic.Syntax ((/))
 import Data.Show
@@ -28,6 +30,7 @@ import Data.Bounded
 import Data.Enum.Generic (genericFromEnum, genericToEnum, genericSucc, genericPred, genericCardinality)
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Argonaut.Decode (class DecodeJson)
+import Undefined
 
 -- | We'll represent routes in our application with a simple sum type. As the application grows,
 -- | you might want to swap this out with an extensible sum type with `Variant` and have several
@@ -37,7 +40,7 @@ data Route
   = Error500
   | Error404
   | UserSurvey
-  | UserHistory
+  | UserHistory String
   | Home
   | SignUp
   | SignIn
@@ -53,20 +56,32 @@ instance Show Route where
   show SignUp = "signUp"
   show SignIn = "signIn"
   show UserSurvey = mempty
-  show UserHistory = mempty
+  show (UserHistory _) = mempty
 
 instance Enum Route where
-  succ = genericSucc
-  pred = genericPred
+  succ Home = Just SignUp
+  succ SignUp = Just SignIn
+  succ SignIn = Nothing
+  succ _ = Nothing
+  pred Home = Nothing
+  pred SignUp = Just Home
+  pred SignIn = Just SignUp
+  pred _ = Nothing
 
 instance BoundedEnum Route where
-  cardinality = genericCardinality
-  toEnum = genericToEnum
-  fromEnum = genericFromEnum
+  cardinality = Cardinality 3
+  toEnum  0 = Just Home
+  toEnum 1 = Just SignUp
+  toEnum 2 = Just SignIn
+  toEnum _ = Nothing
+  fromEnum Home = 0
+  fromEnum SignUp = 1
+  fromEnum SignIn = 2
+  fromEnum _ = undefined
 
 instance Bounded Route where
   top = SignIn
-  bottom = Error500
+  bottom = Home
 
 instance DecodeJson Route where
   decodeJson = genericDecodeJson
@@ -85,5 +100,7 @@ routeCodec = root $ sum
   , "SignUp": "auth" / "signUp" / noArgs
   , "SignIn": "auth" / "signIn" / noArgs
   , "UserSurvey": "user" / "survey" / noArgs
-  , "UserHistory": "user" / "history" / noArgs
+  , "UserHistory": "user" / "history" / default "1" (param "page")
   }
+
+defUserHistoryParam = "1"

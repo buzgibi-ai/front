@@ -3,7 +3,7 @@ module Buzgibi.Component.Menu.Hamburger (component, proxy) where
 import Prelude
 
 import Buzgibi.Component.HTML.Utils (css, safeHref)
-import Buzgibi.Data.Route (Route(..))
+import Buzgibi.Data.Route (Route(..), defUserHistoryParam)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.Subscription.Translation as Translation
@@ -84,6 +84,6 @@ render { route, menu, isAuth, email } =
   mkUser (Just x) = HH.li_ [ HH.text x ]
   mkUser Nothing = HH.li_ []
   mkHistoryRef false = HH.li_ []
-  mkHistoryRef true = HH.li_ [HH.a [css "nav-link", safeHref UserHistory] [addFontStyle (HH.text (fromMaybe "..." (Map.lookup "history" menu)))] ]
+  mkHistoryRef true = HH.li_ [HH.a [css "nav-link", safeHref (UserHistory defUserHistoryParam)] [addFontStyle (HH.text (fromMaybe "..." (Map.lookup "history" menu)))] ]
 
 addFontStyle el = HH.div [ HPExt.style "font-size: 30px; text-align: center" ] [ el ]
