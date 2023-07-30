@@ -127,7 +127,7 @@ content constants isAuth =
     , whenElem isAuth $ HH.div_
         [ HH.a
             [ css "nav-link"
-            , HPExt.style "font-style: 30px"
+            , HPExt.style "font-size: 30px"
             , safeHref Route.UserSurvey
             ]
             [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
