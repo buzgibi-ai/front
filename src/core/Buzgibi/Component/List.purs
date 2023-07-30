@@ -33,7 +33,7 @@ import Affjax.ResponseFormat as AX
 import Affjax.RequestBody as AXB
 import File.Blob (downloadBlob)
 import Data.Array (snoc)
-import Data.String (length, take)
+import Data.String (length, take, joinWith)
 import Effect.AVar as Async
 import DOM.HTML.Indexed.ScopeValue (ScopeValue(ScopeCol))
 import Foreign (isUndefined, unsafeFromForeign)
@@ -70,7 +70,9 @@ component =
     case user of
       Just { token } -> do
         resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory page
-        withError resp \{ success: { items, total, perpage } } ->
+        logDebug $ loc <> " ---> get history for page " <> show page
+        withError resp \{ success: { items, total, perpage } } -> do 
+          logDebug $ loc <> " ---> get history items " <> joinWith "," (map BuzgibiBack.printWithFieldStatusHistoryItem items) <> " for page " <> show page
           H.modify_ _ { list = items, total = total, perpage = perpage }
       Nothing -> pure unit
   handleAction Initialize = do

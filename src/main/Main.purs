@@ -48,6 +48,7 @@ import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
 import Web.Storage.Storage (getItem, removeItem)
 import Crypto.Jwt as Jwt
+import Effect.Ref as Ref 
 
 main :: Cfg.Config -> Effect Unit
 main cfg = do
@@ -89,7 +90,7 @@ main cfg = do
 
         isLogoutVar <- H.liftEffect Async.empty
 
-        paginationVar <- H.liftEffect Async.empty
+        paginationVar <- H.liftEffect $ Ref.new 1
 
         when (logLevel == Dev)
           $ H.liftEffect

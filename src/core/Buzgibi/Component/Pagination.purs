@@ -22,7 +22,7 @@ import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 import Web.Event.Event (preventDefault)
 import Halogen.HTML.Events as HE
 import Halogen.Store.Monad (getStore)
-import Effect.AVar (tryPut)
+import Effect.Ref as Ref
 import Data.Int (rem)
 
 proxy = Proxy :: _ "pagination"
@@ -62,7 +62,7 @@ component =
     { total, perpage } <- H.get
     H.modify_ _ { currenPage = curr, segment = calculateCurrentSegment curr total perpage }
     { paginationVar } <- getStore
-    void $ H.liftEffect $ tryPut curr paginationVar
+    void $ H.liftEffect $ Ref.modify_ (const curr) paginationVar
   handleAction (Receive input) = do
     logDebug $ loc <> " ---> received from parent " <> show input
     { currenPage, perpage, total } <- H.get

@@ -43,6 +43,7 @@ import Data.Map as Map
 import Cache as Cache
 import Concurrent.Channel as Async
 import Crypto.Jwt (JwtUser)
+import Effect.Ref (Ref)
 
 type User = { jwtUser :: JwtUser, token :: BuzgibiBack.JWTToken }
 
@@ -69,7 +70,7 @@ type Store =
   -- I didn't manage to get this feature working
   -- ad-hoc approach is to employ Avar for passing something to a parent
   --- reference to docs: https://purescript-halogen.github.io/purescript-halogen/guide/05-Parent-Child-Components.html#output-messages
-  , paginationVar :: AVar Int
+  , paginationVar :: Ref Int
   , isTest :: Boolean
   }
 
@@ -94,7 +95,7 @@ printStore store =
     <> show (_.user store)
     <> ", isLogoutVa: <AVar> "
     <>
-      ",paginationVar: <AVar>"
+      ",paginationVar: <Ref>"
     <>  ", isTest: " 
     <> show (_.isTest store)
 

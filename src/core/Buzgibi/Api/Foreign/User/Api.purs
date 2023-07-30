@@ -19,7 +19,7 @@ import Effect (Effect)
 import Data.Function.Uncurried (Fn1, Fn3, runFn3)
 import Effect.Aff.Compat as AC
 import Foreign.Object (Object)
-import Foreign (Foreign)
+import Foreign (Foreign, typeOf)
 import Data.Either (Either)
 import Effect.Exception as E
 import Data.Maybe (Maybe, fromMaybe)
@@ -45,8 +45,7 @@ makeSurvey = runFn3 _makeSurvey withError
 
 type WithFieldStatusHistoryItem = { ident :: Foreign, status :: String, name :: String, timestamp :: String }
 
-printWithFieldStatusHistoryItem {ident, status, name, timestamp} = 
-  "{ident: " <> show ident <>  ", status: " <> status <> ", name: " <> name <> ", timestamp" <> timestamp <> "}"
+printWithFieldStatusHistoryItem { ident, status, name, timestamp } = "{ ident:" <> typeOf ident <> ", status:" <> status <> ", name: " <> name <> ", tm: "  <> timestamp <> " }" 
 
 type History = { items :: Array WithFieldStatusHistoryItem, total :: Int, perpage :: Int }
 

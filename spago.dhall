@@ -50,6 +50,7 @@
   , "web-file"
   , "web-uievents"
   , "assert"
+  , "refs"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
