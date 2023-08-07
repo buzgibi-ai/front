@@ -161,11 +161,13 @@ render { list, total, perpage, constants, currPage } =
                   if status == "draft" then 
                     [  HH.a
                       [ css "nav-link"
+                      , HPExt.style $ if isUndefined voice then "pointer-events: none; cursor: default;" else mempty 
                       , safeHref (Route.EditSurvey surveyident)
-                      , HE.onClick (Edit surveyident voice)
+                      , HE.onClick (Edit surveyident (unsafeFromForeign voice))
                       ] [HH.text "edit"]
                     , HH.a
                       [ css "nav-link"
+                      , HPExt.style $ if isUndefined voice then "pointer-events: none; cursor: default;" else mempty
                       , HE.onClick (const (Submit surveyident))
                       ] [HH.text "submit"]
                     ]

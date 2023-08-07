@@ -58,7 +58,7 @@ type WithFieldStatusHistoryItem =
        status :: String, 
        name :: String, 
        timestamp :: String,
-       voice :: Int
+       voice :: Foreign
      }
 
 printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timestamp, voice } = 
