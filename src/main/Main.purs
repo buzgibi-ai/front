@@ -92,6 +92,8 @@ main cfg = do
 
         paginationVar <- H.liftEffect $ Ref.new (Just 1)
 
+        editSurvey <- H.liftEffect Async.empty
+
         when (logLevel == Dev)
           $ H.liftEffect
           $ do
@@ -123,6 +125,7 @@ main cfg = do
             , isLogoutVar: isLogoutVar
             , paginationVar: paginationVar
             , isTest: fromMaybe false (BuzgibiBack.getIsTest init)
+            , editSurvey: editSurvey
             }
 
         -- With our app environment ready to go, we can prepare the router to run as our root component.

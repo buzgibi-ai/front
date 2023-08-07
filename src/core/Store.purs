@@ -4,12 +4,14 @@
 -- | called a "store" by convention.
 module Store
   ( Action(..)
+  , EditSurvey
   , Store(..)
   , User
   , initAppStore
   , printStore
   , reduce
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -47,6 +49,8 @@ import Effect.Ref (Ref)
 
 type User = { jwtUser :: JwtUser, token :: BuzgibiBack.JWTToken }
 
+type EditSurvey = { survey :: Int, voice :: Int }
+
 -- | We can now construct our central state which will be available to all
 -- | components (if they opt-in).
 -- |
@@ -72,6 +76,7 @@ type Store =
   --- reference to docs: https://purescript-halogen.github.io/purescript-halogen/guide/05-Parent-Child-Components.html#output-messages
   , paginationVar :: Ref (Maybe Int)
   , isTest :: Boolean
+  , editSurvey :: AVar EditSurvey
   }
 
 printStore store =

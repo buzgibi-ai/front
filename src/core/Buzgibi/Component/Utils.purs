@@ -1,5 +1,5 @@
 -- | Some utilities are useful across any component. We'll maintain them in this catch-all module.
-module Buzgibi.Component.Utils (OpaqueSlot, withCaptcha, initTranslation) where
+module Buzgibi.Component.Utils (OpaqueSlot, withCaptcha, initTranslation, with404, withAuth) where
 
 import Prelude
 
@@ -8,6 +8,8 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config
+import Buzgibi.Capability.Navigate (navigate)
+import Buzgibi.Data.Route as Route
 
 import Halogen as H
 import Data.Function.Uncurried (runFn2)
@@ -58,3 +60,9 @@ initTranslation loc goCompHandle = do
           else pure Nothing
         Nothing -> try $ c + 1
   try 0
+
+with404 (Just x) go = go x
+with404 Nothing _ = navigate Route.Error404 
+
+withAuth (Just x) go = go x
+withAuth Nothing _ = navigate Route.Home 

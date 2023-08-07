@@ -51,6 +51,9 @@
   , "web-uievents"
   , "assert"
   , "refs"
+  , "media-types"
+  , "arraybuffer-types"
+  , "partial"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

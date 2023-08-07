@@ -20,7 +20,7 @@ import Prelude hiding ((/))
 
 import Data.Either (note)
 import Data.Generic.Rep (class Generic)
-import Routing.Duplex (RouteDuplex', as, root, segment, param, default)
+import Routing.Duplex (RouteDuplex', as, root, segment, int, param, default)
 import Routing.Duplex.Generic (noArgs, sum)
 import Routing.Duplex.Generic.Syntax ((/))
 import Data.Show
@@ -41,6 +41,7 @@ data Route
   | Error404
   | UserSurvey
   | UserHistory String
+  | EditSurvey Int
   | Home
   | SignUp
   | SignIn
@@ -57,6 +58,7 @@ instance Show Route where
   show SignIn = "signIn"
   show UserSurvey = mempty
   show (UserHistory _) = mempty
+  show (EditSurvey _) = mempty 
 
 instance Enum Route where
   succ Home = Just SignUp
@@ -101,6 +103,7 @@ routeCodec = root $ sum
   , "SignIn": "auth" / "signIn" / noArgs
   , "UserSurvey": "user" / "survey" / noArgs
   , "UserHistory": "user" / "history" / default "1" (param "page")
+  , "EditSurvey": "user" / "survey" / int (segment)
   }
 
 defUserHistoryParam = "1"

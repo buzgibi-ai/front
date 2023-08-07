@@ -36,6 +36,7 @@ import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
 import Buzgibi.Page.User.Survey as User.Survey
 import Buzgibi.Page.User.History as User.History
+import Buzgibi.Component.Survey.Edit as Survey.Edit 
 
 import Data.Either (hush, Either(..))
 import Data.Foldable (elem, for_)
@@ -57,6 +58,8 @@ import Data.Map as Map
 import Routing.Duplex.Parser (RouteError(EndOfPath))
 import AppM (AppM)
 
+import Undefined
+
 loc = " Buzgibi.Component.Root"
 
 data Query a = Navigate Route a
@@ -73,6 +76,7 @@ type ChildSlots =
   , auth_container_sign_up :: OpaqueSlot Unit
   , user_survey :: OpaqueSlot Unit
   , user_history :: OpaqueSlot Unit
+  , survey_edit :: OpaqueSlot Unit
   )
 
 component :: H.Component Query Unit Void AppM
@@ -140,3 +144,4 @@ render { route: Just r@UserSurvey } = HH.slot_ User.Survey.proxy unit (User.Surv
 render { route: Just r@(UserHistory page)} = HH.slot_ User.History.proxy unit (User.History.component (Body.mkBodyHtml params r)) {page: page}
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
+render { route: Just r@(EditSurvey _) } = HH.slot_ Survey.Edit.proxy unit (Survey.Edit.component (Body.mkBodyHtml params r)) unit

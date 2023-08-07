@@ -10,7 +10,7 @@ import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Utils (css, safeHref)
+import Buzgibi.Component.HTML.Utils (css, safeHref, maybeElem)
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Component.Async (withAffjax)
 import Buzgibi.Component.Pagination as Pagination
@@ -19,6 +19,8 @@ import Buzgibi.Component.Async as Async
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Data.Route (Route (UserSurvey))
+import Buzgibi.Capability.Navigate (navigate)
+import Buzgibi.Data.Route as Route
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -43,6 +45,7 @@ import Undefined
 import Data.Array ((:))
 import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
 import Data.Foldable (for_)
+import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 
 proxy = Proxy :: _ "list"
 
@@ -62,7 +65,8 @@ data Action =
      Download Int String Event | 
      Query Int | 
      LangChange String (Map.Map String String) | 
-     Submit Int
+     Submit Int |
+     Edit Int Int MouseEvent
 
 component =
   H.mkComponent
@@ -73,7 +77,8 @@ component =
         hash: mempty :: String, 
         constants: 
         Map.empty, 
-        currPage: page }
+        currPage: page
+      }
     , render: render
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
@@ -130,6 +135,12 @@ component =
               _.list s <#> \el@{surveyident} -> 
                 if surveyident == ident then 
                 el { status = "inProcess" } else el }
+  handleAction (Edit ident voice ev) = do
+    H.liftEffect $ preventDefault $ toEvent ev
+    logDebug $ loc <> " ---> edit survey " <> show ident
+    {editSurvey} <- getStore
+    void $ H.liftEffect $ { survey: ident, voice: voice } `Async.tryPut` editSurvey
+    navigate $ Route.EditSurvey ident
 
 render { list: [] } = HH.text "you haven't the history to be shown"
 render { list, total, perpage, constants, currPage } =
@@ -143,13 +154,20 @@ render { list, total, perpage, constants, currPage } =
           , HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "report" constants) ]
           ]
       , HH.tbody_
-          ( list <#> \{ surveyident, reportident, name, timestamp, status } ->
+          ( list <#> \{ surveyident, reportident, name, timestamp, status, voice } ->
               HH.tr_
                 [ HH.td [ HPExt.dataLabel "title" ] 
                   (HH.text (if length name > 20 then take 20 name else name) :
                   if status == "draft" then 
-                    [ HH.button [HPExt.type_ ButtonButton] [HH.text "edit"]
-                    , HH.button [HPExt.type_ ButtonButton, HE.onClick (const (Submit surveyident)) ] [HH.text "submit"]
+                    [  HH.a
+                      [ css "nav-link"
+                      , safeHref (Route.EditSurvey surveyident)
+                      , HE.onClick (Edit surveyident voice)
+                      ] [HH.text "edit"]
+                    , HH.a
+                      [ css "nav-link"
+                      , HE.onClick (const (Submit surveyident))
+                      ] [HH.text "submit"]
                     ]
                   else [])
                 , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
@@ -168,7 +186,7 @@ render { list, total, perpage, constants, currPage } =
                         ]
                 ]
           )
-      ]
+      ]   
   , HH.div [ HPExt.style "margin-top: 10px" ] [ HH.slot_ Pagination.proxy unit Pagination.component { total: total, perpage: perpage, page: currPage } ]
   , HH.div_
     [
@@ -177,5 +195,5 @@ render { list, total, perpage, constants, currPage } =
         , safeHref UserSurvey
         ]
         [ HH.text $ fromMaybe "..." (Map.lookup "makeSurvey" constants) ]
-    ]
+    ] 
   ]

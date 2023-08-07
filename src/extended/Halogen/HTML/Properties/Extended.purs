@@ -5,7 +5,9 @@ module Halogen.HTML.Properties.Extended
   , dataLabel
   , module Properties
   , role
-  ) where
+  , tabindex
+  )
+  where
 
 import Prelude
 
@@ -19,3 +21,5 @@ ariaLabel = Properties.prop (PropName "aria-label")
 dataDismiss = Properties.prop (PropName "data-dismiss")
 ariaHidden = Properties.prop (PropName "aria-hidden")
 dataLabel = Properties.prop (PropName "data-label")
+tabindex = Properties.prop (PropName "tabindex")
+

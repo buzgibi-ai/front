@@ -58,7 +58,7 @@ type WithFieldStatusHistoryItem =
        status :: String, 
        name :: String, 
        timestamp :: String,
-       voice :: Foreign 
+       voice :: Int
      }
 
 printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timestamp, voice } = 
@@ -67,7 +67,7 @@ printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timest
   ", status:" <> status <> 
   ", name: " <> name <> 
   ", tm: "  <> timestamp <> 
-  ", voice: "  <> typeOf voice <> " }" 
+  ", voice: <bytes> }" 
 
 type History = { items :: Array WithFieldStatusHistoryItem, total :: Int, perpage :: Int }
 
