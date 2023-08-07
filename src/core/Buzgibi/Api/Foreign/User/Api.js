@@ -8,7 +8,15 @@ export const mkUserApi = function(api) {
 
 export const _makeSurvey = function(withError, survey, api) {
     return function(onError, onOk) {
-        api.userSurveyPost(survey).then(onOk).catch(resp => {
+        api.userSurveyPut(survey).then(onOk).catch(resp => {
+            return withError(resp, onError)
+        })
+    };
+}
+
+export const _submitSurvey = function(withError, submit, api) {
+    return function(onError, onOk) {
+        api.userSurveySubmitPost(submit).then(onOk).catch(resp => {
             return withError(resp, onError)
         })
     };

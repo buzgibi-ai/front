@@ -41,7 +41,7 @@ export const _getJwtStatus = obj => {
     return obj.getIsJwtValid();
 }
 
-export const _getIsTest =  nothing => just => obj => {
+export const _getIsTest = nothing => just => obj => {
     let env = obj.getEnv();
     return env !== undefined ? just(env.getIsTest()) : nothing;
 }

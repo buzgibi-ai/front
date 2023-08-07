@@ -40,6 +40,9 @@ import Foreign (isUndefined, unsafeFromForeign)
 import Data.Map as Map
 import Data.Maybe (fromMaybe, maybe)
 import Undefined
+import Data.Array ((:))
+import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
+import Data.Foldable (for_)
 
 proxy = Proxy :: _ "list"
 
@@ -54,7 +57,12 @@ type State =
   , currPage :: Int
   }
 
-data Action = Initialize | Download Int String Event | Query Int | LangChange String (Map.Map String String)
+data Action = 
+     Initialize | 
+     Download Int String Event | 
+     Query Int | 
+     LangChange String (Map.Map String String) | 
+     Submit Int
 
 component =
   H.mkComponent
@@ -113,6 +121,15 @@ component =
       Nothing -> pure unit
   handleAction (Query page) = getHistory $ Just { page: page }
   handleAction (LangChange hash xs) = H.modify_ _ { constants = xs, hash = hash }
+  handleAction (Submit ident) = do
+    { config: Config { apiBuzgibiHost }, user } <- getStore
+    for_ user \{ token } -> do
+      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.submitSurvey {ident: ident}
+      withError resp $ const $ H.modify_ \s -> 
+        s { list = 
+              _.list s <#> \el@{surveyident} -> 
+                if surveyident == ident then 
+                el { status = "inProcess" } else el }
 
 render { list: [] } = HH.text "you haven't the history to be shown"
 render { list, total, perpage, constants, currPage } =
@@ -126,16 +143,22 @@ render { list, total, perpage, constants, currPage } =
           , HH.th [ HPExt.scope ScopeCol ] [ HH.text $ fromMaybe "..." (Map.lookup "report" constants) ]
           ]
       , HH.tbody_
-          ( list <#> \{ ident, name, timestamp, status } ->
+          ( list <#> \{ surveyident, reportident, name, timestamp, status } ->
               HH.tr_
-                [ HH.td [ HPExt.dataLabel "title" ] [ HH.text (if length name > 20 then take 20 name else name) ]
+                [ HH.td [ HPExt.dataLabel "title" ] 
+                  (HH.text (if length name > 20 then take 20 name else name) :
+                  if status == "draft" then 
+                    [ HH.button [HPExt.type_ ButtonButton] [HH.text "edit"]
+                    , HH.button [HPExt.type_ ButtonButton, HE.onClick (const (Submit surveyident)) ] [HH.text "submit"]
+                    ]
+                  else [])
                 , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
                 , HH.td [ HPExt.dataLabel "status" ] [ HH.text $ fromMaybe "..." (Map.lookup status constants) ]
                 , HH.td [ HPExt.dataLabel "report" ] $
-                    if isUndefined ident
+                    if isUndefined reportident
                     then [HH.div_ [HH.text "-"]]
                     else 
-                        [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign ident) :: Int) name ]
+                        [ HH.form [ HE.onSubmit $ Download ((unsafeFromForeign reportident) :: Int) name ]
                             [ HH.input
                                 [ HPExt.style "cursor: pointer"
                                 , HPExt.type_ HPExt.InputSubmit

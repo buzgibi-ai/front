@@ -1,6 +1,7 @@
 module Buzgibi.Api.Foreign.User.Api
   ( History
   , Location
+  , SubmitSurvey
   , Survey
   , UserApi
   , WithFieldStatusHistoryItem
@@ -8,6 +9,7 @@ module Buzgibi.Api.Foreign.User.Api
   , makeSurvey
   , mkUserApi
   , printWithFieldStatusHistoryItem
+  , submitSurvey
   )
   where
 
@@ -40,12 +42,32 @@ type Survey =
 
 foreign import _makeSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Survey UserApi (AC.EffectFnAff (Object (Response Unit)))
 
-makeSurvey :: Survey -> UserApi -> (AC.EffectFnAff (Object (Response Unit)))
+makeSurvey :: Survey -> UserApi -> AC.EffectFnAff (Object (Response Unit))
 makeSurvey = runFn3 _makeSurvey withError
 
-type WithFieldStatusHistoryItem = { ident :: Foreign, status :: String, name :: String, timestamp :: String }
+type SubmitSurvey = { ident :: Int } 
 
-printWithFieldStatusHistoryItem { ident, status, name, timestamp } = "{ ident:" <> typeOf ident <> ", status:" <> status <> ", name: " <> name <> ", tm: "  <> timestamp <> " }" 
+foreign import _submitSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) SubmitSurvey UserApi (AC.EffectFnAff (Object (Response Unit)))
+
+submitSurvey :: SubmitSurvey -> UserApi -> AC.EffectFnAff (Object (Response Unit))
+submitSurvey = runFn3 _submitSurvey withError
+
+type WithFieldStatusHistoryItem = 
+     { surveyident :: Int,
+       reportident :: Foreign, 
+       status :: String, 
+       name :: String, 
+       timestamp :: String,
+       voice :: Foreign 
+     }
+
+printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timestamp, voice } = 
+  "{ surveyident: " <> show surveyident <>
+  "reportident:" <> typeOf reportident <> 
+  ", status:" <> status <> 
+  ", name: " <> name <> 
+  ", tm: "  <> timestamp <> 
+  ", voice: "  <> typeOf voice <> " }" 
 
 type History = { items :: Array WithFieldStatusHistoryItem, total :: Int, perpage :: Int }
 
@@ -55,4 +77,3 @@ foreign import _getHistory :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Err
 
 getHistory :: Maybe Page -> UserApi -> (AC.EffectFnAff (Object (Response History)))
 getHistory page = runFn3 _getHistory withError (fromMaybe { page: 1 } page)
-
