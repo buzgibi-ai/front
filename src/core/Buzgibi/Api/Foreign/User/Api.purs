@@ -48,9 +48,9 @@ makeSurvey = runFn3 _makeSurvey withError
 
 type SubmitSurvey = { ident :: Int } 
 
-foreign import _submitSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) SubmitSurvey UserApi (AC.EffectFnAff (Object (Response Unit)))
+foreign import _submitSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) SubmitSurvey UserApi (AC.EffectFnAff (Object (Response Boolean)))
 
-submitSurvey :: SubmitSurvey -> UserApi -> AC.EffectFnAff (Object (Response Unit))
+submitSurvey :: SubmitSurvey -> UserApi -> AC.EffectFnAff (Object (Response Boolean))
 submitSurvey = runFn3 _submitSurvey withError
 
 type EditSurvey = { survey :: String }
