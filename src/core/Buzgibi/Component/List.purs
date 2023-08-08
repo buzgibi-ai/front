@@ -146,7 +146,7 @@ component =
                   el { status = "inProcess" } else el }
         else do 
           {constants} <- H.get
-          let msg = fromMaybe "..." $ Map.lookup "submit_error" constants
+          let msg = fromMaybe "..." $ Map.lookup "submitError" constants
           Async.send $ Async.mkOrdinary msg Async.Warning Nothing         
   handleAction (Edit _ voice ev) | isUndefined voice = do
     H.liftEffect $ preventDefault $ toEvent ev
