@@ -5,6 +5,7 @@ module Buzgibi.Api.Foreign.User.Api
   , Survey
   , UserApi
   , WithFieldStatusHistoryItem
+  , editSurvey
   , getHistory
   , makeSurvey
   , mkUserApi
@@ -18,7 +19,7 @@ import Prelude
 import Buzgibi.Api.Foreign.Common
 
 import Effect (Effect)
-import Data.Function.Uncurried (Fn1, Fn3, runFn3)
+import Data.Function.Uncurried (Fn1, Fn3, Fn4, runFn3, runFn4)
 import Effect.Aff.Compat as AC
 import Foreign.Object (Object)
 import Foreign (Foreign, typeOf)
@@ -51,6 +52,14 @@ foreign import _submitSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.E
 
 submitSurvey :: SubmitSurvey -> UserApi -> AC.EffectFnAff (Object (Response Unit))
 submitSurvey = runFn3 _submitSurvey withError
+
+type EditSurvey = { survey :: String }
+
+foreign import _editSurvey :: Fn4 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Int EditSurvey UserApi (AC.EffectFnAff (Object (Response Boolean)))
+
+editSurvey :: Int -> EditSurvey ->  UserApi -> AC.EffectFnAff (Object (Response Boolean))
+editSurvey = runFn4 _editSurvey withError
+
 
 type WithFieldStatusHistoryItem = 
      { surveyident :: Int,

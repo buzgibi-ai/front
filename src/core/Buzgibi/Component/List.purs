@@ -46,6 +46,7 @@ import Data.Array ((:))
 import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
 import Data.Foldable (for_)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
+import Foreign (Foreign)
 
 proxy = Proxy :: _ "list"
 
@@ -65,8 +66,8 @@ data Action =
      Download Int String Event | 
      Query Int | 
      LangChange String (Map.Map String String) | 
-     Submit Int |
-     Edit Int Int MouseEvent
+     Submit Int Boolean MouseEvent |
+     Edit Int Foreign MouseEvent
 
 component =
   H.mkComponent
@@ -126,7 +127,13 @@ component =
       Nothing -> pure unit
   handleAction (Query page) = getHistory $ Just { page: page }
   handleAction (LangChange hash xs) = H.modify_ _ { constants = xs, hash = hash }
-  handleAction (Submit ident) = do
+  handleAction (Submit _ true ev) = do
+   H.liftEffect $ preventDefault $ toEvent ev
+   {constants} <- H.get
+   let value = fromMaybe "..." $ Map.lookup "bark" constants
+   Async.send $ Async.mkOrdinary value Async.Warning Nothing
+  handleAction (Submit ident false ev) = do
+    H.liftEffect $ preventDefault $ toEvent ev
     { config: Config { apiBuzgibiHost }, user } <- getStore
     for_ user \{ token } -> do
       resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.submitSurvey {ident: ident}
@@ -135,11 +142,17 @@ component =
               _.list s <#> \el@{surveyident} -> 
                 if surveyident == ident then 
                 el { status = "inProcess" } else el }
+  handleAction (Edit _ voice ev) | isUndefined voice = do
+    H.liftEffect $ preventDefault $ toEvent ev
+    {constants} <- H.get
+    let value = fromMaybe "..." $ Map.lookup "bark" constants
+    Async.send $ Async.mkOrdinary value Async.Warning Nothing        
   handleAction (Edit ident voice ev) = do
     H.liftEffect $ preventDefault $ toEvent ev
     logDebug $ loc <> " ---> edit survey " <> show ident
     {editSurvey} <- getStore
-    void $ H.liftEffect $ { survey: ident, voice: voice } `Async.tryPut` editSurvey
+    let unwrappedVoice = unsafeFromForeign voice
+    void $ H.liftEffect $ { survey: ident, voice: unwrappedVoice } `Async.tryPut` editSurvey
     navigate $ Route.EditSurvey ident
 
 render { list: [] } = HH.text "you haven't the history to be shown"
@@ -160,15 +173,13 @@ render { list, total, perpage, constants, currPage } =
                   (HH.text (if length name > 20 then take 20 name else name) :
                   if status == "draft" then 
                     [  HH.a
-                      [ css "nav-link"
-                      , HPExt.style $ if isUndefined voice then "pointer-events: none; cursor: default;" else mempty 
+                      [ css "nav-link" 
                       , safeHref (Route.EditSurvey surveyident)
                       , HE.onClick (Edit surveyident (unsafeFromForeign voice))
                       ] [HH.text "edit"]
                     , HH.a
                       [ css "nav-link"
-                      , HPExt.style $ if isUndefined voice then "pointer-events: none; cursor: default;" else mempty
-                      , HE.onClick (const (Submit surveyident))
+                      , HE.onClick (Submit surveyident (isUndefined voice))
                       ] [HH.text "submit"]
                     ]
                   else [])
