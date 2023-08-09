@@ -7,7 +7,7 @@ module Buzgibi.Component.Survey.Edit
 
 import Prelude
 
-import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Component.HTML.Utils (css, safeHref)
 import Buzgibi.Component.Subscription.Logout as Logout
 import Buzgibi.Capability.Navigate (navigate)
 import Buzgibi.Data.Route as Route
@@ -19,6 +19,7 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Data.Config
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.Async as Async
+import Buzgibi.Component.Subscription.Translation as Translation
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -44,6 +45,7 @@ import Affjax.RequestBody as AXB
 import Data.String (null)
 import Web.Event.Event (preventDefault, Event)
 import Data.Traversable (for_)
+import Data.Map as Map
 
 import Undefined
 
@@ -58,6 +60,9 @@ type State =
   , voice :: String
   , surveyIdent :: Int
   , survey :: Maybe String
+  , hash :: String
+  , constants :: Map.Map String String
+  , error :: Maybe String
   }
 
 data Action
@@ -67,6 +72,7 @@ data Action
   | ToHome
   | MakeRequest Event
   | SetSurvey String
+  | LangChange String (Map.Map String String)
 
 component mkBody =
   H.mkComponent
@@ -77,6 +83,9 @@ component mkBody =
     , voice: mempty
     , survey: Nothing
     , surveyIdent: 0
+    , hash: mempty
+    , constants: Map.empty
+    , error: Nothing
     }
   , render: render mkBody
   , eval: H.mkEval H.defaultEval
@@ -111,6 +120,13 @@ component mkBody =
               , surveyIdent = ident
               }
 
+          Translation.subscribe loc $ \hash translation -> do
+            let warns = 
+                  fromMaybe undefined $
+                    Map.lookup "makeSurvey" $ 
+                      BuzgibiBack.getTranslationEndpoints translation
+            handleAction $ LangChange hash warns
+
           void $ H.subscribe =<< WinResize.subscribe WinResize
           Logout.subscribe loc $ handleAction ToHome
 
@@ -121,32 +137,45 @@ component mkBody =
       sendComponentTime start end loc
     handleAction (MakeRequest ev) = do
       H.liftEffect $ preventDefault ev
-      {survey, surveyIdent} <- H.get
+      {survey, surveyIdent, constants} <- H.get
       logDebug $ loc <> " ---> edit: " <> show survey
       for_ survey \val -> do
         { config: Config { apiBuzgibiHost }, user } <- getStore
         for_ user \{ token, jwtUser: {ident} } -> do
           resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ 
                     BuzgibiBack.editSurvey surveyIdent { survey: val }
-          withError resp \{success: ifOk} ->
+          withError resp \{success: ifOk, warnings} ->
             if ifOk then
-              Async.send $ Async.mkOrdinary "survey has been changed" Async.Success Nothing
+              Async.send $ Async.mkOrdinary (fromMaybe undefined $ Map.lookup "submitted" constants) Async.Success Nothing
             else 
-              Async.send $ Async.mkOrdinary "changes hasn't been applied" Async.Warning Nothing
+             for_ warnings \key -> do
+              let value = fromMaybe undefined $ Map.lookup key constants
+              H.modify_ _ { error = Just value }
           H.modify_ _ { survey = Nothing }     
     handleAction (SetSurvey val) = do 
       s <- H.get
-      H.modify_ _ { survey = if null val then Nothing else Just val }   
+      H.modify_ _ { survey = if null val then Nothing else Just val, error = Nothing }
+    handleAction (LangChange hash xs) = H.modify_ _ { hash = hash, constants = xs }  
 
-render mkBody { winWidth: Just w, platform: Just p, voice, survey } = mkBody p w $ 
-  HH.form [ css "search-container", HE.onSubmit MakeRequest ]
-  [
-      HH.div_ [HH.audio [HP.controls true] [HH.source [HP.src voice, HP.type_ (MediaType "audio/wav")]]] 
-  ,   HH.input
-      [ HP.type_ HP.InputText
-      , HE.onValueInput SetSurvey
-      , HP.value $ fromMaybe mempty survey
+render mkBody { winWidth: Just w, platform: Just p, voice, survey, constants, error } = mkBody p w $
+  HH.div_
+  [ 
+      HH.form [ css "search-container", HE.onSubmit MakeRequest ]
+      [
+          HH.div_ [HH.audio [HP.controls true] [HH.source [HP.src voice, HP.type_ (MediaType "audio/wav")]]] 
+      ,   HH.input
+          [ HP.type_ HP.InputText
+          , HE.onValueInput SetSurvey
+          , HP.value $ fromMaybe mempty survey
+          ]
+      ,   HH.div [HP.style "color:red"] [HH.text (fromMaybe mempty error)]     
+      ,   HH.input [ css "form-control", HP.type_ HP.InputSubmit, HP.value (fromMaybe "..." (Map.lookup "submit" constants)) ]
       ]
-  ,  HH.input [ css "form-control", HP.type_ HP.InputSubmit, HP.value "submit" ]
-  ]
+  ,   HH.a
+        [ css "nav-link"
+        , HP.style "font-size: 20px"
+        , safeHref (Route.UserHistory Route.defUserHistoryParam)
+        ]
+        [ HH.text (fromMaybe "..." (Map.lookup "backToHistory" constants)) ]
+  ]    
 render _ _ = HH.div_ []

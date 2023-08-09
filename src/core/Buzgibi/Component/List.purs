@@ -137,15 +137,17 @@ component =
     { config: Config { apiBuzgibiHost }, user } <- getStore
     for_ user \{ token } -> do
       resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.submitSurvey {ident: ident}
-      withError resp \{success: ifOk} ->
-        if ifOk then
+      withError resp \{success: ifOk} -> do 
+        {constants} <- H.get
+        if ifOk then do
           H.modify_ \s -> 
             s { list = 
                 _.list s <#> \el@{surveyident} -> 
                   if surveyident == ident then 
                   el { status = "inProcess" } else el }
-        else do 
-          {constants} <- H.get
+          let msg = fromMaybe "..." $ Map.lookup "submitOk" constants   
+          Async.send $ Async.mkOrdinary msg Async.Success Nothing          
+        else do
           let msg = fromMaybe "..." $ Map.lookup "submitError" constants
           Async.send $ Async.mkOrdinary msg Async.Warning Nothing         
   handleAction (Edit _ voice ev) | isUndefined voice = do
