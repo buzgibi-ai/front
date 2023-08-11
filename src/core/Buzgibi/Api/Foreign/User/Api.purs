@@ -1,12 +1,14 @@
 module Buzgibi.Api.Foreign.User.Api
   ( History
   , Location
+  , Notification
   , SubmitSurvey
   , Survey
   , UserApi
   , WithFieldStatusHistoryItem
   , editSurvey
   , getHistory
+  , getNotification
   , makeSurvey
   , mkUserApi
   , printWithFieldStatusHistoryItem
@@ -19,7 +21,7 @@ import Prelude
 import Buzgibi.Api.Foreign.Common
 
 import Effect (Effect)
-import Data.Function.Uncurried (Fn1, Fn3, Fn4, runFn3, runFn4)
+import Data.Function.Uncurried (Fn1, Fn3, Fn4, runFn3, runFn4, Fn2, runFn2)
 import Effect.Aff.Compat as AC
 import Foreign.Object (Object)
 import Foreign (Foreign, typeOf)
@@ -84,5 +86,12 @@ type Page = { page :: Int }
 
 foreign import _getHistory :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Page UserApi (AC.EffectFnAff (Object (Response History)))
 
-getHistory :: Maybe Page -> UserApi -> (AC.EffectFnAff (Object (Response History)))
+getHistory :: Maybe Page -> UserApi -> AC.EffectFnAff (Object (Response History))
 getHistory page = runFn3 _getHistory withError (fromMaybe { page: 1 } page)
+
+type Notification = { text :: String, level :: String }
+
+foreign import _getNotification :: Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) UserApi (AC.EffectFnAff (Object (Response (Array Notification))))
+
+getNotification :: UserApi -> AC.EffectFnAff (Object (Response (Array Notification)))
+getNotification = runFn2 _getNotification withError

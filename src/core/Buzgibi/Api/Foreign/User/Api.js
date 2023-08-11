@@ -37,3 +37,11 @@ export const _getHistory = function(withError, page, api) {
         })
     };
 }
+
+export const _getNotification = function(withError, api) {
+    return function(onError, onOk) {
+        api.userNotificationsGet().then(onOk).catch(resp => {
+            return withError(resp, onError)
+        })
+    };
+}

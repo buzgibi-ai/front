@@ -64,6 +64,11 @@ export const withError = function(resp, onError) {
 export const _fetchWS = function(withError, ws) {
     console.log(ws);
     return function(onError, onOk) {
-        ws.onmessage = function(event) { onOk(JSON.parse(event.data)); }
-        ws.onerror = function(err) { return withError(err, onError) }
-};}
+        ws.onmessage = function(event) {
+            onOk(JSON.parse(event.data));
+        }
+        ws.onerror = function(err) {
+            return withError(err, onError)
+        }
+    };
+}

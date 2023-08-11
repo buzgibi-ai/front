@@ -25,7 +25,7 @@ import Buzgibi.Component.HTML.Header as Header
 import Buzgibi.Component.HTML.Footer as Footer
 import Buzgibi.Component.HTML.Body as Body
 import Buzgibi.Component.Lang.Data (Lang(..))
-import Buzgibi.Component.Async (Level(..), mkOrdinary, send) as Async
+import Buzgibi.Component.Async (Level(..), mkOrdinary, send, mkException) as Async
 import Buzgibi.Component.Root.Fork.Translation as Fork.Translation
 import Buzgibi.Component.Root.Fork.Telegram as Fork.Telegram
 import Buzgibi.Component.HTML.Loading as HTML.Loading
@@ -36,7 +36,10 @@ import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
 import Buzgibi.Page.User.Survey as User.Survey
 import Buzgibi.Page.User.History as User.History
-import Buzgibi.Component.Survey.Edit as Survey.Edit 
+import Buzgibi.Component.Survey.Edit as Survey.Edit
+import Buzgibi.Api.Foreign.Request as Request
+import Buzgibi.Api.Foreign.Request.Handler (onFailure)
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 
 import Data.Either (hush, Either(..))
 import Data.Foldable (elem, for_)
@@ -93,13 +96,17 @@ component = H.mkComponent
   handleAction :: Action -> H.HalogenM State Action ChildSlots Void AppM Unit
   handleAction Initialize = do
     logDebug $ loc <> " ---> root component init start .."
-    store@{ config: Config { isCaptcha } } <- getStore
+    store@{ config: Config { isCaptcha, apiBuzgibiHost }, user } <- getStore
     logDebug $ printStore store
 
+    for_ user \{ token, jwtUser: {ident} } -> do 
+      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi BuzgibiBack.getNotification
+      onFailure resp (Async.send <<< flip Async.mkException loc) $ 
+        \{ success: xs :: Array BuzgibiBack.Notification } ->
+          for_ xs \{text} -> Async.send $ Async.mkOrdinary text Async.Info Nothing
+
     -- show up info if captcha is disabled
-    when (not isCaptcha)
-      $ Async.send
-      $ Async.mkOrdinary "captcha is disabled" Async.Info Nothing
+    when (not isCaptcha) $ Async.send $ Async.mkOrdinary "captcha is disabled" Async.Info Nothing
 
     Fork.Telegram.init >>= Fork.Telegram.fork
 
