@@ -60,3 +60,16 @@ export const withError = function(resp, onError) {
     e.message = "status: " + resp['status'] + ". error: " + mkMsg;
     onError(e);
 }
+
+ws.onmessage = function(event) { onOk(JSON.parse(event.data)); }
+ws.onerror = function(err) { onErr(err) }
+
+api.userSurveyHistoryGet(page).then(onOk).catch(resp => {
+    return withError(resp, onError)
+})
+
+export const _fetchWS = function(withError, ws) {
+    return function(onError, onOk) {
+        ws.onmessage = function(event) { onOk(JSON.parse(event.data)); }
+        ws.onerror = function(err) { return withError(err, onError) }
+    };}

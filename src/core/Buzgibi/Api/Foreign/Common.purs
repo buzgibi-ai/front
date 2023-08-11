@@ -4,7 +4,8 @@ module Buzgibi.Api.Foreign.Common
   , JWTStatus(..)
   , JWTToken(..)
   , Response
-  , Success (..)
+  , Success(..)
+  , fetchWS
   , getDataFromObj
   , mkApiClient
   , withError
@@ -27,6 +28,8 @@ import Data.Argonaut.Decode.Error (JsonDecodeError(TypeMismatch))
 import Data.Argonaut.Decode.Generic (genericDecodeJson)
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe, fromMaybe)
+import Web.Socket (WebSocket)
+import Effect.Aff.Compat as AC
 
 import Undefined
 
@@ -72,3 +75,8 @@ derive instance Generic JWTStatus _
 
 instance DecodeJson JWTStatus where
   decodeJson = genericDecodeJson
+
+foreign import _fetchWS :: forall a .  Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) WebSocket (AC.EffectFnAff (Object (Response a)))
+
+fetchWS :: forall a . WebSocket -> AC.EffectFnAff (Object (Response a))
+fetchWS =  runFn2 _fetchWS withError
