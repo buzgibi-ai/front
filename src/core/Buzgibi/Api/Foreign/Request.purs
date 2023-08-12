@@ -2,8 +2,10 @@ module Buzgibi.Api.Foreign.Request
   ( make
   , makeAuth
   , makeAuthWithResp
+  , makeWS
   , makeWithResp
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -23,6 +25,7 @@ import Data.Nullable
 import Data.Bifunctor (rmap)
 import Data.Maybe
 import Safe.Coerce
+import Web.Socket as WS
 
 makeAuthWithResp
   :: forall m api resp
@@ -70,3 +73,8 @@ make
   -> (api -> AC.EffectFnAff (Object resp))
   -> m (Either Error (Success a))
 make = makeAuth Nothing
+
+makeWS :: forall m a . MonadAff m => WS.WebSocket -> m (Either Error (Success a))
+makeWS ws = do 
+  obj <- H.liftAff $ try $ AC.fromEffectFnAff $ fetchWS ws
+  map join $ for obj (H.liftEffect <<< getDataFromObjWS)

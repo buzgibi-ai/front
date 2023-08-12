@@ -3,6 +3,7 @@ module Web.Socket
   , WebSocket
   , create
   , readState
+  , send
   )
   where
 
@@ -16,6 +17,8 @@ import Web.Socket.ReadyState (toEnumReadyState, ReadyState)
 import Data.Maybe (fromJust)
 import Effect.Aff.Compat as AC
 import Data.Either
+import Web.File.Blob (Blob, fromString)
+import Data.MediaType (MediaType (..))
 
 newtype Protocol = Protocol String
 
@@ -32,3 +35,10 @@ readState :: WebSocket -> Effect ReadyState
 readState ws = do 
   st <- runFn1 _readState ws
   pure $ unsafePartial $ fromJust $ toEnumReadyState st
+
+foreign import _send :: Fn2 WebSocket Blob (Effect Unit)
+
+foreign import _unsafeStringify :: forall a. a -> String
+
+send :: forall a . WebSocket -> a -> Effect Unit
+send ws o = runFn2 _send ws $ fromString (_unsafeStringify o) (MediaType "application/json")

@@ -12,3 +12,11 @@ export const _readState = function(ws) {
         return ws.readyState;
     };
 }
+
+export const _send = function(ws, o) {
+    return function() {
+        return ws.send(o);
+    };
+}
+
+export const _unsafeStringify = JSON.stringify;

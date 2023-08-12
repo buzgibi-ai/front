@@ -43,6 +43,35 @@ export const _getDataFromObj = left => right => resp => {
     };
 }
 
+export const _getDataFromObjWS = left => right => resp => {
+    let success = resp['success'];
+
+    let errMsg = (xs) => {
+        tmp = '';
+        xs.forEach(e => {
+            tmp += e['message'];
+        });
+        return tmp;
+    }
+
+    let warnMsg = (xs) => {
+        tmp = [];
+        xs.forEach(e => {
+            tmp.push(e['message']);
+        });
+        return tmp;
+    }
+
+    let err = resp['errors'] !== undefined ? errMsg(resp['errors']) : 'malformed resp: ' + JSON.stringify(resp);
+    let warns = resp['warnings'] !== undefined ? warnMsg(resp['warnings']) : [];
+    const obj = new Object();
+    obj.success = success;
+    obj.warnings = warns;
+    return () => {
+        return success !== undefined ? right(obj) : left(err);
+    };
+}
+
 export const _printError = (err) => {
     return err.getMessage();
 }
@@ -62,7 +91,6 @@ export const withError = function(resp, onError) {
 }
 
 export const _fetchWS = function(withError, ws) {
-    console.log(ws);
     return function(onError, onOk) {
         ws.onmessage = function(event) {
             onOk(JSON.parse(event.data));

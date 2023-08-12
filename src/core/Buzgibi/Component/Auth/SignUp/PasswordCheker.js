@@ -71,7 +71,5 @@ export const check = (password, options = defaultOptions, allowedSymbols = "!\"#
 
     Object.assign(strength, fulfilledOptions[0])
 
-    console.log(strength);
-
     return strength;
 };

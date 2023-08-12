@@ -2,22 +2,41 @@ module Buzgibi.Component.Subscription.WS (subscribe) where
 
 import Prelude
 
+import Buzgibi.Data.Config
+import Buzgibi.Api.Foreign.Request (makeWS)
+import Buzgibi.Api.Foreign.Request.Handler (onFailure)
+import Buzgibi.Component.Async as Async
+import Buzgibi.Capability.LogMessages (logDebug)
+
 import Halogen as H
 import Web.Socket as WS
 import Web.Socket.ReadyState
 import Control.Monad.Rec.Class (forever)
 import Effect.Aff as Aff
+import Halogen.Store.Monad (getStore)
+import Data.Traversable (for_)
 
-import Undefined
 
-subscribe loc ws goCompHandle = do
-  ws <- H.liftEffect $ WS.create ws []
+subscribe loc url trigger goCompHandle = do
+  { config: Config { apiBuzgibiHostWS }, user } <- getStore
+  ws <- H.liftEffect $ WS.create (apiBuzgibiHostWS <> "/" <> url) []
   let isOpen = do
         Aff.delay $ Aff.Milliseconds 1000.0
         st <-  H.liftEffect $ WS.readState ws
         if st == Open then pure true else isOpen
   H.liftAff $ unlessM isOpen $ pure unit
-  void $ H.fork $ forever $ do 
-    H.liftAff $ Aff.delay $ Aff.Milliseconds 1000.0
-    st <- H.liftEffect $ WS.readState ws
-    when (st == Open) undefined
+
+  -- esteblish authorised connection
+  -- if it is successful we'll prcoceed with component handler
+  for_ user \{ token } -> do 
+    H.liftEffect $ ws `WS.send` token
+    resp <- makeWS ws
+    onFailure resp (Async.send <<< flip Async.mkException loc) $ \_ -> do
+      logDebug $ loc <> " ---> ws is open "
+      for_ trigger \init -> H.liftEffect $ ws `WS.send` init
+      void $ H.fork $ forever $ do 
+        H.liftAff $ Aff.delay $ Aff.Milliseconds 1000.0
+        st <- H.liftEffect $ WS.readState ws
+        when (st == Open) do
+         resp <- makeWS ws
+         onFailure resp (Async.send <<< flip Async.mkException loc) goCompHandle

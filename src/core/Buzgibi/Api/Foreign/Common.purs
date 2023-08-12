@@ -7,6 +7,7 @@ module Buzgibi.Api.Foreign.Common
   , Success(..)
   , fetchWS
   , getDataFromObj
+  , getDataFromObjWS
   , mkApiClient
   , withError
   )
@@ -53,6 +54,16 @@ foreign import _getDataFromObj
 
 getDataFromObj :: forall a b. Object a -> Effect (Either E.Error (Success b))
 getDataFromObj = _getDataFromObj (Left <<< E.error) Right
+
+foreign import _getDataFromObjWS
+  :: forall a b
+   . (String -> Either E.Error b)
+  -> (Success b -> Either E.Error (Success b))
+  -> Object a
+  -> Effect (Either E.Error b)
+
+getDataFromObjWS :: forall a b. Object a -> Effect (Either E.Error (Success b))
+getDataFromObjWS = _getDataFromObjWS (Left <<< E.error) Right
 
 foreign import _mkApiClient :: Fn2 String String (Effect ApiClient)
 
