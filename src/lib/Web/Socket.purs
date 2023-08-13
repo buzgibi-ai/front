@@ -1,6 +1,7 @@
 module Web.Socket
   ( Protocol(..)
   , WebSocket
+  , close
   , create
   , readState
   , send
@@ -42,3 +43,8 @@ foreign import _unsafeStringify :: forall a. a -> String
 
 send :: forall a . WebSocket -> a -> Effect Unit
 send ws o = runFn2 _send ws $ fromString (_unsafeStringify o) (MediaType "application/json")
+
+foreign import _close :: WebSocket -> Effect Unit 
+
+close :: WebSocket -> Effect Unit
+close = _close

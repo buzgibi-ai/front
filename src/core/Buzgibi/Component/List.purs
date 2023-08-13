@@ -68,8 +68,7 @@ data Action =
      Query Int | 
      LangChange String (Map.Map String String) | 
      Submit Int Boolean MouseEvent |
-     Edit Int Foreign MouseEvent |
-     CatchWS Int
+     Edit Int Foreign MouseEvent
 
 component =
   H.mkComponent
@@ -117,8 +116,6 @@ component =
                 BuzgibiBack.getTranslationEndpoints translation
       in handleAction $ LangChange hash constants
  
-    WS.subscribe loc "ws/user/history" (Just 1) $ \{success: ident} -> handleAction $ CatchWS ident
-
   handleAction (Download ident name ev) = do
     H.liftEffect $ preventDefault ev
     logDebug $ loc <> " ---> downloaded file " <> name
@@ -167,8 +164,6 @@ component =
     void $ H.liftEffect $ { survey: ident, voice: unwrappedVoice } `Async.tryPut` editSurvey
     navigate $ Route.EditSurvey ident
 
-  handleAction (CatchWS ident) = 
-    logDebug $ loc <> " ---> catch ws " <> show ident
 
 render { list: [] } = HH.text "you haven't the history to be shown"
 render { list, total, perpage, constants, currPage } =

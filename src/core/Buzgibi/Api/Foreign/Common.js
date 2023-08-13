@@ -79,14 +79,17 @@ export const _printError = (err) => {
 export const withError = function(resp, onError) {
     let e = new Error();
     let mkMsg = '';
-    if (resp['body']['combinator'] !== undefined) {
+    if (resp['type'] !== undefined && resp['type'] == 'error') {
+        mkMsg += JSON.stringify(resp['currentTarge']);
+    }
+    else if (resp['body']['combinator'] !== undefined) {
         mkMsg += "combinator " + resp['body']['combinator'] + " has failed with error " + resp['body']['error'];
     } else if (resp['body'] != undefined) {
         mkMsg += "server responded with " + resp['body'];
     } else {
         mkMsg += 'server responded with an unknown error';
     }
-    e.message = "status: " + resp['status'] + ". error: " + mkMsg;
+    e.message = "error: " + mkMsg;
     onError(e);
 }
 
