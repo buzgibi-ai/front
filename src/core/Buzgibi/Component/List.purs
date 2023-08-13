@@ -1,8 +1,10 @@
 module Buzgibi.Component.List
   ( Action(..)
+  , Voice
   , component
   , proxy
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -47,7 +49,12 @@ import Data.Array ((:))
 import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
 import Data.Foldable (for_)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
-import Foreign (Foreign)
+import Foreign (Foreign, unsafeToForeign)
+import Effect.AVar as Async
+import Web.Socket as WS
+import Effect.Aff as Aff
+import Data.Array (uncons)
+
 
 proxy = Proxy :: _ "list"
 
@@ -62,13 +69,17 @@ type State =
   , currPage :: Int
   }
 
+type Voice = { survey :: Int, voice :: Int }
+
 data Action = 
      Initialize | 
      Download Int String Event | 
      Query Int | 
      LangChange String (Map.Map String String) | 
      Submit Int Boolean MouseEvent |
-     Edit Int Foreign MouseEvent
+     Edit Int Foreign MouseEvent | 
+     CatchWS Voice |
+     Finalize
 
 component =
   H.mkComponent
@@ -85,6 +96,7 @@ component =
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
         , initialize = pure Initialize
+        , finalize = pure Finalize
         }
     }
   where
@@ -115,7 +127,9 @@ component =
               Map.lookup "history" $ 
                 BuzgibiBack.getTranslationEndpoints translation
       in handleAction $ LangChange hash constants
- 
+
+    WS.subscribe loc "ws/user/history" (Just 1) $ \{success: val} -> handleAction $ CatchWS val
+
   handleAction (Download ident name ev) = do
     H.liftEffect $ preventDefault ev
     logDebug $ loc <> " ---> downloaded file " <> name
@@ -164,6 +178,20 @@ component =
     void $ H.liftEffect $ { survey: ident, voice: unwrappedVoice } `Async.tryPut` editSurvey
     navigate $ Route.EditSurvey ident
 
+  handleAction Finalize = do
+    {wsVar} <- getStore
+    void $ H.liftEffect $ Async.take wsVar $ flip for_ WS.close
+
+  handleAction (CatchWS { survey, voice: voice_ident }) = do
+    let insertVoice [] = []
+        insertVoice array = 
+          case uncons array of 
+            Just { head: el@{surveyident}, tail } ->
+              if surveyident == survey
+              then el { voice = unsafeToForeign voice_ident } : tail
+              else el : insertVoice tail
+            Nothing -> []
+    H.modify_ \s -> s { list = insertVoice (_.list s) }
 
 render { list: [] } = HH.text "you haven't the history to be shown"
 render { list, total, perpage, constants, currPage } =

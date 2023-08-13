@@ -15,10 +15,13 @@ import Control.Monad.Rec.Class (forever)
 import Effect.Aff as Aff
 import Halogen.Store.Monad (getStore)
 import Data.Traversable (for_)
+import Effect.AVar as Async
 
+import Undefined
 
 subscribe loc url trigger goCompHandle = do
-  { config: Config { apiBuzgibiHostWS }, user } <- getStore
+  { config: Config { apiBuzgibiHostWS }, user, wsVar } <- getStore
+  logDebug $ loc <> " ---> ws url: " <> apiBuzgibiHostWS <> "/" <> url 
   ws <- H.liftEffect $ WS.create (apiBuzgibiHostWS <> "/" <> url) []
   let isOpen = do
         Aff.delay $ Aff.Milliseconds 1000.0
@@ -40,3 +43,5 @@ subscribe loc url trigger goCompHandle = do
         when (st == Open) do
           resp <- makeWS ws
           onFailure resp (Async.send <<< flip Async.mkException loc) goCompHandle
+
+  void $ H.liftEffect $ ws `Async.tryPut` wsVar

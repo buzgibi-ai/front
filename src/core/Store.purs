@@ -46,6 +46,7 @@ import Cache as Cache
 import Concurrent.Channel as Async
 import Crypto.Jwt (JwtUser)
 import Effect.Ref (Ref)
+import Web.Socket as WS
 
 type User = { jwtUser :: JwtUser, token :: BuzgibiBack.JWTToken }
 
@@ -77,6 +78,7 @@ type Store =
   , paginationVar :: Ref (Maybe Int)
   , isTest :: Boolean
   , editSurvey :: AVar EditSurvey
+  , wsVar :: AVar WS.WebSocket
   }
 
 printStore store =
@@ -100,9 +102,11 @@ printStore store =
     <> show (_.user store)
     <> ", isLogoutVa: <AVar> "
     <>
-      ",paginationVar: <Ref>"
+      ", paginationVar: <Ref>"
     <>  ", isTest: " 
     <> show (_.isTest store)
+    <> ", editSurvey: <AVar> "
+    <> ", wsVar: <AVar>"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that
