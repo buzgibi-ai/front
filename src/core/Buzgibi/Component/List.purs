@@ -210,11 +210,12 @@ render { list, total, perpage, constants, currPage } =
                 [ HH.td [ HPExt.dataLabel "title" ] 
                   (HH.text (if length name > 20 then take 20 name else name) :
                   if status == "draft" then 
-                    [  HH.a
+                    [  
+                      HH.a
                       [ css "nav-link" 
                       , safeHref (Route.EditSurvey surveyident)
                       , HE.onClick (Edit surveyident (unsafeFromForeign voice))
-                      ] [HH.text "edit"]
+                      ] (HH.text "edit" : if isUndefined voice then [HH.div [css "voice-lock-loader "] []] else [])
                     , HH.a
                       [ css "nav-link"
                       , HE.onClick (Submit surveyident (isUndefined voice))
