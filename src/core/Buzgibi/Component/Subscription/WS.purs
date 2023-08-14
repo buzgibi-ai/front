@@ -37,11 +37,10 @@ subscribe loc url trigger goCompHandle = do
     onFailure resp (Async.send <<< flip Async.mkException loc) $ \_ -> do
       logDebug $ loc <> " ---> ws is open "
       for_ trigger \init -> H.liftEffect $ ws `WS.send` init
-      void $ H.fork $ forever $ do 
+      forkId <- H.fork $ forever $ do 
         H.liftAff $ Aff.delay $ Aff.Milliseconds 1000.0
         st <- H.liftEffect $ WS.readState ws
         when (st == Open) do
           resp <- makeWS ws
           onFailure resp (Async.send <<< flip Async.mkException loc) goCompHandle
-
-  void $ H.liftEffect $ ws `Async.tryPut` wsVar
+      void $ H.liftEffect $ { ws: ws, forkId: forkId } `Async.tryPut` wsVar    

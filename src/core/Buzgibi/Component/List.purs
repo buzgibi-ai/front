@@ -180,7 +180,11 @@ component =
 
   handleAction Finalize = do
     {wsVar} <- getStore
-    void $ H.liftEffect $ Async.take wsVar $ flip for_ WS.close
+    wsm <- H.liftEffect $ Async.tryTake wsVar
+    for_ wsm \{ws, forkId} -> do
+      H.kill forkId
+      H.liftEffect $ WS.close ws
+      logDebug $ loc <> " ---> ws has been killed"
 
   handleAction (CatchWS { survey, voice: voice_ident }) = do
     let insertVoice [] = []

@@ -7,6 +7,7 @@ module Store
   , EditSurvey
   , Store(..)
   , User
+  , WS
   , initAppStore
   , printStore
   , reduce
@@ -24,6 +25,7 @@ import Buzgibi.Data.Route (Route)
 import Buzgibi.Component.Async as Async
 import Store.Types
 
+import Halogen as H
 import Data.Maybe (Maybe(..))
 import Effect.Exception (Error, message)
 import Data.Argonaut.Core (stringify)
@@ -52,6 +54,8 @@ type User = { jwtUser :: JwtUser, token :: BuzgibiBack.JWTToken }
 
 type EditSurvey = { survey :: Int, voice :: Int }
 
+type WS = { ws :: WS.WebSocket, forkId :: H.ForkId }
+
 -- | We can now construct our central state which will be available to all
 -- | components (if they opt-in).
 -- |
@@ -78,7 +82,7 @@ type Store =
   , paginationVar :: Ref (Maybe Int)
   , isTest :: Boolean
   , editSurvey :: AVar EditSurvey
-  , wsVar :: AVar WS.WebSocket
+  , wsVar :: AVar WS
   }
 
 printStore store =
