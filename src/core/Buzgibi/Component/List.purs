@@ -1,5 +1,6 @@
 module Buzgibi.Component.List
   ( Action(..)
+  , Report
   , Voice
   , component
   , proxy
@@ -49,12 +50,11 @@ import Data.Array ((:))
 import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
 import Data.Foldable (for_)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
-import Foreign (Foreign, unsafeToForeign)
+import Foreign (Foreign, unsafeToForeign, unsafeFromForeign, isNull)
 import Effect.AVar as Async
 import Web.Socket as WS
 import Effect.Aff as Aff
 import Data.Array (uncons)
-
 
 proxy = Proxy :: _ "list"
 
@@ -71,6 +71,8 @@ type State =
 
 type Voice = { survey :: Int, voice :: Int }
 
+type Report = { survey :: Int, report :: Int }
+
 data Action = 
      Initialize | 
      Download Int String Event | 
@@ -78,7 +80,8 @@ data Action =
      LangChange String (Map.Map String String) | 
      Submit Int Boolean MouseEvent |
      Edit Int Foreign MouseEvent | 
-     CatchWS Voice |
+     CatchVoiceWS Voice |
+     CatchReportWS Report |
      Finalize
 
 component =
@@ -128,7 +131,16 @@ component =
                 BuzgibiBack.getTranslationEndpoints translation
       in handleAction $ LangChange hash constants
 
-    WS.subscribe loc "ws/user/history" (Just 1) $ \{success: val} -> handleAction $ CatchWS val
+    WS.subscribe loc "ws/user/survey/history/voice" (Just 1) $ 
+      \{success: val} -> handleAction $ CatchVoiceWS val
+    WS.subscribe loc "ws/user/survey/history/report" (Just 1) $ 
+      \{success: o} ->
+       if isNull o then
+         pure unit
+       else 
+         handleAction $ 
+           CatchReportWS $ 
+             unsafeFromForeign o
 
   handleAction (Download ident name ev) = do
     H.liftEffect $ preventDefault ev
@@ -186,7 +198,7 @@ component =
       H.liftEffect $ WS.close ws
       logDebug $ loc <> " ---> ws has been killed"
 
-  handleAction (CatchWS { survey, voice: voice_ident }) = do
+  handleAction (CatchVoiceWS { survey, voice: voice_ident }) = do
     let insertVoice [] = []
         insertVoice array = 
           case uncons array of 
@@ -197,7 +209,31 @@ component =
             Nothing -> []
     H.modify_ \s -> s { list = insertVoice (_.list s) }
 
-render { list: [] } = HH.text "you haven't the history to be shown"
+  handleAction (CatchReportWS { survey, report: report_ident, status }) = do
+    let insertReport [] = []
+        insertReport array = 
+          case uncons array of 
+            Just { head: el@{surveyident}, tail } ->
+              if surveyident == survey
+              then el { reportident = unsafeToForeign report_ident, status = status } : tail
+              else el : insertReport tail
+            Nothing -> []
+    H.modify_ \s -> s { list = insertReport (_.list s) }  
+
+render { list: [], constants } =
+  HH.div_ 
+  [ 
+      HH.div_ [ HH.text "you haven't the history to be shown"]
+  ,   HH.div_ 
+      [
+          HH.a
+          [ css "nav-link"
+          , HPExt.style "font-size: 20px"
+          , safeHref Route.UserSurvey
+          ]
+          [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
+      ]    
+  ]
 render { list, total, perpage, constants, currPage } =
   HH.div
   [ css "history-item-container" ]
