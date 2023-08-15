@@ -49,12 +49,14 @@ import Undefined
 import Data.Array ((:))
 import DOM.HTML.Indexed.ButtonType (ButtonType (ButtonButton))
 import Data.Foldable (for_)
+import Data.Traversable (for)
 import Web.UIEvent.MouseEvent (MouseEvent, toEvent)
 import Foreign (Foreign, unsafeToForeign, unsafeFromForeign, isNull)
 import Effect.AVar as Async
 import Web.Socket as WS
 import Effect.Aff as Aff
 import Data.Array (uncons)
+import Date.Format (format) 
 
 proxy = Proxy :: _ "list"
 
@@ -109,9 +111,12 @@ component =
       Just { token } -> do
         resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi $ BuzgibiBack.getHistory page
         logDebug $ loc <> " ---> get history for page " <> show page
-        withError resp \{ success: { items, total, perpage } } -> do 
-          logDebug $ loc <> " ---> get history items " <> joinWith "," (map BuzgibiBack.printWithFieldStatusHistoryItem items) <> " for page " <> show page
-          H.modify_ _ { list = items, total = total, perpage = perpage, currPage = maybe 1 _.page page  }
+        withError resp \{ success: { items: old, total, perpage } } -> do 
+          logDebug $ loc <> " ---> get history items " <> joinWith "," (map BuzgibiBack.printWithFieldStatusHistoryItem old) <> " for page " <> show page
+          new <- for old \item@{timestamp} -> do 
+            tm <- H.liftEffect $ format timestamp
+            pure item { timestamp = tm }
+          H.modify_ _ { list = new, total = total, perpage = perpage, currPage = maybe 1 _.page page  }
       Nothing -> pure unit
   handleAction Initialize = do
     void $ initTranslation loc \hash translation -> do
