@@ -71,7 +71,7 @@ type State =
 
 type Voice = { survey :: Int, voice :: Int }
 
-type Report = { survey :: Int, report :: Int }
+type Report = { survey :: Int, report :: Int, status :: String }
 
 data Action = 
      Initialize | 
