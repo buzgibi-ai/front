@@ -75,4 +75,4 @@ jobs:
               cd back
               ./deploy/stop.sh
               rm .env
-              ./deploy/start.sh $HOME/registry-token
+              ./deploy/start.sh $HOME/docker_envs
