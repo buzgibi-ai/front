@@ -16,6 +16,7 @@ import Effect.Aff as Aff
 import Halogen.Store.Monad (getStore)
 import Data.Traversable (for_)
 import Effect.AVar as Async
+import Data.Array ((:), singleton)
 
 import Undefined
 
@@ -43,4 +44,10 @@ subscribe loc url trigger goCompHandle = do
         when (st == Open) do
           resp <- makeWS ws
           onFailure resp (Async.send <<< flip Async.mkException loc) goCompHandle
-      void $ H.liftEffect $ { ws: ws, forkId: forkId } `Async.tryPut` wsVar    
+      void $ H.liftEffect $ do 
+        st <- Async.status wsVar
+        if Async.isEmpty st 
+        then void $ singleton { ws: ws, forkId: forkId } `Async.tryPut` wsVar
+        else do 
+          mxs <- Async.tryTake wsVar
+          for_ mxs \xs -> ({ ws: ws, forkId: forkId } : xs) `Async.tryPut` wsVar

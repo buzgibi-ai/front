@@ -82,7 +82,7 @@ type Store =
   , paginationVar :: Ref (Maybe Int)
   , isTest :: Boolean
   , editSurvey :: AVar EditSurvey
-  , wsVar :: AVar WS
+  , wsVar :: AVar (Array WS)
   }
 
 printStore store =
