@@ -203,7 +203,8 @@ surveyForm survey isSurveyEmpty error constants =
   [
       HH.div [css "form-group"]
       [
-          HH.div [HPExt.style "color:red"] [HH.text (fromMaybe mempty error)] 
+          HH.div [HPExt.style "color:red"] [HH.text (fromMaybe mempty error)]
+      ,   HH.div_ [HH.text "make sure that you are uploading a valid csv file with one of the following delimiters ',', ';', '\t', ' ', '|'" ]    
       ,   HH.input
           [ HPExt.type_ HPExt.InputFile
           , HE.onFileUpload Upload
@@ -222,6 +223,6 @@ surveyForm survey isSurveyEmpty error constants =
           , HE.onValueInput SetSurvey
           , HPExt.value $ maybe mempty (_.survey) survey
           ]
-      ,   HH.input [ css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "..." (Map.lookup "submit" constants)) ]    
+      ,   HH.input [ HPExt.style "cursor:pointer", css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "..." (Map.lookup "submit" constants)) ]    
       ]
   ]
