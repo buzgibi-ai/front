@@ -27,6 +27,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen.HTML.Events as HE
 import Halogen.Query.Input (RefLabel (..))
+import Halogen.HTML.Properties.ARIA as HP
 import Type.Proxy (Proxy(..))
 import Web.HTML.HTMLDocument (setTitle)
 import Web.HTML.Window (document, innerWidth)
@@ -204,25 +205,28 @@ surveyForm survey isSurveyEmpty error constants =
       HH.div [css "form-group"]
       [
           HH.div [HPExt.style "color:red"] [HH.text (fromMaybe mempty error)]
-      ,   HH.div_ [HH.text "make sure that you are uploading a valid csv file with one of the following delimiters ',', ';', '\t', ' ', '|'" ]    
+      ,   HH.div_ [HH.text "phones. make sure that you are uploading a valid csv file with one of the following delimiters ',', ';', '\t', ' ', '|'" ]
       ,   HH.input
           [ HPExt.type_ HPExt.InputFile
           , HE.onFileUpload Upload
           , css "form-control"
           , HPExt.ref $ RefLabel "file"
           ]
+      ,   HH.label_ [HH.text "survey category"]      
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetCategory] $ 
             (fromEnum CustomerSatisfaction .. fromEnum PoliticalPoll) <#> \x ->
               HH.option_ [HH.text (fromMaybe "..." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe Category))) constants))]
+      ,   HH.label_ [HH.text "survey score scale"]          
       ,   HH.select [ css "form-control", HE.onSelectedIndexChange SetAssessmentScore] $ 
             (fromEnum YN .. fromEnum ScaleOf10) <#> \x ->
               HH.option_ [HH.text (fromMaybe "..." (Map.lookup (show (fromMaybe undefined (toEnum x :: Maybe AssessmentScore))) constants))]
+      ,   HH.label_ [HH.text "survey question"]        
       ,   HH.input
           [ HPExt.type_ HPExt.InputText
           , css $ "form-control " <> if isSurveyEmpty then "border border-danger" else mempty
           , HE.onValueInput SetSurvey
           , HPExt.value $ maybe mempty (_.survey) survey
           ]
-      ,   HH.input [ HPExt.style "cursor:pointer", css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "..." (Map.lookup "submit" constants)) ]    
+      ,   HH.input [ HPExt.style "cursor:pointer; margin-top:20px", css "form-control", HPExt.type_ HPExt.InputSubmit, HPExt.value (fromMaybe "..." (Map.lookup "submit" constants)) ]    
       ]
   ]
