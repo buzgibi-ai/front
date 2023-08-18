@@ -216,6 +216,7 @@ component =
     H.modify_ \s -> s { list = insertVoice (_.list s) }
 
   handleAction (CatchReportWS { survey, report: report_ident, status }) = do
+    logDebug $ loc <> " ---> ws report caught: " <> show survey
     let insertReport [] = []
         insertReport array = 
           case uncons array of 
