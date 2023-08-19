@@ -11,13 +11,14 @@ module Buzgibi.Api.Foreign.BuzgibiBack
   , mkForeignApi
   , mkReCaptchaApi
   , mkSendGridSendMailRequest
-  , module Common
-  , module FrontApi
   , module AuthApi
-  , module UserApi
+  , module Common
   , module FileApi
-  , send
-  ) where
+  , module FrontApi
+  , module UserApi
+  , sendEmail
+  )
+  where
 
 import Prelude
 
@@ -48,7 +49,10 @@ type SendGridSendMailRequestBody = { from :: String, personalization :: String, 
 
 foreign import mkSendGridSendMailRequest :: Fn1 SendGridSendMailRequestBody (Effect SendGridSendMailRequest)
 
-foreign import send :: forall a. Fn2 SendGridSendMailRequest ForeignApi (AC.EffectFnAff (Object (Response a)))
+foreign import _sendEmail :: Fn3 (Foreign -> (Foreign -> Either E.Error Unit) -> Either E.Error Unit) SendGridSendMailRequest ForeignApi (AC.EffectFnAff (Object (Response Unit)))
+
+sendEmail :: SendGridSendMailRequest -> ForeignApi -> AC.EffectFnAff (Object (Response Unit))
+sendEmail = runFn3 _sendEmail Common.withError
 
 foreign import mkReCaptchaApi :: Fn1 ApiClient (Effect ReCaptchaApi)
 

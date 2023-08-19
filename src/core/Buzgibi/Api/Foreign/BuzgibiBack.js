@@ -14,13 +14,13 @@ export const mkSendGridSendMailRequest =
         };
     }
 
-export const send =
-    function(req, api) {
+export const _sendEmail =
+    function(withError, mail, api) {
         return function(onError, onOk) {
-            api.foreignSendgridSendPost(req).then(onOk).catch(onError)
+            api.foreignSendgridSendPost(mail).then(onOk).catch(resp => {
+                return withError(resp, onError); })
         };
     }
-
 
 export const mkReCaptchaApi = function(api) {
     return () => {

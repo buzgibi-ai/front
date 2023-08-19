@@ -56,7 +56,8 @@ import Effect.AVar as Async
 import Web.Socket as WS
 import Effect.Aff as Aff
 import Data.Array (uncons)
-import Date.Format (format) 
+import Date.Format (format)
+import Data.Function.Uncurried (runFn1)
 
 proxy = Proxy :: _ "list"
 
@@ -84,7 +85,8 @@ data Action =
      Edit Int Foreign MouseEvent | 
      CatchVoiceWS Voice |
      CatchReportWS Report |
-     Finalize
+     Finalize | 
+     TechnicalHitch Int MouseEvent
 
 component =
   H.mkComponent
@@ -225,7 +227,18 @@ component =
               then el { reportident = unsafeToForeign report_ident, status = status } : tail
               else el : insertReport tail
             Nothing -> []
-    H.modify_ \s -> s { list = insertReport (_.list s) }  
+    H.modify_ \s -> s { list = insertReport (_.list s) }
+
+  handleAction (TechnicalHitch ident ev) = do 
+    H.liftEffect $ preventDefault $ toEvent ev
+    { config: Config { apiBuzgibiHost } } <- getStore
+    email <- H.liftEffect $ runFn1 BuzgibiBack.mkSendGridSendMailRequest 
+      {from: "admin@buzgibi.app", 
+       personalization: "admin", 
+       subject: "technical hitch", 
+       body: "survey " <> show ident <> " cannot be carried out" }
+    resp <- Request.make apiBuzgibiHost BuzgibiBack.mkForeignApi $ BuzgibiBack.sendEmail email
+    withError resp $ const $ pure unit
 
 render { list: [], constants } =
   HH.div_ 
@@ -270,7 +283,11 @@ render { list, total, perpage, constants, currPage } =
                     ]
                   else [])
                 , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
-                , HH.td [ HPExt.dataLabel "status" ] [ HH.text $ fromMaybe "..." (Map.lookup status constants) ]
+                , HH.td [ HPExt.dataLabel "status" ] 
+                  [ if status == "technicalFailure" 
+                    then HH.a [css "nav-link", HE.onClick (TechnicalHitch surveyident) ] 
+                              [ HH.text $ fromMaybe "..." (Map.lookup status constants) ]
+                    else HH.text $ fromMaybe "..." (Map.lookup status constants) ]
                 , HH.td [ HPExt.dataLabel "report" ] $
                     if isUndefined reportident
                     then [HH.div_ [HH.text "-"]]
