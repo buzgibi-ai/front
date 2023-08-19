@@ -14,10 +14,9 @@ import Buzgibi.Document.Meta as Meta
 import Buzgibi.Component.Utils (initTranslation)
 import Buzgibi.Component.Subscription.Translation as Translation
 import Buzgibi.Data.Config
-import Buzgibi.Component.HTML.Utils (css, safeHref, whenElem)
 import Buzgibi.Component.Subscription.Logout as Logout
+import Buzgibi.Page.Render.Home (html)
 
-import Halogen.HTML.Properties.Extended as HPExt
 import Halogen as H
 import Halogen.HTML as HH
 import Web.HTML.HTMLDocument (setTitle)
@@ -31,7 +30,6 @@ import Halogen.Store.Monad (getStore)
 import Data.Map as Map
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime)
-import Halogen.Html.Raw.Render as H
 
 import Undefined
 
@@ -74,7 +72,7 @@ component mkBody =
     }
   where
   render { winWidth: Just w, platform: Just p, constants: constants, isAuth } =
-    HH.div_ [ mkBody p w (content constants isAuth) ]
+    HH.div_ [ mkBody p w (html constants isAuth) ]
   render _ = HH.div_ []
   handleAction Initialize = do
     H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Home"
@@ -120,16 +118,3 @@ component mkBody =
     { start } <- H.get
     sendComponentTime start end loc
   handleAction Logout = H.modify_ _ { isAuth = false }
-
-content constants isAuth =
-  HH.div_
-    [ H.render_ $ fromMaybe undefined $ Map.lookup "headline" constants
-    , whenElem isAuth $ HH.div_
-        [ HH.a
-            [ css "nav-link"
-            , HPExt.style "font-size: 30px"
-            , safeHref Route.UserSurvey
-            ]
-            [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
-        ]
-    ]
