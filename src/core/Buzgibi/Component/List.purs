@@ -235,10 +235,11 @@ component =
     email <- H.liftEffect $ runFn1 BuzgibiBack.mkSendGridSendMailRequest 
       {from: "admin@buzgibi.app", 
        personalization: "admin", 
-       subject: "technical hitch", 
+       subject: "technical hitch",
        body: "survey " <> show ident <> " cannot be carried out" }
     resp <- Request.make apiBuzgibiHost BuzgibiBack.mkForeignApi $ BuzgibiBack.sendEmail email
-    withError resp $ const $ pure unit
+    let msg = "thank ypu for the request! we are getting to it"
+    withError resp $ const $ Async.send $ Async.mkOrdinary msg Async.Success Nothing
 
 render { list: [], constants } =
   HH.div_ 
@@ -286,7 +287,7 @@ render { list, total, perpage, constants, currPage } =
                 , HH.td [ HPExt.dataLabel "status" ] 
                   [ if status == "technicalFailure" 
                     then HH.a [css "nav-link", HE.onClick (TechnicalHitch surveyident) ] 
-                              [ HH.text $ fromMaybe "..." (Map.lookup status constants) ]
+                              [ HH.span [HPExt.style "color:red"] [HH.text $ fromMaybe "..." (Map.lookup status constants) ]]
                     else HH.text $ fromMaybe "..." (Map.lookup status constants) ]
                 , HH.td [ HPExt.dataLabel "report" ] $
                     if isUndefined reportident
