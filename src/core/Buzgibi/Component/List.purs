@@ -286,8 +286,12 @@ render { list, total, perpage, constants, currPage } =
                 , HH.td [ HPExt.dataLabel "time" ] [ HH.text timestamp ]
                 , HH.td [ HPExt.dataLabel "status" ] 
                   [ if status == "technicalFailure" 
-                    then HH.a [css "nav-link", HE.onClick (TechnicalHitch surveyident) ] 
-                              [ HH.span [HPExt.style "color:red"] [HH.text $ fromMaybe "..." (Map.lookup status constants) ]]
+                    then 
+                      HH.a [css "nav-link", HE.onClick (TechnicalHitch surveyident) ] 
+                      [ 
+                          HH.span [HPExt.style "color:red"] [HH.text $ fromMaybe "..." (Map.lookup status constants) ]
+                      ,   HH.span [css "toolip-tech-failure"] [HH.text "let us know about this issue"] 
+                      ]
                     else HH.text $ fromMaybe "..." (Map.lookup status constants) ]
                 , HH.td [ HPExt.dataLabel "report" ] $
                     if isUndefined reportident
