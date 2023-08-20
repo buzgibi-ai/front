@@ -3,7 +3,7 @@ module Buzgibi.Page.Home.Html (html) where
 import Prelude
 
 import Buzgibi.Data.Route as Route
-import Buzgibi.Component.HTML.Utils (css, safeHref, whenElem)
+import Buzgibi.Component.HTML.Utils (css, safeHref)
 
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen.Html.Raw.Render as H
@@ -28,14 +28,15 @@ html constants isAuth =
           ,   HH.span [css "text-gradient"] [HH.text "Fast and Easy"]      
           ]
       ]
-  ,   whenElem isAuth $ HH.div_
+  ,   
+      HH.div [css "make-survey-button-container"] 
       [
-          HH.div [css "make-survey-button-container"] 
+          HH.div [css "make-survey-button"] 
           [
-              HH.div [css "make-survey-button"] 
-              [
-                  HH.a [ safeHref Route.UserSurvey ] [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
-              ]
+              if isAuth then 
+                 HH.a [ safeHref Route.UserSurvey ] [ HH.text $ fromMaybe undefined $ Map.lookup "makeSurvey" constants ]
+              else
+                HH.a [ safeHref Route.SignUp ] [ HH.text $ fromMaybe undefined $ Map.lookup "signUp" constants ]
           ]
       ]
   ]            
