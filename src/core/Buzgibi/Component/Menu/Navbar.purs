@@ -72,26 +72,21 @@ component =
   handleAction Finalize = logDebug $ loc <> " ---> nav bar vanished"
   handleAction ShowAuth = H.modify_ _ { isAuth = false }
 
-render { route, menu, isAuth } =
-  HH.nav [ css "navbar navbar-expand-lg navbar-light" ]
-    [ HH.ul [ css "navbar-nav mr-auto" ]
-        ( (concatMap (mkItem isAuth route menu addFontStyle) (fromEnum Home .. fromEnum SignIn)) `snoc`
-            HH.slot_ Auth.User.proxy unit Auth.User.component unit
-        )
-    ]
+render { route, menu, isAuth } = 
+  HH.div [ css "nav-auth" ] $ 
+    concatMap (mkItem isAuth route menu addFontStyle) (fromEnum SignUp .. fromEnum SignIn) `snoc`  
+    HH.slot_ Auth.User.proxy unit Auth.User.component unit
 
-mkItem _ _ xs _ _ | Map.isEmpty xs = [ HH.li_ [ HH.text "..." ] ]
+mkItem _ _ xs _ _ | Map.isEmpty xs = []
 mkItem isAuth route xs applyStyle idx =
   if (mkRoute idx == SignUp || mkRoute idx == SignIn) && isAuth then []
   else
-    [ HH.li [ css "nav-item" ]
-        [ HH.a
-            [ css "nav-link"
-            , safeHref (mkRoute idx)
-            , isDisabled (mkRoute idx == route)
-            ]
-            [ el ]
+    [ HH.a
+        [ css $ if mkRoute idx == route then "nav-link-signin" else "nav-link-signup"
+        , safeHref (mkRoute idx)
+        , isDisabled (mkRoute idx == route)
         ]
+        [ el ]
     ]
   where
   mkRoute = fromMaybe undefined <<< (toEnum :: Int -> Maybe Route)
