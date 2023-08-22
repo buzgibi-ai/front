@@ -17,6 +17,7 @@ import Buzgibi.Data.Config
 import Buzgibi.Component.HTML.Utils (css, safeHref, whenElem)
 import Buzgibi.Component.Subscription.Logout as Logout
 import Buzgibi.Page.Home.Html (html)
+import Buzgibi.Capability.Navigate (navigate)
 
 import Halogen.HTML.Properties.Extended as HPExt
 import Halogen as H
@@ -77,6 +78,8 @@ component mkBody =
     HH.div_ [ mkBody p w (html constants isAuth) ]
   render _ = HH.div_ []
   handleAction Initialize = do
+    { user } <- getStore
+    when (isJust user) $ navigate $ Route.UserHistory Route.defUserHistoryParam
     H.liftEffect $ window >>= document >>= setTitle "Buzgibi | Home"
     { platform, config: Config { apiBuzgibiHost: host }, async, user } <- getStore
     w <- H.liftEffect $ window >>= innerWidth

@@ -166,5 +166,5 @@ html constants isAuth =
               ]
           ]
       ,   HH.div [css "mascot"] [HH.img [HPExt.src "images/cta_area.png"]]    
-      ]    
+      ]
   ]
