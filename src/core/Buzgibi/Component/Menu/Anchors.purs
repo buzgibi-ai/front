@@ -7,6 +7,7 @@ import Buzgibi.Component.HTML.Utils (css)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties.Extended as HPExt
+import Halogen.HTML.Events (onClick)
 import Halogen.Store.Monad (getStore)
 import Data.Maybe (isJust)
 import Data.Map as Map
@@ -19,6 +20,7 @@ import Data.Bounded
 import Data.Enum.Generic (genericFromEnum, genericToEnum, genericSucc, genericPred, genericCardinality)
 import Undefined (undefined)
 import Type.Proxy (Proxy(..))
+import Web.Element (scrollTo)
 
 proxy = Proxy :: _ "hamburger"
 
@@ -59,7 +61,7 @@ mkPrintAnchor Home = "home"
 mkPrintAnchor Advanteges = "advanteges"
 mkPrintAnchor HowItWorks = "how"
 
-data Action = Initialize
+data Action = Initialize | Scroll String
 
 component isHome =
   H.mkComponent
@@ -74,11 +76,13 @@ component isHome =
       handleAction Initialize = do
         { user } <- getStore
         H.modify_ _ { isAuth = isJust user }
+      handleAction (Scroll el) = H.liftEffect $ scrollTo el
+        
 
 render true { isAuth: false } = 
   HH.div [css "nav-links"] 
   [
       HH.ul_ $ (fromEnum Home .. fromEnum HowItWorks) <#> \idx -> 
-        HH.li_ [HH.a [css "nav-link", HPExt.href ("#" <> mkPrintAnchor (mkAnchor idx))] [HH.text (print (mkAnchor idx))]]
+        HH.li_ [HH.div [css "nav-link", HPExt.style "cursor:pointer", onClick $ const $ Scroll (mkPrintAnchor (mkAnchor idx))] [HH.text (print (mkAnchor idx))]]
   ]
 render _ _ = HH.div_ []

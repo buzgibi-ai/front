@@ -67,7 +67,7 @@ html constants isAuth =
   [
       HH.section [css "hero-container"]
       [
-          HH.a [ HPExt.namep (mkPrintAnchor Home) ] []
+          HH.div [ HPExt.id (mkPrintAnchor Home) ] []
       ,   HH.div [css "heroheader"]
           [
               HH.h1_ 
@@ -96,7 +96,7 @@ html constants isAuth =
               HH.a [ safeHref Route.SignUp, css "cta-button" ] [ HH.text "let's begin" ]
           ]
       ]
-  ,   HH.a [ HPExt.namep (mkPrintAnchor Advanteges) ] []
+  ,   HH.div [ HPExt.id (mkPrintAnchor Advanteges) ] []
   ,   HH.div [css "advantages-container"]
       [
           HH.div [css "titleCapital"] [HH.h4_ [HH.text "ADVANTAGES OF BUZGİBİ"]]
