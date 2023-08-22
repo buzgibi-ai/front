@@ -110,4 +110,61 @@ html constants isAuth =
             ,  HH.p_ [HH.text p]
             ]
       ]
+  ,   HH.div [ HPExt.id (mkPrintAnchor HowItWorks) ] []    
+  ,   HH.section [css "hiw"]
+      [
+          HH.div [css "howitworks-container"]
+          [
+              HH.div [css "mockup"] [HH.img [HPExt.src "images/mockupen.png"]]
+          ,   HH.div [css "howitworkscontent"]
+              [
+                  HH.div [css "titleGray"] [HH.h4_ [HH.text "HOW IT WORKS?"]]
+              ,   HH.div [css "signupcontent"]
+                  [
+                      HH.div [css "boldtitle"] [HH.h5_ [HH.text "Sign Up!"]]
+                  ,   HH.p_ [HH.text "Buzgibi is an application that allows you to manage your calls. You can start a search by typing with ice cold. But first, you need to create an account for this.!"]
+                  ]    
+              ]
+          ]
+      ]
+  ,   HH.div [css "achievements-container"]
+      [
+          HH.div [css "box-achievement"]
+          [
+              HH.div [css "box1"]
+              [
+                  HH.img [HPExt.src "images/people.png"]
+              ,   HH.h5_ [HH.text "100,000+"]
+              ,   HH.p_ [HH.text "Cold Calls Conducted"]    
+              ]
+          ,   HH.div [css "box2"]
+              [
+                  HH.img [HPExt.src "images/botwithq.png"]
+              ,   HH.h5_ [HH.text "5M+"]
+              ,   HH.p_ [HH.text "Generated realistic voice"]    
+              ]
+          ,   HH.div [css "box3"]
+              [
+                  HH.img [HPExt.src "images/globe.png"]
+              ,   HH.h5_ [HH.text "100+"]
+              ,   HH.p_ [HH.text "Countries you can call"]    
+              ]        
+          ]
+      ]
+  ,   HH.section [css "reach-container"]
+      [
+          HH.div [css "reachcontent"]
+          [
+              HH.div [css "threewords"] [HH.h4_ [HH.text "Fast, Automated, Analysis-based"]]
+          ,   HH.div [css "heroheader"] [HH.h1_ [HH.span [css "text-gradient"] [HH.text "Reach your customers with Buzgibi!"] ]]
+          ,   HH.div [HPExt.id "CTAabovefooter", css "CTA-container"]
+              [
+                  HH.div [css "cta-button"] 
+                  [
+                      HH.a [ safeHref Route.SignUp, css "cta-button" ] [ HH.text "let's begin" ]
+                  ]
+              ]
+          ]
+      ,   HH.div [css "mascot"] [HH.img [HPExt.src "images/cta_area.png"]]    
+      ]    
   ]
