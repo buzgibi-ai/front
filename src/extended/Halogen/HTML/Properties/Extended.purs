@@ -6,6 +6,7 @@ module Halogen.HTML.Properties.Extended
   , module Properties
   , role
   , tabindex
+  , namep
   )
   where
 
@@ -22,4 +23,5 @@ dataDismiss = Properties.prop (PropName "data-dismiss")
 ariaHidden = Properties.prop (PropName "aria-hidden")
 dataLabel = Properties.prop (PropName "data-label")
 tabindex = Properties.prop (PropName "tabindex")
+namep = Properties.prop (PropName "name")
 

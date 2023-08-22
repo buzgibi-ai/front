@@ -28,7 +28,7 @@ import Undefined
 
 proxy = Proxy :: _ "navbar"
 
-loc = "Buzgibi.Component.HTML.Menu.Navbar"
+loc = "Buzgibi.Component.Menu.Navbar"
 
 data Action = Initialize | LangChange String (Map.Map String String) | Finalize | ShowAuth
 

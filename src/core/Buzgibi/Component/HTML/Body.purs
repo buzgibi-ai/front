@@ -25,6 +25,4 @@ type BodyHtml =
   }
 
 mkBodyHtml { header, footer } route platform width content =
-  HH.div_ [ header route platform width, footer, contentWrapper content ]
-
-contentWrapper content = HH.div [ css "body-container" ] [ content ]
+  HH.div_ [ header route platform width, footer, content ]

@@ -27,7 +27,7 @@ import Data.Array (concatMap, (:))
 
 proxy = Proxy :: _ "hamburger"
 
-loc = "Buzgibi.Component.HTML.Menu.Hamburger"
+loc = "Buzgibi.Component.Menu.Hamburger"
 
 data Action = Initialize | LangChange String (Map.Map String String) | Finalize | ShowAuth
 
