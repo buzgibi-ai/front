@@ -4,6 +4,7 @@
     "telegramHost": "https://api.telegram.org/",
     "apiBuzgibiHost": "https://api.buzgibi.app",
     "apiBuzgibiHostWS": "wss://api.buzgibi.app",
-    "cssLink": "https://cdn.jsdelivr.net/gh/buzgibi-ai/front-css@",
-    "cssFiles": ["error", "alert", "miscellaneous", "main"]
+    "cssLink": "css",
+    "cssFiles": ["main"],
+    "localCss": true
 }

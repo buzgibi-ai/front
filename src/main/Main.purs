@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>))
+import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty)
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
@@ -76,7 +76,7 @@ main cfg = do
 
         -- I am sick to the back teeth of changing css hash manualy
         -- let's make the process a bit self-generating
-        for_ (_.cssFiles (getVal cfg)) $ H.liftEffect <<< setCssLink (getShaCSSCommit init) (_.cssLink (getVal cfg))
+        for_ (_.cssFiles (getVal cfg)) $ H.liftEffect <<< setCssLink (getShaCSSCommit init) (_.cssLink (getVal cfg)) (_.localCss (getVal cfg))
 
         langVar <- H.liftEffect $ Async.new Eng
 
@@ -183,8 +183,8 @@ main cfg = do
 -- link.href = 'http://website.example/css/stylesheet.css';
 -- link.media = 'all';
 -- head.appendChild(link);
-setCssLink :: String -> String -> String -> Effect Unit
-setCssLink sha mkHref file = do
+setCssLink :: String -> String -> Boolean -> String -> Effect Unit
+setCssLink sha mkHref localcss file = do
   win <- window
   doc <- map toDocument $ document win
   xs <- "head" `getElementsByTagName` doc
@@ -193,7 +193,7 @@ setCssLink sha mkHref file = do
     link :: Element <- "link" `createElement` doc
     setAttribute "rel" "stylesheet" link
     setAttribute "type" "text/css" link
-    let href = mkHref <> sha <> "/" <> file <> ".css"
+    let href = mkHref <> (if localcss then mempty else sha) <> "/" <> file <> ".css"
     setAttribute "href" href link
     appendChild (toNode (unsafeCoerce link)) (toNode (unsafeCoerce head))
     pure $ Just unit
