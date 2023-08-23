@@ -32,6 +32,7 @@ import Buzgibi.Component.HTML.Loading as HTML.Loading
 import Buzgibi.Data.Config
 import Buzgibi.Component.Auth.SignUp as SignUp
 import Buzgibi.Component.Auth.SignIn as SignIn
+import Buzgibi.Component.Auth.Email as Auth.Email 
 import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
 import Buzgibi.Page.User.Survey as User.Survey
@@ -80,6 +81,7 @@ type ChildSlots =
   , user_survey :: OpaqueSlot Unit
   , user_history :: OpaqueSlot Unit
   , survey_edit :: OpaqueSlot Unit
+  , auth_email_confirmation :: OpaqueSlot Unit
   )
 
 component :: H.Component Query Unit Void AppM
@@ -152,3 +154,4 @@ render { route: Just r@(UserHistory page)} = HH.slot_ User.History.proxy unit (U
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
 render { route: Just r@(EditSurvey _) } = HH.slot_ Survey.Edit.proxy unit (Survey.Edit.component (Body.mkBodyHtml params r)) unit
+render { route: Just r@(EmailConfirmation key) } = HH.slot_ Auth.Email.proxy unit Auth.Email.component { key: key }

@@ -42,6 +42,7 @@ data Route
   | UserSurvey
   | UserHistory String
   | EditSurvey Int
+  | EmailConfirmation String
   | Home
   | SignUp
   | SignIn
@@ -59,6 +60,7 @@ instance Show Route where
   show UserSurvey = mempty
   show (UserHistory _) = mempty
   show (EditSurvey _) = mempty 
+  show (EmailConfirmation _) = mempty
 
 instance Enum Route where
   succ Home = Just SignUp
@@ -104,6 +106,7 @@ routeCodec = root $ sum
   , "UserSurvey": "user" / "survey" / noArgs
   , "UserHistory": "user" / "history" / default "1" (param "page")
   , "EditSurvey": "user" / "survey" / int (segment)
+  , "EmailConfirmation": "auth" / "email" / "confirm" / param "key" 
   }
 
 defUserHistoryParam = "1"

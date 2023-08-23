@@ -1,9 +1,9 @@
 export const _create = function create(url, protocols) {
-  return function () {
-     let ws = new WebSocket(url, protocols);
-     ws.binaryType = "blob";
-     return ws;
-  }
+    return function() {
+        let ws = new WebSocket(url, protocols);
+        ws.binaryType = "blob";
+        return ws;
+    }
 };
 
 export const _readState = function(ws) {
@@ -21,5 +21,7 @@ export const _send = function(ws, o) {
 export const _unsafeStringify = JSON.stringify;
 
 export const _close = function(ws) {
-    return function () { ws.close(); };
+    return function() {
+        ws.close();
+    };
 }

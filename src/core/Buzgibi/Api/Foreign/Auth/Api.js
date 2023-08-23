@@ -32,3 +32,12 @@ export const _logout =
             })
         };
     }
+
+export const _confirmEmail =
+    function(withError, key, api) {
+        return function(onError, onOk) {
+            api.authEmailConfirmGet(key).then(onOk).catch(resp => {
+                return withError(resp, onError)
+            })
+        };
+    }

@@ -18,7 +18,8 @@ export const _sendEmail =
     function(withError, mail, api) {
         return function(onError, onOk) {
             api.foreignSendgridSendPost(mail).then(onOk).catch(resp => {
-                return withError(resp, onError); })
+                return withError(resp, onError);
+            })
         };
     }
 

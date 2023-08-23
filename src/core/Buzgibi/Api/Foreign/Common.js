@@ -81,8 +81,7 @@ export const withError = function(resp, onError) {
     let mkMsg = '';
     if (resp['type'] !== undefined && resp['type'] == 'error') {
         mkMsg += JSON.stringify(resp['currentTarge']);
-    }
-    else if (resp['body']['combinator'] !== undefined) {
+    } else if (resp['body']['combinator'] !== undefined) {
         mkMsg += "combinator " + resp['body']['combinator'] + " has failed with error " + resp['body']['error'];
     } else if (resp['body'] != undefined) {
         mkMsg += "server responded with " + resp['body'];

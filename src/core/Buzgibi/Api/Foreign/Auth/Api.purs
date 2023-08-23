@@ -2,11 +2,13 @@ module Buzgibi.Api.Foreign.Auth.Api
   ( AuthApi
   , AuthType(..)
   , ResponseAuthToken
+  , confirmEmail
   , login
   , logout
   , mkAuthApi
   , register
-  ) where
+  )
+  where
 
 import Prelude
 
@@ -46,3 +48,10 @@ foreign import _logout :: Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a
 
 logout :: AuthApi -> AC.EffectFnAff (Object (Response Unit))
 logout = runFn2 _logout withError
+
+type Emailconfirm = { key :: String }
+
+foreign import _confirmEmail :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Emailconfirm AuthApi (AC.EffectFnAff (Object (Response Boolean)))
+
+confirmEmail :: Emailconfirm -> AuthApi -> AC.EffectFnAff (Object (Response Boolean))
+confirmEmail = runFn3 _confirmEmail withError
