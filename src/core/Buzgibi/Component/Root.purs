@@ -15,7 +15,7 @@ import Prelude
 
 import Buzgibi.Component.Utils (OpaqueSlot)
 import Buzgibi.Data.Route (Route(..), routeCodec)
-import Buzgibi.Page.Home as Home
+import Buzgibi.Page.HomeV2 as HomeV2
 import Buzgibi.Page.Error.Page500 as Page500
 import Buzgibi.Page.Error.Page404 as Page404
 import Buzgibi.Capability.Navigate
@@ -34,6 +34,7 @@ import Buzgibi.Component.Auth.SignUp as SignUp
 import Buzgibi.Component.Auth.SignIn as SignIn
 import Buzgibi.Component.Auth.Email as Auth.Email
 import Buzgibi.Page.Auth as Auth
+import Buzgibi.Page.AuthV2 as AuthV2
 import Buzgibi.Data.Route as Route
 import Buzgibi.Page.User.Survey as User.Survey
 import Buzgibi.Page.User.History as User.History
@@ -73,7 +74,7 @@ type State = { route :: Maybe Route, lang :: Lang }
 data Action = Initialize | LangChange Lang
 
 type ChildSlots =
-  ( home :: OpaqueSlot Unit
+  ( home_v2 :: OpaqueSlot Unit
   , error500 :: OpaqueSlot Unit
   , error404 :: OpaqueSlot Unit
   , auth_container_sign_in :: OpaqueSlot Unit
@@ -82,6 +83,7 @@ type ChildSlots =
   , user_history :: OpaqueSlot Unit
   , survey_edit :: OpaqueSlot Unit
   , auth_email_confirmation :: OpaqueSlot Unit
+  , auth_container_sign_up_v2 :: OpaqueSlot Unit
   )
 
 component :: H.Component Query Unit Void AppM
@@ -140,7 +142,7 @@ params =
 
 render :: State -> H.ComponentHTML Action ChildSlots AppM
 render { route: Nothing } = HTML.Loading.html
-render { route: Just r@Home } = HH.slot_ Home.proxy unit (Home.component (Body.mkBodyHtml params r)) unit
+render { route: Just r@Home } = HH.slot_ HomeV2.proxy unit HomeV2.component unit
 render { route: Just r@SignIn } =
   HH.slot_ Auth.proxy_sign_in unit
     (Auth.component (Body.mkBodyHtml params r) SignIn.slot)
@@ -155,3 +157,5 @@ render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component 
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
 render { route: Just r@(EditSurvey _) } = HH.slot_ Survey.Edit.proxy unit (Survey.Edit.component (Body.mkBodyHtml params r)) unit
 render { route: Just r@(EmailConfirmation key) } = HH.slot_ Auth.Email.proxy unit Auth.Email.component { key: key }
+render { route: Just r@SignUpV2 } = HH.slot_ AuthV2.proxy_sign_up_v2 unit (AuthV2.component SignUp.slot) { route: Route.SignUp, title: "SignUp" }
+render { route: Just r@UserHome } = undefined
