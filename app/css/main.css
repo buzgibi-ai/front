@@ -490,3 +490,22 @@ footer th img{
 footer td {
     font-size: 14px;
 }
+
+.split {
+    height: 100%;
+    width: 50%;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    overflow-x: hidden;
+    padding-top: 20px;
+  }
+  .left{
+    left: 0;
+    top: auto;
+  }
+  .right{
+    right: 0;
+   background: linear-gradient(225deg, #814AF5 0%, #5D49F4 80.59%); 
+  
+  }

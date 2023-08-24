@@ -7,25 +7,24 @@ module Buzgibi.Page.Auth
 
 import Prelude
 
-import Buzgibi.Component.HTML.Body as Body
 import Buzgibi.Capability.LogMessages (logDebug)
 import Buzgibi.Document.Meta as Meta
-import Buzgibi.Page.Subscription.WinResize as WinResize
-import Buzgibi.Data.Config
-import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Data.Route as Route
+import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
+import Buzgibi.Component.HTML.Utils (css)
 
+import Buzgibi.Data.Config
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Properties.Extended as HPExt
 import Type.Proxy (Proxy(..))
 import Data.Maybe (Maybe(..))
-import Store.Types (Platform)
 import Web.HTML.HTMLDocument (setTitle)
-import Web.HTML.Window (document, innerWidth)
+import Web.HTML.Window (document)
 import Web.HTML (window)
-import Halogen.Store.Monad (getStore)
 import System.Time (getTimestamp)
 import Statistics (sendComponentTime)
+import Halogen.Store.Monad (getStore)
 
 proxy_sign_in = Proxy :: _ "auth_container_sign_in"
 proxy_sign_up = Proxy :: _ "auth_container_sign_up"
@@ -34,29 +33,22 @@ loc = "Buzgibi.Page.Auth"
 
 data Action
   = Initialize
-  | WinResize Int
   | Finalize
 
 type State =
-  { winWidth :: Maybe Int
-  , platform :: Maybe Platform
-  , hash :: String
-  , start :: Int
+  { start :: Int
   , route :: Route.Route
   , title :: String
   }
 
-component mkBody authComp =
+component authComp =
   H.mkComponent
     { initialState: \{ route, title } ->
-        { winWidth: Nothing
-        , platform: Nothing
-        , hash: mempty :: String
-        , start: 0
+        { start: 0
         , route: route
         , title: title
         }
-    , render: render mkBody authComp
+    , render: const $ render authComp
     , eval: H.mkEval H.defaultEval
         { handleAction = handleAction
         , initialize = pure Initialize
@@ -67,23 +59,23 @@ component mkBody authComp =
   handleAction Initialize = do
     { route, title } <- H.get
     H.liftEffect $ window >>= document >>= setTitle ("Buzgibi | " <> title)
-    { platform, config: Config { apiBuzgibiHost: host }, async } <- getStore
-    w <- H.liftEffect $ window >>= innerWidth
-
     tm <- H.liftEffect getTimestamp
-
     logDebug $ loc <> " component has started at " <> show tm
-
-    void $ H.subscribe =<< WinResize.subscribe WinResize
-
+    { config: Config { apiBuzgibiHost: host }, async } <- getStore
     Meta.set host async $ pure $ BuzgibiBack.MetaPage (show route)
-
-    H.modify_ _ { platform = pure platform, winWidth = pure w }
-  handleAction (WinResize w) = H.modify_ _ { winWidth = pure w }
   handleAction Finalize = do
     end <- H.liftEffect getTimestamp
     { start } <- H.get
     sendComponentTime start end loc
-
-render mkBody authComp { winWidth: Just w, platform: Just p } = HH.div_ [ mkBody p w authComp ]
-render _ _ _ = HH.div_ []
+render comp =
+ HH.main_
+  [ 
+      HH.div [ css "split left" ]
+      [ comp
+      ]
+  ,   HH.div [css "split right"]
+      [
+          HH.div [css "side"] []
+      ,   HH.img [HPExt.src "images/side-img.png"]
+      ]
+  ]

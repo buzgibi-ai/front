@@ -42,7 +42,6 @@ data Route
   | UserHistory String
   | EditSurvey Int
   | EmailConfirmation String
-  | SignUpV2
   | UserHome
   | Home
   | SignUp
@@ -57,7 +56,6 @@ instance Show Route where
   show Error500 = "500"
   show Error404 = "404"
   show SignUp = "signUp"
-  show SignUpV2 = "signUpV2"
   show SignIn = "signIn"
   show UserHome = "..."
   show UserSurvey = mempty
@@ -110,7 +108,6 @@ routeCodec = root $ sum
   , "UserHistory": "user" / "history" / default "1" (param "page")
   , "EditSurvey": "user" / "survey" / int (segment)
   , "EmailConfirmation": "auth" / "email" / "confirm" / param "key"
-  , "SignUpV2": "auth" / "signUpV2" / noArgs
   , "UserHome": "user" / noArgs
   }
 
