@@ -491,20 +491,45 @@ footer td {
     font-size: 14px;
 }
 
-.split {
+.image-container {
+    margin-top: 111px;
+    height: 60%;
+    display: flex;
+    flex: 1; /* Occupy remaining space */
+  }
+  
+  .sideimg {
+    display: flex;
+    align-items: center;
+    justify-content: space-between
+  }
+  .left-container{height: 100%;}
+  @media (max-width: 768px) {
+    .right {
+      display: none;
+      visibility: hidden;
+      flex-direction: column;
+    }
+  .split{
     height: 100%;
-    width: 50%;
+    width: 100%;
     position: fixed;
     z-index: 1;
-    top: 0;
+    margin-top: 10px;
     overflow-x: hidden;
     padding-top: 20px;
   }
-  .left{
+  .split-left{
+  
+    align-items: center;
+  }
+  }
+  
+.left{
     left: 0;
     top: auto;
   }
-  .right{
+.right{
     right: 0;
    background: linear-gradient(225deg, #814AF5 0%, #5D49F4 80.59%); 
   

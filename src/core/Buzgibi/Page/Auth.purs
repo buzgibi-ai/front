@@ -67,15 +67,15 @@ component authComp =
     end <- H.liftEffect getTimestamp
     { start } <- H.get
     sendComponentTime start end loc
+
 render comp =
- HH.main_
-  [ 
-      HH.div [ css "split left" ]
-      [ comp
-      ]
-  ,   HH.div [css "split right"]
-      [
-          HH.div [css "side"] []
-      ,   HH.img [HPExt.src "images/side-img.png"]
-      ]
-  ]
+  HH.main_
+    [ HH.div [ css "split left" ]
+        [ HH.div [ css "form-container" ] [ comp ]
+        ]
+    , HH.div [ css "split right" ]
+        [ HH.div [ css "left-container" ]
+            [ HH.div [ css "image-container" ] [ HH.img [ css "sideimg", HPExt.src "images/side-img.png" ] ]
+            ]
+        ]
+    ]
