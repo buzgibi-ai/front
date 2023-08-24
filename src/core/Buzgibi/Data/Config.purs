@@ -29,6 +29,7 @@ type ConfigVal =
   , traceLocation :: String
   , cssFiles :: Array String
   , isCaptcha :: Boolean
+  , localCss :: Boolean
   }
 
 newtype Config = Config ConfigVal
@@ -49,6 +50,7 @@ instance EncodeJson Config where
         , cssFiles
         , isCaptcha
         , apiBuzgibiHostWS
+        , localCss
         }
     ) =
     "telegramBot" := telegramBot
@@ -62,6 +64,7 @@ instance EncodeJson Config where
       ~> "cssFiles" := cssFiles
       ~> "isCaptcha" := isCaptcha
       ~> "apiBuzgibiHostWS" := apiBuzgibiHostWS
+      ~> "localCss" := localCss
       ~> jsonEmptyObject
 
 instance DecodeJson Config where
@@ -78,7 +81,8 @@ instance DecodeJson Config where
     cssFiles <- obj .: "cssFiles"
     isCaptcha <- obj .: "isCaptcha"
     apiBuzgibiHostWS <- obj .: "apiBuzgibiHostWS"
-    pure $ Config $ { telegramBot, telegramChat, telegramHost, toTelegram, apiBuzgibiHost, sha256Commit, cssLink, traceLocation, cssFiles, isCaptcha, apiBuzgibiHostWS }
+    localCss <- obj .: "localCss"
+    pure $ Config $ { telegramBot, telegramChat, telegramHost, toTelegram, apiBuzgibiHost, sha256Commit, cssLink, traceLocation, cssFiles, isCaptcha, apiBuzgibiHostWS, localCss }
 
 setShaCommit :: String -> Config -> Config
 setShaCommit x (Config cfg) = Config $ cfg { sha256Commit = x }

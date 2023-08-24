@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>))
+import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty)
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
@@ -76,7 +76,8 @@ main cfg = do
 
         -- I am sick to the back teeth of changing css hash manualy
         -- let's make the process a bit self-generating
-        for_ (_.cssFiles (getVal cfg)) $ H.liftEffect <<< setCssLink (getShaCSSCommit init) (_.cssLink (getVal cfg))
+        let cssSha = if _.localCss (getVal cfg) then mempty else getShaCSSCommit init
+        for_ (_.cssFiles (getVal cfg)) $ H.liftEffect <<< setCssLink cssSha (_.cssLink (getVal cfg))
 
         langVar <- H.liftEffect $ Async.new Eng
 
