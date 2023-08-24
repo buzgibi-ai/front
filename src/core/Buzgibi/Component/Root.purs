@@ -15,7 +15,7 @@ import Prelude
 
 import Buzgibi.Component.Utils (OpaqueSlot)
 import Buzgibi.Data.Route (Route(..), routeCodec)
-import Buzgibi.Page.HomeV2 as HomeV2
+import Buzgibi.Page.Home as Home
 import Buzgibi.Page.Error.Page500 as Page500
 import Buzgibi.Page.Error.Page404 as Page404
 import Buzgibi.Capability.Navigate
@@ -74,7 +74,7 @@ type State = { route :: Maybe Route, lang :: Lang }
 data Action = Initialize | LangChange Lang
 
 type ChildSlots =
-  ( home_v2 :: OpaqueSlot Unit
+  ( home :: OpaqueSlot Unit
   , error500 :: OpaqueSlot Unit
   , error404 :: OpaqueSlot Unit
   , auth_container_sign_in :: OpaqueSlot Unit
@@ -142,7 +142,7 @@ params =
 
 render :: State -> H.ComponentHTML Action ChildSlots AppM
 render { route: Nothing } = HTML.Loading.html
-render { route: Just r@Home } = HH.slot_ HomeV2.proxy unit HomeV2.component unit
+render { route: Just r@Home } = HH.slot_ Home.proxy unit Home.component unit
 render { route: Just r@SignIn } =
   HH.slot_ Auth.proxy_sign_in unit
     (Auth.component (Body.mkBodyHtml params r) SignIn.slot)

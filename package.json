@@ -1,7 +1,7 @@
 {
   "private": true,
   "devDependencies": {
-    "@openapitools/openapi-generator-cli": "^2.6.0",
+    "@openapitools/openapi-generator-cli": "^2.7.0",
     "esbuild": "0.17.19",
     "openapi": "^1.0.1",
     "purescript": "0.15.9",
@@ -20,10 +20,10 @@
     "data.either": "^1.5.2",
     "expect.js": "^0.3.1",
     "forever": "^4.0.3",
-    "js-beautify": "^1.14.8",
+    "js-beautify": "^1.14.9",
     "mocha": "^10.2.0",
     "purs-tidy": "^0.9.3",
     "querystring": "^0.2.1",
-    "superagent": "^8.0.9"
+    "superagent": "^8.1.2"
   }
 }
