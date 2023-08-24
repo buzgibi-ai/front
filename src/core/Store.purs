@@ -11,8 +11,7 @@ module Store
   , initAppStore
   , printStore
   , reduce
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -107,7 +106,7 @@ printStore store =
     <> ", isLogoutVa: <AVar> "
     <>
       ", paginationVar: <Ref>"
-    <>  ", isTest: " 
+    <> ", isTest: "
     <> show (_.isTest store)
     <> ", editSurvey: <AVar> "
     <> ", wsVar: <AVar>"

@@ -87,10 +87,12 @@ component mkBody =
 
     void $ initTranslation loc \hash translation -> do
       logDebug $ loc <> " translation ---> " <> show (BuzgibiBack.getTranslationPage translation)
-      let constants = 
-             fromMaybe undefined $ 
-               Map.lookup "home" $ 
-                 BuzgibiBack.getTranslationPage translation
+      let
+        constants =
+          fromMaybe undefined
+            $ Map.lookup "home"
+            $
+              BuzgibiBack.getTranslationPage translation
       H.modify_ _
         { platform = pure platform
         , winWidth = pure w
@@ -105,10 +107,12 @@ component mkBody =
     Meta.set host async $ pure $ BuzgibiBack.MetaPage (show Route.Home)
 
     Translation.subscribe loc $ \hash translation -> do
-      let warns = 
-            fromMaybe undefined $ 
-              Map.lookup "home" $ 
-                BuzgibiBack.getTranslationPage translation
+      let
+        warns =
+          fromMaybe undefined
+            $ Map.lookup "home"
+            $
+              BuzgibiBack.getTranslationPage translation
       handleAction $ LangChange hash warns
 
     Logout.subscribe loc $ handleAction Logout

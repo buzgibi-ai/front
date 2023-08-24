@@ -1,10 +1,10 @@
 module Data.Base64
-       ( encodeBase64
-       , decodeBase64
-       , Base64
-       , runBase64
-       , fromString
-       ) where
+  ( encodeBase64
+  , decodeBase64
+  , Base64
+  , runBase64
+  , fromString
+  ) where
 
 import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Function.Uncurried (Fn3, runFn3)
@@ -30,7 +30,7 @@ encodeBase64 = Base64 <<< encodeBase64Impl
 foreign import decodeBase64Impl :: Fn3 (ArrayBuffer -> Maybe ArrayBuffer) (Maybe ArrayBuffer) String (Maybe ArrayBuffer)
 
 -- | Decode base64 content to the array buffer(byte) representation it stored internally.
-decodeBase64 :: Base64 ->  ArrayBuffer
+decodeBase64 :: Base64 -> ArrayBuffer
 -- Uses unsafe calls to coerce types, but because Base64 can only be constructed in this module,
 -- The function with this type signature is total. The underlying ffi function must however be defined in terms of Maybe
 decodeBase64 (Base64 content) = unsafePartial $ fromJust $ runFn3 decodeBase64Impl Just Nothing content

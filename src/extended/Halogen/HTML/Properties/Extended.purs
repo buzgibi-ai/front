@@ -6,8 +6,7 @@ module Halogen.HTML.Properties.Extended
   , module Properties
   , role
   , tabindex
-  )
-  where
+  ) where
 
 import Prelude
 

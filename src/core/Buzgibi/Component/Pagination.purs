@@ -9,7 +9,7 @@ import Prelude
 
 import Buzgibi.Component.HTML.Utils (css, safeHref)
 import Buzgibi.Capability.LogMessages (logDebug)
-import Buzgibi.Data.Route (Route (UserHistory), routeCodec)
+import Buzgibi.Data.Route (Route(UserHistory), routeCodec)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -25,7 +25,7 @@ import Halogen.HTML.Events as HE
 import Halogen.Store.Monad (getStore)
 import Effect.Ref as Ref
 import Data.Int (rem)
-import Web.HTML.History (state, replaceState, DocumentTitle (..), URL (..))
+import Web.HTML.History (state, replaceState, DocumentTitle(..), URL(..))
 import Web.HTML.Window (history)
 import Web.HTML (window)
 import Routing.Duplex (print)
@@ -77,11 +77,11 @@ component =
         { total = input.total
         , segment = calculateCurrentSegment currenPage input.total perpage
         }
-  pushBrowserToNextPage page = do 
+  pushBrowserToNextPage page = do
     win <- window
     history <- history win
     s <- state history
-    replaceState s (DocumentTitle "User | History") (URL ("#" <> print routeCodec (UserHistory (show page)))) history     
+    replaceState s (DocumentTitle "User | History") (URL ("#" <> print routeCodec (UserHistory (show page)))) history
 
 render { segment: Nothing } = HH.div_ []
 render { currenPage, segment: Just { xs, next } } =

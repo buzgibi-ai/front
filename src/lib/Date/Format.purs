@@ -5,4 +5,3 @@ import Effect (Effect)
 
 foreign import format :: String -> Effect String
 
-

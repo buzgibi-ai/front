@@ -17,8 +17,7 @@ module Buzgibi.Api.Foreign.BuzgibiBack
   , module FrontApi
   , module UserApi
   , sendEmail
-  )
-  where
+  ) where
 
 import Prelude
 

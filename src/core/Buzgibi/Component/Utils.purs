@@ -62,7 +62,7 @@ initTranslation loc goCompHandle = do
   try 0
 
 with404 (Just x) go = go x
-with404 Nothing _ = navigate Route.Error404 
+with404 Nothing _ = navigate Route.Error404
 
 withAuth (Just x) go = go x
-withAuth Nothing _ = navigate Route.Home 
+withAuth Nothing _ = navigate Route.Home

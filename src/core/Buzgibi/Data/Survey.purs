@@ -1,8 +1,7 @@
 module Buzgibi.Data.Survey
   ( AssessmentScore(..)
   , Category(..)
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -13,12 +12,12 @@ import Data.Maybe
 import Data.Bounded
 import Data.Enum.Generic (genericFromEnum, genericToEnum, genericSucc, genericPred, genericCardinality)
 
-data Category =
-       CustomerSatisfaction 
-     | MarketResearch 
-     | ProductCampaign 
-     | SocialResearch
-     | PoliticalPoll
+data Category
+  = CustomerSatisfaction
+  | MarketResearch
+  | ProductCampaign
+  | SocialResearch
+  | PoliticalPoll
 
 derive instance Generic Category _
 derive instance Eq Category
@@ -30,7 +29,7 @@ instance Show Category where
   show ProductCampaign = "productCampaign"
   show SocialResearch = "socialResearch"
   show PoliticalPoll = "politicalPoll"
- 
+
 instance Enum Category where
   succ = genericSucc
   pred = genericPred
@@ -44,7 +43,6 @@ instance Bounded Category where
   top = PoliticalPoll
   bottom = CustomerSatisfaction
 
-
 data AssessmentScore = YN | ScaleOf10
 
 derive instance Generic AssessmentScore _
@@ -54,7 +52,7 @@ derive instance Ord AssessmentScore
 instance Show AssessmentScore where
   show YN = "yn"
   show ScaleOf10 = "scaleOfTen"
- 
+
 instance Enum AssessmentScore where
   succ = genericSucc
   pred = genericPred

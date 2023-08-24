@@ -4,8 +4,7 @@ module Buzgibi.Api.Foreign.Request
   , makeAuthWithResp
   , makeWS
   , makeWithResp
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -63,7 +62,7 @@ makeAuth token host mkApi runApi = do
   obj <- H.liftAff $ try $ AC.fromEffectFnAff $ runApi api
   val <- map join $ for obj (H.liftEffect <<< getDataFromObj)
   let msg = "wrong type has been recieved: `{success: null}``. `success` must always be populated with either value or error"
-  pure $ val  -- <#> \(x :: Success a) -> maybe (Left (error msg)) Right $ toMaybe x
+  pure $ val -- <#> \(x :: Success a) -> maybe (Left (error msg)) Right $ toMaybe x
 
 make
   :: forall m api resp a
@@ -74,7 +73,7 @@ make
   -> m (Either Error (Success a))
 make = makeAuth Nothing
 
-makeWS :: forall m a . MonadAff m => WS.WebSocket -> m (Either Error (Success a))
-makeWS ws = do 
+makeWS :: forall m a. MonadAff m => WS.WebSocket -> m (Either Error (Success a))
+makeWS ws = do
   obj <- H.liftAff $ try $ AC.fromEffectFnAff $ fetchWS ws
   map join $ for obj (H.liftEffect <<< getDataFromObjWS)

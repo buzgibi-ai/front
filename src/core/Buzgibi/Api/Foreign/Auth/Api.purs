@@ -7,8 +7,7 @@ module Buzgibi.Api.Foreign.Auth.Api
   , logout
   , mkAuthApi
   , register
-  )
-  where
+  ) where
 
 import Prelude
 

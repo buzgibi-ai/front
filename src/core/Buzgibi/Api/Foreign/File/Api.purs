@@ -2,8 +2,7 @@ module Buzgibi.Api.Foreign.File.Api
   ( FileApi
   , mkFileApi
   , upload
-  )
-  where
+  ) where
 
 import Prelude
 

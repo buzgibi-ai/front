@@ -10,8 +10,7 @@ module Buzgibi.Api.Foreign.Common
   , getDataFromObjWS
   , mkApiClient
   , withError
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -87,7 +86,7 @@ derive instance Generic JWTStatus _
 instance DecodeJson JWTStatus where
   decodeJson = genericDecodeJson
 
-foreign import _fetchWS :: forall a .  Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) WebSocket (AC.EffectFnAff (Object (Response a)))
+foreign import _fetchWS :: forall a. Fn2 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) WebSocket (AC.EffectFnAff (Object (Response a)))
 
-fetchWS :: forall a . WebSocket -> AC.EffectFnAff (Object (Response a))
-fetchWS =  runFn2 _fetchWS withError
+fetchWS :: forall a. WebSocket -> AC.EffectFnAff (Object (Response a))
+fetchWS = runFn2 _fetchWS withError

@@ -48,7 +48,7 @@ import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
 import Web.Storage.Storage (getItem, removeItem)
 import Crypto.Jwt as Jwt
-import Effect.Ref as Ref 
+import Effect.Ref as Ref
 
 main :: Cfg.Config -> Effect Unit
 main cfg = do
@@ -171,9 +171,12 @@ main cfg = do
         -- https://github.com/slamdata/purescript-routing/blob/v8.0.0/GUIDE.md
         -- https://github.com/natefaubion/purescript-routing-duplex/blob/v0.2.0/README.md
         void $ liftEffect $ matchesWith (parse routeCodec) \from to ->
-          when (from /= Just to) $ launchAff_ $
-            flip catchError (liftEffect <<< logShow) $
-              void $ halogenIO.query $ H.mkTell $ Root.Navigate to
+          when (from /= Just to) $ launchAff_
+            $ flip catchError (liftEffect <<< logShow)
+            $ void
+            $ halogenIO.query
+            $ H.mkTell
+            $ Root.Navigate to
 
 -- var head  = document.getElementsByTagName('head')[0];
 -- var link  = document.createElement('link');

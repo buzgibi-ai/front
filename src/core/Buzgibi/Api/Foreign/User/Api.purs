@@ -13,8 +13,7 @@ module Buzgibi.Api.Foreign.User.Api
   , mkUserApi
   , printWithFieldStatusHistoryItem
   , submitSurvey
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -35,20 +34,20 @@ foreign import mkUserApi :: Fn1 ApiClient (Effect UserApi)
 
 type Location = { latitude :: Number, longitude :: Number }
 
-type Survey = 
-     { survey :: String
-     , assessmentscore :: String
-     , category :: String
-     , phonesfileident :: Int
-     , location :: Location
-     }
+type Survey =
+  { survey :: String
+  , assessmentscore :: String
+  , category :: String
+  , phonesfileident :: Int
+  , location :: Location
+  }
 
 foreign import _makeSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Survey UserApi (AC.EffectFnAff (Object (Response Unit)))
 
 makeSurvey :: Survey -> UserApi -> AC.EffectFnAff (Object (Response Unit))
 makeSurvey = runFn3 _makeSurvey withError
 
-type SubmitSurvey = { ident :: Int } 
+type SubmitSurvey = { ident :: Int }
 
 foreign import _submitSurvey :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) SubmitSurvey UserApi (AC.EffectFnAff (Object (Response Boolean)))
 
@@ -59,26 +58,30 @@ type EditSurvey = { survey :: String }
 
 foreign import _editSurvey :: Fn4 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) Int EditSurvey UserApi (AC.EffectFnAff (Object (Response Boolean)))
 
-editSurvey :: Int -> EditSurvey ->  UserApi -> AC.EffectFnAff (Object (Response Boolean))
+editSurvey :: Int -> EditSurvey -> UserApi -> AC.EffectFnAff (Object (Response Boolean))
 editSurvey = runFn4 _editSurvey withError
 
+type WithFieldStatusHistoryItem =
+  { surveyident :: Int
+  , reportident :: Foreign
+  , status :: String
+  , name :: String
+  , timestamp :: String
+  , voice :: Foreign
+  }
 
-type WithFieldStatusHistoryItem = 
-     { surveyident :: Int,
-       reportident :: Foreign, 
-       status :: String, 
-       name :: String, 
-       timestamp :: String,
-       voice :: Foreign
-     }
-
-printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timestamp, voice } = 
-  "{ surveyident: " <> show surveyident <>
-  "reportident:" <> typeOf reportident <> 
-  ", status:" <> status <> 
-  ", name: " <> name <> 
-  ", tm: "  <> timestamp <> 
-  ", voice: <bytes> }" 
+printWithFieldStatusHistoryItem { surveyident, reportident, status, name, timestamp, voice } =
+  "{ surveyident: " <> show surveyident
+    <> "reportident:"
+    <> typeOf reportident
+    <> ", status:"
+    <> status
+    <> ", name: "
+    <> name
+    <> ", tm: "
+    <> timestamp
+    <>
+      ", voice: <bytes> }"
 
 type History = { items :: Array WithFieldStatusHistoryItem, total :: Int, perpage :: Int }
 

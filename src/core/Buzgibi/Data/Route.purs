@@ -13,8 +13,7 @@ module Buzgibi.Data.Route
   ( Route(..)
   , defUserHistoryParam
   , routeCodec
-  )
-  where
+  ) where
 
 import Prelude hiding ((/))
 
@@ -59,7 +58,7 @@ instance Show Route where
   show SignIn = "signIn"
   show UserSurvey = mempty
   show (UserHistory _) = mempty
-  show (EditSurvey _) = mempty 
+  show (EditSurvey _) = mempty
   show (EmailConfirmation _) = mempty
 
 instance Enum Route where
@@ -74,7 +73,7 @@ instance Enum Route where
 
 instance BoundedEnum Route where
   cardinality = Cardinality 3
-  toEnum  0 = Just Home
+  toEnum 0 = Just Home
   toEnum 1 = Just SignUp
   toEnum 2 = Just SignIn
   toEnum _ = Nothing
@@ -106,7 +105,7 @@ routeCodec = root $ sum
   , "UserSurvey": "user" / "survey" / noArgs
   , "UserHistory": "user" / "history" / default "1" (param "page")
   , "EditSurvey": "user" / "survey" / int (segment)
-  , "EmailConfirmation": "auth" / "email" / "confirm" / param "key" 
+  , "EmailConfirmation": "auth" / "email" / "confirm" / param "key"
   }
 
 defUserHistoryParam = "1"

@@ -2,8 +2,7 @@ module Buzgibi.Component.Auth.Email
   ( Action
   , component
   , proxy
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -15,7 +14,7 @@ import Buzgibi.Data.Config (Config(..))
 import Halogen as H
 import Halogen.HTML as HH
 import Type.Proxy (Proxy(..))
-import Data.Maybe (Maybe (..))
+import Data.Maybe (Maybe(..))
 import Halogen.Store.Monad (getStore)
 import Data.Traversable (for_)
 
@@ -34,14 +33,14 @@ component =
         , initialize = pure Initialize
         }
     }
-    where 
-      handleAction Initialize = do
-        { config: Config { apiBuzgibiHost }, user } <- getStore
-        for_ user \{ token } -> do
-          {key} <- H.get
-          resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.confirmEmail { key: key }
-          withError resp \{ success: res } -> H.modify_ _ { isConfirmed = Just res }
+  where
+  handleAction Initialize = do
+    { config: Config { apiBuzgibiHost }, user } <- getStore
+    for_ user \{ token } -> do
+      { key } <- H.get
+      resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.confirmEmail { key: key }
+      withError resp \{ success: res } -> H.modify_ _ { isConfirmed = Just res }
 
-render { isConfirmed: Nothing } = HH.div_ [HH.text "confiormation is being processed..."]
-render { isConfirmed: Just true } = HH.div_ [HH.text "the email is confirmed"]
-render { isConfirmed: Just false } = HH.div_ [HH.text "we cannot confirm the email"]
+render { isConfirmed: Nothing } = HH.div_ [ HH.text "confiormation is being processed..." ]
+render { isConfirmed: Just true } = HH.div_ [ HH.text "the email is confirmed" ]
+render { isConfirmed: Just false } = HH.div_ [ HH.text "we cannot confirm the email" ]

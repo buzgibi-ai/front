@@ -48,7 +48,7 @@ type State =
 
 component mkBody =
   H.mkComponent
-    { initialState: \{page} ->
+    { initialState: \{ page } ->
         { winWidth: Nothing
         , platform: Nothing
         , start: 0
@@ -73,7 +73,7 @@ component mkBody =
 
     logDebug $ loc <> " component has started at " <> show tm
 
-    {page} <- H.get
+    { page } <- H.get
 
     H.modify_ _ { platform = pure platform, winWidth = pure w, start = tm }
 
@@ -90,5 +90,5 @@ component mkBody =
     sendComponentTime start end loc
   handleAction ToHome = navigate Route.Home
 
-render mkBody { winWidth: Just w, platform: Just p, page } = mkBody p w (HH.slot_ List.proxy unit List.component {page: page})
+render mkBody { winWidth: Just w, platform: Just p, page } = mkBody p w (HH.slot_ List.proxy unit List.component { page: page })
 render _ _ = HH.div_ []

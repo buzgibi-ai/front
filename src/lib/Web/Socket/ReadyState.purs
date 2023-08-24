@@ -2,8 +2,7 @@ module Web.Socket.ReadyState
   ( ReadyState(..)
   , fromEnumReadyState
   , toEnumReadyState
-  )
-  where
+  ) where
 
 import Prelude
 import Data.Enum (Cardinality(..), class BoundedEnum, defaultPred, defaultSucc, class Enum)

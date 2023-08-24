@@ -35,8 +35,7 @@ module Buzgibi.Api.Foreign.Front.Api
   , mkLogReq
   , sendLog
   , translationLookup
-  )
-  where
+  ) where
 
 import Prelude
 
@@ -182,7 +181,7 @@ type TranslationPageItem = { key :: String, value :: Array MapTextText }
 foreign import _getTranslationPage :: Translation -> Array MapPageMapTextText
 foreign import _getTranslationEndpoints :: Translation -> Array MapEndpointsMapTextText
 
-foreign import _getTranslationPageItem :: forall a . a -> TranslationPageItem
+foreign import _getTranslationPageItem :: forall a. a -> TranslationPageItem
 
 type TranslationItemMap = Map.Map String (Map.Map String String)
 

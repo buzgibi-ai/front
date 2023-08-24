@@ -32,7 +32,7 @@ import Buzgibi.Component.HTML.Loading as HTML.Loading
 import Buzgibi.Data.Config
 import Buzgibi.Component.Auth.SignUp as SignUp
 import Buzgibi.Component.Auth.SignIn as SignIn
-import Buzgibi.Component.Auth.Email as Auth.Email 
+import Buzgibi.Component.Auth.Email as Auth.Email
 import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
 import Buzgibi.Page.User.Survey as User.Survey
@@ -101,11 +101,11 @@ component = H.mkComponent
     store@{ config: Config { isCaptcha, apiBuzgibiHost }, user } <- getStore
     logDebug $ printStore store
 
-    for_ user \{ token, jwtUser: {ident} } -> do 
+    for_ user \{ token, jwtUser: { ident } } -> do
       resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkUserApi BuzgibiBack.getNotification
-      onFailure resp (Async.send <<< flip Async.mkException loc) $ 
+      onFailure resp (Async.send <<< flip Async.mkException loc) $
         \{ success: xs :: Array BuzgibiBack.Notification } ->
-          for_ xs \{text} -> Async.send $ Async.mkOrdinary text Async.Info Nothing
+          for_ xs \{ text } -> Async.send $ Async.mkOrdinary text Async.Info Nothing
 
     -- show up info if captcha is disabled
     when (not isCaptcha) $ Async.send $ Async.mkOrdinary "captcha is disabled" Async.Info Nothing
@@ -150,7 +150,7 @@ render { route: Just r@SignUp } =
     (Auth.component (Body.mkBodyHtml params r) SignUp.slot)
     { route: Route.SignUp, title: "SignUp" }
 render { route: Just r@UserSurvey } = HH.slot_ User.Survey.proxy unit (User.Survey.component (Body.mkBodyHtml params r)) unit
-render { route: Just r@(UserHistory page)} = HH.slot_ User.History.proxy unit (User.History.component (Body.mkBodyHtml params r)) {page: page}
+render { route: Just r@(UserHistory page) } = HH.slot_ User.History.proxy unit (User.History.component (Body.mkBodyHtml params r)) { page: page }
 render { route: Just Error500 } = HH.slot_ Page500.proxy unit Page500.component unit
 render { route: Just Error404 } = HH.slot_ Page404.proxy unit Page404.component unit
 render { route: Just r@(EditSurvey _) } = HH.slot_ Survey.Edit.proxy unit (Survey.Edit.component (Body.mkBodyHtml params r)) unit
