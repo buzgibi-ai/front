@@ -111,14 +111,15 @@ render { email, password, errMsg } =
                     , if isNothing errMsg then HH.div_ []
                       else HH.div [ HPExt.style "margin-bottom: 10px;" ] [ HH.span [ HPExt.style "color: red" ] [ HH.text (fromMaybe undefined errMsg) ] ]
                     , HH.form [ HE.onSubmit MakeRequest ]
-                        [ HH.input
+                        [ HH.label [ HPExt.for "label" ] [ HH.text "E-mail" ]
+                        , HH.input
                             [ css "form-style"
                             , HPExt.type_ HPExt.InputEmail
                             , HE.onValueInput FillEmail
                             , HPExt.value $ fromMaybe mempty email
                             , HPExt.placeholder "email"
                             ]
-
+                        , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
                         , HH.input
                             [ css "form-style"
                             , HPExt.type_ HPExt.InputPassword
