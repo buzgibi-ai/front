@@ -5,6 +5,6 @@
     "apiBuzgibiHost": "https://api.buzgibi.app",
     "apiBuzgibiHostWS": "wss://api.buzgibi.app",
     "cssLink": "css",
-    "cssFiles": ["main"],
+    "cssFiles": ["main", "auth"],
     "localCss": true
 }

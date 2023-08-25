@@ -101,42 +101,46 @@ component =
           navigate Route.Home
 
 render { email, password, errMsg } =
-  HH.div [ css "col-12 text-center align-self-center py-5" ]
-    [ HH.div [ css "section pb-5 pt-5 pt-sm-2 text-center" ]
-        [ HH.div [ css "card-3d-wrap mx-auto" ]
-            [ HH.div [ css "card-3d-wrapper" ]
-                [ HH.div [ css "card-front" ]
-                    [ HH.div [ css "center-wrap" ]
-                        [ HH.div [ css "section text-center" ]
-                            [ HH.h4 [ css "mb-4 pb-3", HPExt.style "margin-top: 30px;" ] [ HH.text "Sign In" ]
-                            , if isNothing errMsg then HH.div_ []
-                              else HH.div [ HPExt.style "margin-bottom: 10px;" ] [ HH.span [ HPExt.style "color: red" ] [ HH.text (fromMaybe undefined errMsg) ] ]
-                            , HH.form [ HE.onSubmit MakeRequest ]
-                                [ HH.div [ css "form-group" ]
-                                    [ HH.input
-                                        [ css "form-style"
-                                        , HPExt.type_ HPExt.InputEmail
-                                        , HE.onValueInput FillEmail
-                                        , HPExt.value $ fromMaybe mempty email
-                                        , HPExt.placeholder "email"
-                                        ]
-                                    , HH.i [ css "input-icon uil uil-at" ] []
-                                    ]
-                                , HH.div [ css "form-group mt-2" ]
-                                    [ HH.input
-                                        [ css "form-style"
-                                        , HPExt.type_ HPExt.InputPassword
-                                        , HE.onValueInput FillPassword
-                                        , HPExt.value $ fromMaybe mempty password
-                                        , HPExt.placeholder "password"
-                                        ]
-                                    , HH.i [ css "input-icon uil uil-lock-alt" ] []
-                                    ]
-                                , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
-                                , HH.p [ css "mb-0 mt-4 text-center" ] [ HH.a [ css "link", safeHref Route.SignUp ] [ HH.text "Sign Up" ] ]
-                                ]
+  HH.main_
+    [ HH.div [ css "screen-container" ]
+        [ HH.div [ css "verticallycenter" ]
+            [ HH.div [ css "split left" ]
+                [ HH.div [ css "form-container" ]
+                    [ HH.h1_ [ HH.text "Sign In" ]
+                    , HH.h2_ [ HH.text "Login to your account with your e-mail" ]
+                    , if isNothing errMsg then HH.div_ []
+                      else HH.div [ HPExt.style "margin-bottom: 10px;" ] [ HH.span [ HPExt.style "color: red" ] [ HH.text (fromMaybe undefined errMsg) ] ]
+                    , HH.form [ HE.onSubmit MakeRequest ]
+                        [ HH.input
+                            [ css "form-style"
+                            , HPExt.type_ HPExt.InputEmail
+                            , HE.onValueInput FillEmail
+                            , HPExt.value $ fromMaybe mempty email
+                            , HPExt.placeholder "email"
+                            ]
+
+                        , HH.input
+                            [ css "form-style"
+                            , HPExt.type_ HPExt.InputPassword
+                            , HE.onValueInput FillPassword
+                            , HPExt.value $ fromMaybe mempty password
+                            , HPExt.placeholder "password"
+                            ]
+
+                        , HH.div [ css "CTA-container" ]
+                            [ HH.div [ css "cta-button" ]
+                                [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
+                            ]
+                        , HH.h4 [ css "Already" ]
+                            [ HH.text "Not a Buzgibi user? "
+                            , HH.a [ css "link", safeHref Route.SignUp ] [ HH.text "Sign Up" ]
                             ]
                         ]
+                    ]
+                ]
+            , HH.div [ css "split right" ]
+                [ HH.div [ css "left-container" ]
+                    [ HH.div [ css "image-container" ] [ HH.img [ HPExt.src "images/side-img.png" ] ]
                     ]
                 ]
             ]

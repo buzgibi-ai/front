@@ -1,6 +1,8 @@
 module Buzgibi.Page.Auth
   ( Action(..)
   , component
+  , proxy_password_reset
+  , proxy_password_reset_link
   , proxy_sign_in
   , proxy_sign_up
   ) where
@@ -28,6 +30,8 @@ import Halogen.Store.Monad (getStore)
 
 proxy_sign_in = Proxy :: _ "auth_container_sign_in"
 proxy_sign_up = Proxy :: _ "auth_container_sign_up"
+proxy_password_reset_link = Proxy :: _ "auth_container_password_reset_link"
+proxy_password_reset = Proxy :: _ "auth_container_password_reset"
 
 loc = "Buzgibi.Page.Auth"
 

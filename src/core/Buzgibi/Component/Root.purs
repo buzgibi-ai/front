@@ -32,6 +32,8 @@ import Buzgibi.Component.HTML.Loading as HTML.Loading
 import Buzgibi.Data.Config
 import Buzgibi.Component.Auth.SignUp as SignUp
 import Buzgibi.Component.Auth.SignIn as SignIn
+import Buzgibi.Component.Auth.Password.ResetLink as ResetLink
+import Buzgibi.Component.Auth.Password.NewPassword as NewPassword
 import Buzgibi.Component.Auth.Email as Auth.Email
 import Buzgibi.Page.Auth as Auth
 import Buzgibi.Data.Route as Route
@@ -82,6 +84,8 @@ type ChildSlots =
   , user_history :: OpaqueSlot Unit
   , survey_edit :: OpaqueSlot Unit
   , auth_email_confirmation :: OpaqueSlot Unit
+  , auth_container_password_reset_link :: OpaqueSlot Unit
+  , auth_container_password_reset :: OpaqueSlot Unit
   )
 
 component :: H.Component Query Unit Void AppM
@@ -149,4 +153,6 @@ render { route: Just r@(EditSurvey _) } = HH.slot_ Survey.Edit.proxy unit (Surve
 render { route: Just r@(EmailConfirmation key) } = HH.slot_ Auth.Email.proxy unit Auth.Email.component { key: key }
 render { route: Just r@SignUp } = HH.slot_ Auth.proxy_sign_up unit (Auth.component SignUp.slot) { route: Route.SignUp, title: "SignUp" }
 render { route: Just r@SignIn } = HH.slot_ Auth.proxy_sign_in unit (Auth.component SignIn.slot) { route: Route.SignIn, title: "SignIn" }
+render { route: Just r@PasswordResetLink } = HH.slot_ Auth.proxy_password_reset_link unit (Auth.component ResetLink.slot) { route: Route.PasswordResetLink, title: "PasswordResetLink" }
+render { route: Just r@(NewPassword key) } = HH.slot_ Auth.proxy_password_reset unit (Auth.component (NewPassword.slot key)) { route: r, title: "NewPassword" }
 render { route: Just r@UserHome } = undefined

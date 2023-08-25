@@ -42,6 +42,8 @@ data Route
   | UserHistory String
   | EditSurvey Int
   | EmailConfirmation String
+  | PasswordResetLink
+  | NewPassword String
   | UserHome
   | Home
   | SignUp
@@ -62,6 +64,8 @@ instance Show Route where
   show (UserHistory _) = mempty
   show (EditSurvey _) = mempty
   show (EmailConfirmation _) = mempty
+  show PasswordResetLink = "password_reset_link"
+  show (NewPassword _) = "new_password"
 
 instance Enum Route where
   succ Home = Just SignUp
@@ -109,6 +113,8 @@ routeCodec = root $ sum
   , "EditSurvey": "user" / "survey" / int (segment)
   , "EmailConfirmation": "auth" / "email" / "confirm" / param "key"
   , "UserHome": "user" / noArgs
+  , "PasswordResetLink": "auth" / "password" / "reset" / "link" / noArgs
+  , "NewPassword": "auth" / "password" / "reset" / param "key"
   }
 
 defUserHistoryParam = "1"

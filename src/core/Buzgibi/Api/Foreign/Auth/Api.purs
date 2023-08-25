@@ -7,6 +7,8 @@ module Buzgibi.Api.Foreign.Auth.Api
   , logout
   , mkAuthApi
   , register
+  , sendResetPasswordLink
+  , setNewPassword
   ) where
 
 import Prelude
@@ -20,6 +22,7 @@ import Foreign.Object (Object)
 import Foreign (Foreign)
 import Data.Either (Either)
 import Effect.Exception as E
+import Data.Maybe (Maybe)
 
 foreign import data AuthApi :: Type
 foreign import data ResponseAuthToken :: Type
@@ -54,3 +57,15 @@ foreign import _confirmEmail :: Fn3 (forall a. Foreign -> (Foreign -> Either E.E
 
 confirmEmail :: Emailconfirm -> AuthApi -> AC.EffectFnAff (Object (Response Boolean))
 confirmEmail = runFn3 _confirmEmail withError
+
+foreign import _sendResetPasswordLink :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) String AuthApi (AC.EffectFnAff (Object (Response (Maybe Int))))
+
+sendResetPasswordLink :: String -> AuthApi -> AC.EffectFnAff (Object (Response (Maybe Int)))
+sendResetPasswordLink = runFn3 _sendResetPasswordLink withError
+
+type NewPassword = { password :: String, key :: String }
+
+foreign import _setNewPassword :: Fn3 (forall a. Foreign -> (Foreign -> Either E.Error a) -> Either E.Error a) NewPassword AuthApi (AC.EffectFnAff (Object (Response Boolean)))
+
+setNewPassword :: NewPassword -> AuthApi -> AC.EffectFnAff (Object (Response Boolean))
+setNewPassword = runFn3 _setNewPassword withError

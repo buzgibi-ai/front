@@ -41,3 +41,21 @@ export const _confirmEmail =
             })
         };
     }
+
+export const _sendResetPasswordLink =
+    function(withError, email, api) {
+        return function(onError, onOk) {
+            api.authPasswordResetLinkPut(JSON.stringify(email)).then(onOk).catch(resp => {
+                return withError(resp, onError)
+            })
+        };
+    }
+
+export const _setNewPassword =
+    function(withError, pass, api) {
+        return function(onError, onOk) {
+            api.authPasswordResetPost(pass).then(onOk).catch(resp => {
+                return withError(resp, onError)
+            })
+        };
+    }

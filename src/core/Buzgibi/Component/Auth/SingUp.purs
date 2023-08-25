@@ -124,56 +124,59 @@ component =
   handleAction (FillRepeatedPassword s) = H.modify_ _ { reapatedPassword = Just s }
 
 render { email, password, reapatedPassword, strength, errMsg } =
-  HH.div [ css "col-12 text-center align-self-center py-5" ]
-    [ HH.div [ css "section pb-5 pt-5 pt-sm-2 text-center" ]
-        [ HH.div [ css "card-3d-wrap mx-auto" ]
-            [ HH.div [ css "card-3d-wrapper" ]
-                [ HH.div [ css "card-front" ]
-                    [ HH.div [ css "center-wrap" ]
-                        [ HH.div [ css "section text-center" ]
-                            [ HH.h4 [ css "mb-4 pb-3", HPExt.style "margin-top: 30px;" ] [ HH.text "Sign Up" ]
-                            , if isNothing errMsg then HH.div_ []
-                              else HH.div [ HPExt.style "margin-bottom: 10px;" ] [ HH.span [ HPExt.style "color: red" ] [ HH.text (fromMaybe undefined errMsg) ] ]
-                            , HH.form [ HE.onSubmit MakeRequest ]
-                                [ HH.div [ css "form-group" ]
-                                    [ HH.input
-                                        [ css "form-style"
-                                        , HPExt.type_ HPExt.InputEmail
-                                        , HE.onValueInput FillEmail
-                                        , HPExt.value $ fromMaybe mempty email
-                                        , HPExt.placeholder "email"
-                                        ]
-                                    , HH.i [ css "input-icon uil uil-at" ] []
-                                    ]
-                                , if
-                                    isNothing password ||
-                                      (map length password == Just 0) then HH.div_ []
-                                  else HH.div_ $ [ HH.text (fromMaybe mempty (map _.value strength)) ]
-                                , HH.div [ css "form-group mt-2" ]
-                                    [ HH.input
-                                        [ css "form-style"
-                                        , HPExt.type_ HPExt.InputPassword
-                                        , HE.onValueInput FillPassword
-                                        , HPExt.value $ fromMaybe mempty password
-                                        , HPExt.placeholder "password"
-                                        ]
-                                    , HH.i [ css "input-icon uil uil-lock-alt" ] []
-                                    ]
-                                , HH.div [ css "form-group mt-2" ]
-                                    [ HH.input
-                                        [ css "form-style"
-                                        , HPExt.type_ HPExt.InputPassword
-                                        , HE.onValueInput FillRepeatedPassword
-                                        , HPExt.value $ fromMaybe mempty reapatedPassword
-                                        , HPExt.placeholder "repeat password"
-                                        ]
-                                    , HH.i [ css "input-icon uil uil-lock-alt" ] []
-                                    ]
-                                , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
-                                , HH.p [ css "mb-0 mt-4 text-center" ] [ HH.a [ css "link", safeHref Route.SignIn ] [ HH.text "Sign In" ] ]
-                                ]
+  HH.main_
+    [ HH.div [ css "screen-container" ]
+        [ HH.div [ css "verticallycenter" ]
+            [ HH.div [ css "split left" ]
+                [ HH.div [ css "form-container" ]
+                    [ HH.h1_ [ HH.text "Sign Up" ]
+                    , HH.h2_ [ HH.text "Create an account with your e-mail" ]
+                    , if isNothing errMsg then HH.div_ []
+                      else HH.div [ HPExt.style "margin-bottom: 10px;" ] [ HH.span [ HPExt.style "color: red" ] [ HH.text (fromMaybe undefined errMsg) ] ]
+                    , HH.form [ HE.onSubmit MakeRequest ]
+                        [ HH.label [ HPExt.for "label" ] [ HH.text "E-mail" ]
+                        , HH.input
+                            [ css "form-style"
+                            , HPExt.type_ HPExt.InputEmail
+                            , HE.onValueInput FillEmail
+                            , HPExt.value $ fromMaybe mempty email
+                            , HPExt.placeholder "email"
+                            ]
+                        , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
+                        , HH.input
+                            [ css "form-style"
+                            , HPExt.type_ HPExt.InputPassword
+                            , HE.onValueInput FillPassword
+                            , HPExt.value $ fromMaybe mempty password
+                            , HPExt.placeholder "password"
+                            ]
+                        , if
+                            isNothing password ||
+                              (map length password == Just 0) then HH.div_ []
+                          else HH.div_ $ [ HH.text (fromMaybe mempty (map _.value strength)) ]
+                        , HH.label [ HPExt.for "label" ] [ HH.text "Enter the password again" ]
+                        , HH.input
+                            [ css "form-style"
+                            , HPExt.type_ HPExt.InputPassword
+                            , HE.onValueInput FillRepeatedPassword
+                            , HPExt.value $ fromMaybe mempty reapatedPassword
+                            , HPExt.placeholder "repeat password"
+                            ]
+
+                        , HH.div [ css "CTA-container" ]
+                            [ HH.div [ css "cta-button" ]
+                                [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
                             ]
                         ]
+                    , HH.h4 [ css "Already" ]
+                        [ HH.text "Already a Buzgibi user? "
+                        , HH.a [ safeHref Route.SignIn ] [ HH.text "Sign In" ]
+                        ]
+                    ]
+                ]
+            , HH.div [ css "split right" ]
+                [ HH.div [ css "left-container" ]
+                    [ HH.div [ css "image-container" ] [ HH.img [ HPExt.src "images/side-img.png" ] ]
                     ]
                 ]
             ]
