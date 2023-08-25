@@ -11,6 +11,7 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Data.Config (Config(..))
 import Buzgibi.Api.Foreign.Request.Handler (withError)
+import Buzgibi.Component.HTML.Utils (css)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -19,7 +20,7 @@ import Halogen.HTML.Properties.Extended as HPExt
 import Data.String (length)
 import Type.Proxy (Proxy(..))
 import Web.Event.Event (preventDefault, Event)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, isNothing)
 import Halogen.Store.Monad (getStore)
 import Foreign (isNull, unsafeFromForeign)
 import Data.Foldable (for_)
@@ -55,17 +56,37 @@ component =
         if isNull o then H.modify_ _ { email = Nothing, isSuccess = true }
         else H.modify_ _ { email = Nothing, result = Just $ unsafeFromForeign o }
 
-render { email, result: Nothing, isSuccess } =
-  HH.div_
-    [ if isSuccess then HH.text "reset link has been sent to the requeted email" else HH.text mempty
-    , HH.form [ HE.onSubmit MakeRequest ]
-        [ HH.input
-            [ HPExt.type_ HPExt.InputText
-            , HE.onValueInput FillEmail
-            , HPExt.value $ fromMaybe mempty email
-            , HPExt.placeholder "email"
+render { email, result, isSuccess } =
+  HH.main_
+    [ HH.div [ css "screen-container" ]
+        [ HH.div [ css "verticallycenter" ]
+            [ HH.div [ css "split left" ]
+                [ HH.div [ css "form-container" ]
+                    [ HH.h1_ [ HH.text "Reset Link" ]
+                    , if isSuccess then HH.text "reset link has been sent to the requeted email"
+                      else HH.text mempty
+                    , if isNothing result then
+                        HH.form
+                          [ HE.onSubmit MakeRequest ]
+                          [ HH.input
+                              [ HPExt.type_ HPExt.InputText
+                              , HE.onValueInput FillEmail
+                              , HPExt.value $ fromMaybe mempty email
+                              , HPExt.placeholder "email"
+                              ]
+                          , HH.div [ css "CTA-container" ]
+                              [ HH.div [ css "cta-button" ]
+                                  [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
+                              ]
+                          ]
+                      else HH.text ("the next try will be available in " <> show (fromMaybe undefined result) <> " sec")
+                    ]
+                ]
+            , HH.div [ css "split right" ]
+                [ HH.div [ css "left-container" ]
+                    [ HH.div [ css "image-container" ] [ HH.img [ HPExt.src "images/side-img.png" ] ]
+                    ]
+                ]
             ]
-        , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
         ]
     ]
-render { result: Just left } = HH.div_ [ HH.text ("the next try will be available in " <> show left <> " sec") ]

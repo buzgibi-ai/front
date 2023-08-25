@@ -60,22 +60,44 @@ component =
           withError res \{ success: res } ->
             H.modify_ _ { result = Just res, pass = Nothing, repeatPass = Nothing }
 
-render { pass, repeatPass, result: Nothing } =
-  HH.form [ HE.onSubmit MakeRequest ]
-    [ if pass /= repeatPass then HH.text "passwords mismatch" else HH.text mempty
-    , HH.input
-        [ HPExt.type_ HPExt.InputText
-        , HE.onValueInput $ FillPassword 1
-        , HPExt.value $ fromMaybe mempty pass
-        , HPExt.placeholder "password"
+render { pass, repeatPass, result } =
+  HH.main_
+    [ HH.div [ css "screen-container" ]
+        [ HH.div [ css "verticallycenter" ]
+            [ HH.div [ css "split left" ]
+                [ HH.div [ css "form-container" ]
+                    [ HH.h1_ [ HH.text "New Password" ]
+                    , HH.h2_ [ HH.text "Set a new password to your account" ]
+                    , case result of
+                        Just false -> HH.text "key is either broken or exipred"
+                        Just true -> HH.text "the password has been changed successfully"
+                        Nothing -> HH.text mempty
+                      HH.form
+                      [ HE.onSubmit MakeRequest ]
+                      [ if pass /= repeatPass then HH.text "passwords mismatch" else HH.text mempty
+                      , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
+                      , HH.input
+                          [ HPExt.type_ HPExt.InputText
+                          , HE.onValueInput $ FillPassword 1
+                          , HPExt.value $ fromMaybe mempty pass
+                          , HPExt.placeholder "password"
+                          ]
+                      , HH.label [ HPExt.for "label" ] [ HH.text "New password" ]
+                      , HH.input
+                          [ HPExt.type_ HPExt.InputText
+                          , HE.onValueInput $ FillPassword 2
+                          , HPExt.value $ fromMaybe mempty repeatPass
+                          , HPExt.placeholder "repeat password"
+                          ]
+                      , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
+                      ]
+                    ]
+                ]
+            , HH.div [ css "split right" ]
+                [ HH.div [ css "left-container" ]
+                    [ HH.div [ css "image-container" ] [ HH.img [ HPExt.src "images/side-img.png" ] ]
+                    ]
+                ]
+            ]
         ]
-    , HH.input
-        [ HPExt.type_ HPExt.InputText
-        , HE.onValueInput $ FillPassword 2
-        , HPExt.value $ fromMaybe mempty repeatPass
-        , HPExt.placeholder "repeat password"
-        ]
-    , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
     ]
-render { result: Just false } = HH.div_ [ HH.text "key is either broken or exipred" ]
-render { result: Just true } = HH.div_ [ HH.text "the password has been changed successfully" ]

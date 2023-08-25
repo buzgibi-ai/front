@@ -127,10 +127,13 @@ render { email, password, errMsg } =
                             , HPExt.value $ fromMaybe mempty password
                             , HPExt.placeholder "password"
                             ]
-
                         , HH.div [ css "CTA-container" ]
                             [ HH.div [ css "cta-button" ]
                                 [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
+                            ]
+                        , HH.h4 [ css "Forget" ]
+                            [ HH.text "I forgot my password "
+                            , HH.a [ css "link", safeHref Route.PasswordResetLink ] [ HH.text "Reset my password" ]
                             ]
                         , HH.h4 [ css "Already" ]
                             [ HH.text "Not a Buzgibi user? "
