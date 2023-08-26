@@ -11,7 +11,7 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Data.Config (Config(..))
 import Buzgibi.Api.Foreign.Request.Handler (withError)
-import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Component.HTML.Utils (css, maybeElem)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -65,21 +65,20 @@ render { email, result, isSuccess } =
                     [ HH.h1_ [ HH.text "Reset Link" ]
                     , if isSuccess then HH.text "reset link has been sent to the requeted email"
                       else HH.text mempty
-                    , if isNothing result then
-                        HH.form
-                          [ HE.onSubmit MakeRequest ]
-                          [ HH.input
-                              [ HPExt.type_ HPExt.InputText
-                              , HE.onValueInput FillEmail
-                              , HPExt.value $ fromMaybe mempty email
-                              , HPExt.placeholder "email"
-                              ]
-                          , HH.div [ css "CTA-container" ]
-                              [ HH.div [ css "cta-button" ]
-                                  [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
-                              ]
-                          ]
-                      else HH.text ("the next try will be available in " <> show (fromMaybe undefined result) <> " sec")
+                    , maybeElem result \sec -> HH.text $ "the next try will be available in " <> show sec <> " sec"
+                    , HH.form
+                        [ HE.onSubmit MakeRequest ]
+                        [ HH.input
+                            [ HPExt.type_ HPExt.InputText
+                            , HE.onValueInput FillEmail
+                            , HPExt.value $ fromMaybe mempty email
+                            , HPExt.placeholder "email"
+                            ]
+                        , HH.div [ css "CTA-container" ]
+                            [ HH.div [ css "cta-button" ]
+                                [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
+                            ]
+                        ]
                     ]
                 ]
             , HH.div [ css "split right" ]

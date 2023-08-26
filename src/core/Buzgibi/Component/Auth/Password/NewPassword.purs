@@ -11,6 +11,7 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Data.Config (Config(..))
 import Buzgibi.Api.Foreign.Request.Handler (withError)
+import Buzgibi.Component.HTML.Utils (css)
 
 import Halogen as H
 import Halogen.HTML as HH
@@ -72,25 +73,25 @@ render { pass, repeatPass, result } =
                         Just false -> HH.text "key is either broken or exipred"
                         Just true -> HH.text "the password has been changed successfully"
                         Nothing -> HH.text mempty
-                      HH.form
-                      [ HE.onSubmit MakeRequest ]
-                      [ if pass /= repeatPass then HH.text "passwords mismatch" else HH.text mempty
-                      , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
-                      , HH.input
-                          [ HPExt.type_ HPExt.InputText
-                          , HE.onValueInput $ FillPassword 1
-                          , HPExt.value $ fromMaybe mempty pass
-                          , HPExt.placeholder "password"
-                          ]
-                      , HH.label [ HPExt.for "label" ] [ HH.text "New password" ]
-                      , HH.input
-                          [ HPExt.type_ HPExt.InputText
-                          , HE.onValueInput $ FillPassword 2
-                          , HPExt.value $ fromMaybe mempty repeatPass
-                          , HPExt.placeholder "repeat password"
-                          ]
-                      , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
-                      ]
+                    , HH.form
+                        [ HE.onSubmit MakeRequest ]
+                        [ if pass /= repeatPass then HH.text "passwords mismatch" else HH.text mempty
+                        , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
+                        , HH.input
+                            [ HPExt.type_ HPExt.InputText
+                            , HE.onValueInput $ FillPassword 1
+                            , HPExt.value $ fromMaybe mempty pass
+                            , HPExt.placeholder "password"
+                            ]
+                        , HH.label [ HPExt.for "label" ] [ HH.text "New password" ]
+                        , HH.input
+                            [ HPExt.type_ HPExt.InputText
+                            , HE.onValueInput $ FillPassword 2
+                            , HPExt.value $ fromMaybe mempty repeatPass
+                            , HPExt.placeholder "repeat password"
+                            ]
+                        , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
+                        ]
                     ]
                 ]
             , HH.div [ css "split right" ]

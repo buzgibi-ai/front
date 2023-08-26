@@ -10,9 +10,11 @@ import Buzgibi.Api.Foreign.Request as Request
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Api.Foreign.Request.Handler (withError)
 import Buzgibi.Data.Config (Config(..))
+import Buzgibi.Component.HTML.Utils (css)
 
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Properties.Extended as HPExt
 import Type.Proxy (Proxy(..))
 import Data.Maybe (Maybe(..))
 import Halogen.Store.Monad (getStore)
@@ -41,6 +43,22 @@ component =
       resp <- Request.makeAuth (Just token) apiBuzgibiHost BuzgibiBack.mkAuthApi $ BuzgibiBack.confirmEmail { key: key }
       withError resp \{ success: res } -> H.modify_ _ { isConfirmed = Just res }
 
-render { isConfirmed: Nothing } = HH.div_ [ HH.text "confiormation is being processed..." ]
-render { isConfirmed: Just true } = HH.div_ [ HH.text "the email is confirmed" ]
-render { isConfirmed: Just false } = HH.div_ [ HH.text "we cannot confirm the email" ]
+render { isConfirmed } =
+  HH.main_
+    [ HH.div [ css "screen-container" ]
+        [ HH.div [ css "verticallycenter" ]
+            [ HH.div [ css "split left" ]
+                [ HH.div [ css "form-container" ] $
+                    case isConfirmed of
+                      Nothing -> [ HH.text "confirmation is being processed..." ]
+                      Just true -> [ HH.text "the email is confirmed" ]
+                      Just false -> [ HH.text "we cannot confirm the email" ]
+                ]
+            , HH.div [ css "split right" ]
+                [ HH.div [ css "left-container" ]
+                    [ HH.div [ css "image-container" ] [ HH.img [ HPExt.src "images/side-img.png" ] ]
+                    ]
+                ]
+            ]
+        ]
+    ]

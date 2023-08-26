@@ -14,13 +14,14 @@ import Buzgibi.Document.Meta as Meta
 import Buzgibi.Data.Route as Route
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
 import Buzgibi.Component.HTML.Utils (css)
+import Buzgibi.Capability.Navigate (navigate)
 
 import Buzgibi.Data.Config
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties.Extended as HPExt
 import Type.Proxy (Proxy(..))
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Web.HTML.HTMLDocument (setTitle)
 import Web.HTML.Window (document)
 import Web.HTML (window)
@@ -61,6 +62,10 @@ component authComp =
     }
   where
   handleAction Initialize = do
+    { user } <- getStore
+    when (isJust user)
+      $ navigate
+      $ Route.UserHistory Route.defUserHistoryParam
     { route, title } <- H.get
     H.liftEffect $ window >>= document >>= setTitle ("Buzgibi | " <> title)
     tm <- H.liftEffect getTimestamp

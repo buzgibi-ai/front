@@ -30,6 +30,8 @@ component =
   where
   handleAction Initialize = do
     { user } <- getStore
-    when (isJust user) $ navigate Route.UserHome
+    when (isJust user)
+      $ navigate
+      $ Route.UserHistory Route.defUserHistoryParam
 
 render = html

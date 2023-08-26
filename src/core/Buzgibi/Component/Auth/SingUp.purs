@@ -79,7 +79,7 @@ component =
   where
   handleAction Initialize = do
     { user } <- getStore
-    when (isJust user) $ navigate Route.Home
+    when (isJust user) $ navigate $ Route.UserHistory Route.defUserHistoryParam
   handleAction (MakeRequest ev) = do
     H.liftEffect $ preventDefault ev
     logDebug $ loc <> "pass stregth ---> trying registering"

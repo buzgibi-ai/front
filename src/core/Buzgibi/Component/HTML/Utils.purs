@@ -28,7 +28,7 @@ safeHref = HP.href <<< append "#" <<< print routeCodec
 -- | provide rendering for the element if it exists, and renders an empty node otherwise.
 maybeElem :: forall p i a. Maybe a -> (a -> HH.HTML p i) -> HH.HTML p i
 maybeElem (Just x) f = f x
-maybeElem _ _ = HH.text ""
+maybeElem _ _ = HH.text mempty
 
 -- | PureScript is a strict language. If we want to conditionally display an element, then we
 -- | should hide the evaluation behind a function, which won't be evaluated right away, in order

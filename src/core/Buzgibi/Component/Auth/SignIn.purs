@@ -65,7 +65,7 @@ component =
   where
   handleAction Initialize = do
     { user } <- getStore
-    when (isJust user) $ navigate Route.Home
+    when (isJust user) $ navigate $ Route.UserHistory Route.defUserHistoryParam
   handleAction (FillEmail s) = H.modify_ _ { email = Just s }
   handleAction (FillPassword s) = H.modify_ _ { password = Just s }
   handleAction (MakeRequest ev) = do

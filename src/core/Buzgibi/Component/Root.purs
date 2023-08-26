@@ -14,7 +14,7 @@ module Buzgibi.Component.Root
 import Prelude
 
 import Buzgibi.Component.Utils (OpaqueSlot)
-import Buzgibi.Data.Route (Route(..), routeCodec)
+import Buzgibi.Data.Route (Route(..), routeCodec, defUserHistoryParam)
 import Buzgibi.Page.Home as Home
 import Buzgibi.Page.Error.Page500 as Page500
 import Buzgibi.Page.Error.Page404 as Page404
