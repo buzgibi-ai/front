@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Prelude (Unit, (<$>), (<*>), bind, not, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty, (&&))
+import Prelude (Unit, (<$>), (<*>), bind, join, not, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty, (&&))
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
@@ -43,7 +43,7 @@ import Web.HTML.HTMLDocument (toDocument, toNode)
 import Web.DOM.Internal.Types (Element)
 import Unsafe.Coerce (unsafeCoerce)
 import Cache as Cache
-import Data.Foldable (for_)
+import Data.Foldable (for_, or)
 import Concurrent.Channel (newChannel) as Async
 import Data.Argonaut.Encode (encodeJson)
 import Data.Argonaut.Core (stringifyWithIndent)
@@ -52,6 +52,7 @@ import Crypto.Jwt as Jwt
 import Effect.Ref as Ref
 import Web.DOM.NodeList (toArray)
 import Data.Tuple (Tuple(..))
+import File.Utils (getFileName)
 
 import Undefined
 
@@ -211,8 +212,8 @@ setCssLink sha mkHref file = do
     setAttribute "type" "text/css" link
     let href = mkHref <> sha <> "/" <> file <> ".css"
     setAttribute "href" href link
-    appendChild (toNode (unsafeCoerce link)) (toNode (unsafeCoerce head))
-    pure $ Just unit
+    isAlready <- checkIfCssExists file
+    when (not isAlready) $ appendChild (toNode (unsafeCoerce link)) (toNode (unsafeCoerce head))
 
   when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
 
@@ -231,7 +232,8 @@ removeCssLink route = do
         href <- getAttribute "href" el
         let res = Tuple <$> attr <*> href
         for_ res \(Tuple a h) ->
-          when (a == "stylesheet") $
+          when (a == "stylesheet" && 
+                ifCSSBeRemoved route (getFileName h)) $
             removeChild (toNode (unsafeCoerce el)) (toNode (unsafeCoerce head))
 
   when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
@@ -244,6 +246,25 @@ ifCSSBeRemoved (Route.NewPassword _) "main" = true
 ifCSSBeRemoved Route.SignUp "main" = true
 ifCSSBeRemoved Route.SignIn "main" = true
 ifCSSBeRemoved _ _ = false
+
+checkIfCssExists :: String -> Effect Boolean
+checkIfCssExists css = do
+  win <- window
+  doc <- map toDocument $ document win
+  xs <- "head" `getElementsByTagName` doc
+  headm <- 0 `item` xs
+  res <- for headm \(head :: Element) -> do
+    nodes <- childNodes $ toNode (unsafeCoerce head)
+    xs <- toArray nodes
+    map or $ for xs \node ->
+      map (fromMaybe false <<< join) $ 
+        for (fromNode node) \el -> do
+          attr <- getAttribute "rel" el
+          href <- getAttribute "href" el
+          let res = Tuple <$> attr <*> href
+          for res \(Tuple a h) -> 
+            pure $ a == "stylesheet" && getFileName h == css
+  pure $ fromMaybe false res        
 
 withMaybe :: forall a. Maybe a -> Effect a
 withMaybe Nothing = throwError $ Excep.error "value has been resolved into nothing"

@@ -1,0 +1,1 @@
+export const getFileName = (s) => { return s.replace(/^.*[\\\/]/, '').replace(/\.[^/.]+$/, ""); }
