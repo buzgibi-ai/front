@@ -51,7 +51,7 @@ import Web.Storage.Storage (getItem, removeItem)
 import Crypto.Jwt as Jwt
 import Effect.Ref as Ref
 import Web.DOM.NodeList (toArray)
-import Data.Tuple (Tuple (..))
+import Data.Tuple (Tuple(..))
 
 import Undefined
 
@@ -82,12 +82,14 @@ main cfg = do
         -- I am sick to the back teeth of changing css hash manualy
         -- let's make the process a bit self-generating
         let cssSha = if _.localCss (getVal cfg) then mempty else getShaCSSCommit init
-        let cssManager route = do 
-              removeCssLink route 
-              for_ (_.cssFiles (getVal cfg)) \css ->
-                when (not (ifCSSBeRemoved route css)) $
-                  H.liftEffect $ setCssLink cssSha (_.cssLink (getVal cfg)) css
-         
+        let
+          cssManager route = do
+            removeCssLink route
+            for_ (_.cssFiles (getVal cfg)) \css ->
+              when (not (ifCSSBeRemoved route css))
+                $ H.liftEffect
+                $ setCssLink cssSha (_.cssLink (getVal cfg)) css
+
         langVar <- H.liftEffect $ Async.new Eng
 
         async <- H.liftEffect $ Async.newChannel
@@ -215,12 +217,12 @@ setCssLink sha mkHref file = do
   when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
 
 removeCssLink :: Route.Route -> Effect Unit
-removeCssLink route = do 
+removeCssLink route = do
   win <- window
   doc <- map toDocument $ document win
   xs <- "head" `getElementsByTagName` doc
   headm <- 0 `item` xs
-  res <- for headm \(head :: Element) -> do 
+  res <- for headm \(head :: Element) -> do
     nodes <- childNodes $ toNode (unsafeCoerce head)
     xs <- toArray nodes
     for_ xs \node ->
@@ -228,11 +230,11 @@ removeCssLink route = do
         attr <- getAttribute "rel" el
         href <- getAttribute "href" el
         let res = Tuple <$> attr <*> href
-        for_ res \(Tuple a h) -> 
+        for_ res \(Tuple a h) ->
           when (a == "stylesheet") $
             removeChild (toNode (unsafeCoerce el)) (toNode (unsafeCoerce head))
 
-  when (isNothing res) $ throwError $ Excep.error "cannot append link to head"  
+  when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
 
 ifCSSBeRemoved :: Route.Route -> String -> Boolean
 ifCSSBeRemoved Route.Home "auth" = true

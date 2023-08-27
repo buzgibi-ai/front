@@ -78,19 +78,22 @@ render { pass, repeatPass, result } =
                         [ if pass /= repeatPass then HH.text "passwords mismatch" else HH.text mempty
                         , HH.label [ HPExt.for "label" ] [ HH.text "Password" ]
                         , HH.input
-                            [ HPExt.type_ HPExt.InputText
+                            [ HPExt.type_ HPExt.InputPassword
                             , HE.onValueInput $ FillPassword 1
                             , HPExt.value $ fromMaybe mempty pass
                             , HPExt.placeholder "password"
                             ]
                         , HH.label [ HPExt.for "label" ] [ HH.text "New password" ]
                         , HH.input
-                            [ HPExt.type_ HPExt.InputText
+                            [ HPExt.type_ HPExt.InputPassword
                             , HE.onValueInput $ FillPassword 2
                             , HPExt.value $ fromMaybe mempty repeatPass
                             , HPExt.placeholder "repeat password"
                             ]
-                        , HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit" ]
+                        , HH.div [ css "CTA-container" ]
+                            [ HH.div [ css "cta-button" ]
+                                [ HH.input [ HPExt.type_ HPExt.InputSubmit, HPExt.value "submit", css "cta-button" ] ]
+                            ]
                         ]
                     ]
                 ]
