@@ -82,6 +82,7 @@ type Store =
   , isTest :: Boolean
   , editSurvey :: AVar EditSurvey
   , wsVar :: AVar (Array WS)
+  , cssManager :: Route -> Effect Unit
   }
 
 printStore store =
@@ -110,6 +111,7 @@ printStore store =
     <> show (_.isTest store)
     <> ", editSurvey: <AVar> "
     <> ", wsVar: <AVar>"
+    <> ", cssManager: Route -> Effect Unit"
 
 -- | Ordinarily we'd write an initialStore function, but in our case we construct
 -- | all three values in our initial store during app initialization. For that

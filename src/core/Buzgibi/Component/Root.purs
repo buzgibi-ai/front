@@ -132,7 +132,8 @@ component = H.mkComponent
   handleQuery :: forall a. Query a -> H.HalogenM State Action ChildSlots Void AppM (Maybe a)
   handleQuery (Navigate dest a) = do
     logDebug $ loc <> " ---> routing to " <> show dest
-    store <- getStore
+    store@{ cssManager } <- getStore
+    H.liftEffect $ cssManager dest
     logDebug $ printStore store
     H.modify_ _ { route = pure dest }
     pure $ Just a

@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Prelude (Unit, bind, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty)
+import Prelude (Unit, (<$>), (<*>), bind, not, discard, flip, map, pure, show, unit, void, when, ($), (/=), (<<<), (<>), (>>=), (==), (*>), mempty, (&&))
 
 import Buzgibi.Data.Route (routeCodec)
 import Buzgibi.Component.Root as Root
@@ -10,6 +10,7 @@ import Buzgibi.Component.Lang.Data (Lang(..))
 import Buzgibi.Component.AppInitFailure as AppInitFailure
 import Buzgibi.Data.Config
 import Buzgibi.Api.Foreign.BuzgibiBack as BuzgibiBack
+import Buzgibi.Data.Route as Route
 
 import Effect (Effect)
 import Halogen.Aff as HA
@@ -35,8 +36,8 @@ import Effect.AVar (new, empty) as Async
 import Effect.Console (infoShow, logShow)
 import Web.DOM.Document (getElementsByTagName, createElement)
 import Web.DOM.HTMLCollection (item)
-import Web.DOM.Element (setAttribute)
-import Web.DOM.Node (appendChild)
+import Web.DOM.Element (setAttribute, fromNode, getAttribute)
+import Web.DOM.Node (appendChild, childNodes, removeChild)
 import Data.Traversable (for)
 import Web.HTML.HTMLDocument (toDocument, toNode)
 import Web.DOM.Internal.Types (Element)
@@ -49,6 +50,10 @@ import Data.Argonaut.Core (stringifyWithIndent)
 import Web.Storage.Storage (getItem, removeItem)
 import Crypto.Jwt as Jwt
 import Effect.Ref as Ref
+import Web.DOM.NodeList (toArray)
+import Data.Tuple (Tuple (..))
+
+import Undefined
 
 main :: Cfg.Config -> Effect Unit
 main cfg = do
@@ -77,8 +82,12 @@ main cfg = do
         -- I am sick to the back teeth of changing css hash manualy
         -- let's make the process a bit self-generating
         let cssSha = if _.localCss (getVal cfg) then mempty else getShaCSSCommit init
-        for_ (_.cssFiles (getVal cfg)) $ H.liftEffect <<< setCssLink cssSha (_.cssLink (getVal cfg))
-
+        let cssManager route = do 
+              removeCssLink route 
+              for_ (_.cssFiles (getVal cfg)) \css ->
+                when (not (ifCSSBeRemoved route css)) $
+                  H.liftEffect $ setCssLink cssSha (_.cssLink (getVal cfg)) css
+         
         langVar <- H.liftEffect $ Async.new Eng
 
         async <- H.liftEffect $ Async.newChannel
@@ -130,6 +139,7 @@ main cfg = do
             , isTest: fromMaybe false (BuzgibiBack.getIsTest init)
             , editSurvey: editSurvey
             , wsVar: wsVar
+            , cssManager: cssManager
             }
 
         -- With our app environment ready to go, we can prepare the router to run as our root component.
@@ -203,6 +213,35 @@ setCssLink sha mkHref file = do
     pure $ Just unit
 
   when (isNothing res) $ throwError $ Excep.error "cannot append link to head"
+
+removeCssLink :: Route.Route -> Effect Unit
+removeCssLink route = do 
+  win <- window
+  doc <- map toDocument $ document win
+  xs <- "head" `getElementsByTagName` doc
+  headm <- 0 `item` xs
+  res <- for headm \(head :: Element) -> do 
+    nodes <- childNodes $ toNode (unsafeCoerce head)
+    xs <- toArray nodes
+    for_ xs \node ->
+      for_ (fromNode node) \el -> do
+        attr <- getAttribute "rel" el
+        href <- getAttribute "href" el
+        let res = Tuple <$> attr <*> href
+        for_ res \(Tuple a h) -> 
+          when (a == "stylesheet") $
+            removeChild (toNode (unsafeCoerce el)) (toNode (unsafeCoerce head))
+
+  when (isNothing res) $ throwError $ Excep.error "cannot append link to head"  
+
+ifCSSBeRemoved :: Route.Route -> String -> Boolean
+ifCSSBeRemoved Route.Home "auth" = true
+ifCSSBeRemoved (Route.EmailConfirmation _) "main" = true
+ifCSSBeRemoved Route.PasswordResetLink "main" = true
+ifCSSBeRemoved (Route.NewPassword _) "main" = true
+ifCSSBeRemoved Route.SignUp "main" = true
+ifCSSBeRemoved Route.SignIn "main" = true
+ifCSSBeRemoved _ _ = false
 
 withMaybe :: forall a. Maybe a -> Effect a
 withMaybe Nothing = throwError $ Excep.error "value has been resolved into nothing"
